@@ -2,6 +2,9 @@
 All notable changes to this project are documented in this file.
 ## 2026-07-26
 ### Added
+- Added a shared local TLS ingress that routes Notoli, MacroMapper, and
+  FullStackTemplate by `.localhost` hostname while one container owns ports
+  80 and 443.
 - Added first-class `fullstacktemplate.localhost` support for Django, Nginx, Docker, local password-reset links, and browser access.
 - Added a PowerShell helper that generates a local TLS certificate with `mkcert` or OpenSSL.
 - Added the FullStackTemplate React and Material UI application shell.
@@ -21,6 +24,9 @@ All notable changes to this project are documented in this file.
   security alert aggregation, branch rules, Cloudflare, DigitalOcean, GHCR,
   Resend, and production deployment.
 ### Fixed
+- Prevented port-free `fullstacktemplate.localhost` authentication requests
+  from falling through to Notoli's backend when all three local applications
+  are running.
 - Made workspace, collection, and item creator metadata immutable so API
   clients cannot reassign `created_by` or grant access outside the workspace
   collaboration boundary.
@@ -40,6 +46,13 @@ All notable changes to this project are documented in this file.
 - Removed the Dependabot-only auto-merge job from required status checks so normal pull requests are not blocked by its intentional skip.
 - Replaced the inherited Create React App toolchain that introduced high and critical transitive dependency vulnerabilities.
 ### Changed
+- Reduced the authenticated frontend to a reusable header, navigation drawer,
+  notifications, profile/logout controls, and one placeholder Material UI
+  Paper.
+- Replaced Vite, Vitest, and Biome with Notoli's Create React App,
+  react-scripts, Jest, ESLint, and Prettier conventions.
+- Decoupled persisted notifications from the removed sample domain while
+  preserving recipient-scoped read and clear APIs.
 - Standardized all three AI reviewers on one shared 512 KiB Git diff budget and
   bounded each review's output-token reservation.
 - Changed Project setup to link the copied Project to the target repository and
@@ -53,3 +66,7 @@ All notable changes to this project are documented in this file.
   non-Docker development.
 - Adapted Notoli's application-specific boards, lists, and notes into the
   reusable Workspace, Collection, and Item domain.
+### Removed
+- Removed the Workspace, Collection, and Item backend, starter data, sharing,
+  ordering, mobile gestures, component showcase, and related frontend routes,
+  services, documentation, and tests.

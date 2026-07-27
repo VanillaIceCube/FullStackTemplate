@@ -9,14 +9,11 @@ class NotificationAdmin(admin.ModelAdmin):
         "title",
         "recipient",
         "actor",
-        "workspace",
-        "collection",
-        "item",
         "event_type",
         "is_read",
         "created_at",
     )
-    list_filter = ("event_type", "is_read", "workspace", "created_at")
+    list_filter = ("event_type", "is_read", "created_at")
     search_fields = (
         "title",
         "message",
@@ -24,16 +21,9 @@ class NotificationAdmin(admin.ModelAdmin):
         "recipient__email",
         "actor__username",
         "actor__email",
-        "workspace__name",
-        "collection__name",
-        "item__note",
     )
-    autocomplete_fields = ("recipient", "actor", "workspace", "collection", "item")
+    autocomplete_fields = ("recipient", "actor")
     readonly_fields = ("created_at", "read_at")
 
     def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("recipient", "actor", "workspace", "collection", "item")
-        )
+        return super().get_queryset(request).select_related("recipient", "actor")

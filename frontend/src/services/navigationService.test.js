@@ -3,7 +3,7 @@ import { clearNavigate, navigate, setNavigate } from './navigationService';
 describe('navigationService', () => {
   beforeEach(() => {
     clearNavigate();
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   test('when no navigate impl is registered, navigate() returns false', () => {
@@ -17,7 +17,7 @@ describe('navigationService', () => {
   });
 
   test('when setNavigate() is given a function, navigate() calls it and returns true', () => {
-    const impl = vi.fn();
+    const impl = jest.fn();
     setNavigate(impl);
 
     expect(navigate('/login', { replace: true })).toBe(true);
@@ -25,7 +25,7 @@ describe('navigationService', () => {
   });
 
   test('when clearNavigate() is called, navigate() returns false again', () => {
-    setNavigate(vi.fn());
+    setNavigate(jest.fn());
     clearNavigate();
 
     expect(navigate('/login')).toBe(false);

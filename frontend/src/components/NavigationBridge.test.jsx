@@ -2,18 +2,16 @@ import { renderWithProviders } from '../test-support/utils';
 import NavigationBridge from './NavigationBridge';
 import { navigate } from '../services/navigationService';
 
-const { mockNavigate } = vi.hoisted(() => ({
-  mockNavigate: vi.fn(),
-}));
+const mockNavigate = jest.fn();
 
-vi.mock('react-router-dom', async () => ({
-  ...(await vi.importActual('react-router-dom')),
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
 }));
 
 describe('NavigationBridge', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   test('registers the router navigate function while mounted', () => {

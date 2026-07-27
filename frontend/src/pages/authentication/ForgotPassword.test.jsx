@@ -4,13 +4,13 @@ import { forgotPassword } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
 import ForgotPassword from './ForgotPassword';
 
-vi.mock('../../services/authApiClient', () => ({
-  forgotPassword: vi.fn(),
+jest.mock('../../services/authApiClient', () => ({
+  forgotPassword: jest.fn(),
 }));
 
 describe('ForgotPassword', () => {
   test('requests a password reset', async () => {
-    const showSnackbar = vi.fn();
+    const showSnackbar = jest.fn();
     forgotPassword.mockResolvedValue({
       ok: true,
       json: async () => ({ message: 'Password reset link has been sent!' }),

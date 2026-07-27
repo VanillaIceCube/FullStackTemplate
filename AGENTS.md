@@ -78,7 +78,7 @@ Production is designed for `https://app.example.com` behind Cloudflare and an or
 - Frontend: `/`
 - Authentication: `/auth/`
 - Django admin: `/admin/`
-- Workspace, notification, and future backend APIs: `/api/`
+- Notification and future application APIs: `/api/`
 - GitHub deployment branch: `env-prod`
 - GHCR images: `fullstacktemplate-backend` and `fullstacktemplate-frontend`
 - Suggested deployment path: `/root/apps/fullstacktemplate`

@@ -1,8 +1,8 @@
 import { apiFetch } from './requestClient';
 import { forgotPassword, login, register, resetPassword } from './authApiClient';
 
-vi.mock('./requestClient', () => ({
-  apiFetch: vi.fn(),
+jest.mock('./requestClient', () => ({
+  apiFetch: jest.fn(),
 }));
 
 describe('authApiClient', () => {
