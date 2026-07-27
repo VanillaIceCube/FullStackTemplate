@@ -169,6 +169,26 @@ Keep `env-prod` protected and update it only from reviewed `main`.
 The template itself uses `fullstacktemplate.localhost`. A generated repository
 uses the slug passed to `initialize-template.ps1`.
 
+For fast source iteration, use the development Compose file instead of the
+production-shaped stack:
+
+```powershell
+Copy-Item deploy/backend.env deploy/.env
+New-Item -ItemType File -Path deploy/db.sqlite3 -Force
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml up --build -d
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
+```
+
+This mounts both source trees, runs React's hot-reload server and Django's
+autoreloading `runserver`, and uses direct HTTP ports 3000 and 8000 bound to
+localhost only. Set `FULLSTACKTEMPLATE_DEV_FRONTEND_PORT` or
+`FULLSTACKTEMPLATE_DEV_BACKEND_PORT` in `deploy/.env` to override the host
+ports. It does not require a certificate, Nginx proxy, or shared local
+ingress. Open `http://fullstacktemplate.localhost:3000`.
+
+Use the production-shaped commands below when testing HTTPS, Nginx, or the
+deployment image path.
+
 ```powershell
 Copy-Item deploy/backend.env deploy/.env
 New-Item -ItemType File -Path deploy/db.sqlite3 -Force
