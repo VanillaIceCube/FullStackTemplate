@@ -10,7 +10,7 @@ inputs:
   max_bytes:
     description: Maximum diff size in bytes before truncation.
     required: false
-    default: "45000"
+    default: "1048576"
 outputs:
   diff_path:
     description: Path to the generated diff file.
@@ -21,6 +21,9 @@ outputs:
   diff_bytes:
     description: Size of the original diff in bytes.
     value: ${{ steps.diff.outputs.diff_bytes }}
+  max_bytes:
+    description: Configured maximum diff size in bytes.
+    value: ${{ steps.diff.outputs.max_bytes }}
   truncated:
     description: Whether the diff was truncated.
     value: ${{ steps.diff.outputs.truncated }}
@@ -105,5 +108,6 @@ runs:
           echo "diff_path=pr.diff"
           echo "linediff_path=pr_lines.diff"
           echo "diff_bytes=$ACTUAL_BYTES"
+          echo "max_bytes=$MAX_BYTES"
           echo "truncated=$TRUNCATED"
         } >> "$GITHUB_OUTPUT"

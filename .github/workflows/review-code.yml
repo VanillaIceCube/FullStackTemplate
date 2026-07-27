@@ -48,7 +48,6 @@ jobs:
         with:
           base_sha: ${{ github.event.pull_request.base.sha }}
           head_sha: ${{ github.event.pull_request.head.sha }}
-          max_bytes: "120000"
 
       - name: Build code review context
         if: steps.pr-diff.outputs.truncated != 'true'
@@ -217,7 +216,7 @@ jobs:
               "summary": "**Review incomplete; check failed.** The full diff extends beyond my review horizon, and a partial reading cannot guide a safe verdict. The path remains closed until every changed line is brought into view.",
               "unchanged": false,
               "findings": [],
-              "evidence": ["The complete diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is 120000 bytes."],
+              "evidence": ["The complete diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is ${{ steps.pr-diff.outputs.max_bytes }} bytes."],
               "actions": ["Split the change into smaller pull requests or intentionally raise my reviewed diff budget, then call for my review again."],
               "comments": []
             }

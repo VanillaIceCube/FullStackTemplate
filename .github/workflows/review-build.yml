@@ -81,7 +81,6 @@ jobs:
         with:
           base_sha: ${{ github.event.pull_request.base.sha }}
           head_sha: ${{ github.event.pull_request.head.sha }}
-          max_bytes: "45000"
 
       - name: Build review context
         if: steps.pr-diff.outputs.truncated != 'true'
@@ -205,7 +204,7 @@ jobs:
               "summary": "**Review incomplete; check failed.** This change is bigger than the byte budget in this town. I will not stamp a clean build on evidence I could not inspect from end to end.",
               "unchanged": false,
               "findings": [],
-              "evidence": ["The complete diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is 45000 bytes."],
+              "evidence": ["The complete diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is ${{ steps.pr-diff.outputs.max_bytes }} bytes."],
               "actions": ["Break the change into smaller pull requests or intentionally raise my reviewed diff budget, then send it back through."],
               "comments": []
             }

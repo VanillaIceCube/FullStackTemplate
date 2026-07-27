@@ -458,6 +458,8 @@ test("does not repeat an unavailable review for the same persona and commit", as
 test("reviewer identities explain truncated reviews before their checks fail", () => {
   const actionPath = path.resolve(__dirname, "../get-pr-diff/action.yml");
   const action = fs.readFileSync(actionPath, "utf8");
+  assert.match(action, /default: "1048576"/);
+  assert.match(action, /echo "max_bytes=\$MAX_BYTES"/);
   assert.match(action, /echo "truncated=\$TRUNCATED"/);
   assert.doesNotMatch(action, /exit 1/);
 
@@ -471,6 +473,8 @@ test("reviewer identities explain truncated reviews before their checks fail", (
       path.join(workflowRoot, workflowName),
       "utf8",
     );
+    assert.doesNotMatch(workflow, /^\s+max_bytes:/m);
+    assert.match(workflow, /steps\.pr-diff\.outputs\.max_bytes/);
     const publishIndex = workflow.indexOf("Publish incomplete");
     const failIndex = workflow.indexOf("Fail incomplete");
 
@@ -485,9 +489,8 @@ test("reviewer identities explain truncated reviews before their checks fail", (
       /if: steps\.pr-diff\.outputs\.truncated == 'true'[\s\S]*?exit 1/,
     );
     assert.ok(
-      workflow.match(
-        /if: steps\.pr-diff\.outputs\.truncated != 'true'/g,
-      )?.length >= 3,
+      workflow.match(/if: steps\.pr-diff\.outputs\.truncated != 'true'/g)
+        ?.length >= 3,
     );
   }
 });

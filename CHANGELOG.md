@@ -43,6 +43,7 @@
 
 ### Changed
 
+- Standardized all three AI reviewers on one shared 1 MiB Git diff budget.
 - Changed Project setup to link the copied Project to the target repository and
   set `SECURITY_ALERTS_PROJECT_ID` automatically.
 - Changed local setup documentation and environment templates to use `fullstacktemplate.localhost`.
