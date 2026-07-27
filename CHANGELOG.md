@@ -21,6 +21,9 @@ All notable changes to this project are documented in this file.
   and the protected placeholder page.
 - Removed the persistent translucent selection overlay from the drawer's Home
   item.
+### Removed
+- Removed the shared multi-application local-ingress scripts and configuration;
+  FullStackTemplate now uses its own application proxy like Notoli.
 ## 2026-07-26
 ### Added
 - Added a shared local TLS ingress that routes Notoli, MacroMapper, and

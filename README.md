@@ -123,26 +123,6 @@ Open `https://fullstacktemplate.localhost`, register, and log in. The protected
 home page contains the reusable application header and a minimal placeholder
 Paper.
 
-When Notoli, MacroMapper, and FullStackTemplate run together, keep their
-application proxies on ports 8442, 8443, and 8444, then start the shared local
-ingress:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File ./deploy/local-ingress/start.ps1
-```
-
-The ingress owns ports 80 and 443 and routes TLS by hostname, so all three apps
-remain available without ports:
-
-- `https://notoli.localhost`
-- `https://macromapper.localhost`
-- `https://fullstacktemplate.localhost`
-
-Run
-`powershell -ExecutionPolicy Bypass -File ./deploy/local-ingress/stop.ps1` to
-stop the shared ingress and restore Notoli as the direct owner of ports 80 and
-443.
-
 `deploy/.env`, `deploy/db.sqlite3`, and certificate keys are ignored. Do not
 commit them.
 
@@ -167,9 +147,9 @@ To override them, set `FULLSTACKTEMPLATE_DEV_FRONTEND_PORT` or
 docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml down
 ```
 
-This development workflow does not need a local certificate, Nginx proxy, or
-shared local ingress. Use the production Compose workflow above when testing
-the HTTPS proxy and deployment-shaped containers.
+This development workflow does not need a local certificate or Nginx proxy.
+Use the production Compose workflow above when testing the HTTPS proxy and
+deployment-shaped containers.
 
 ## Run without Docker
 Requirements: Python 3.12 and Node.js 25. Docker remains the simplest option

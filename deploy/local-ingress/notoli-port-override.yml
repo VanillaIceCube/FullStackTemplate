@@ -1,5 +1,0 @@
-services:
-  proxy:
-    ports: !override
-      - "8082:80"
-      - "8442:443"
