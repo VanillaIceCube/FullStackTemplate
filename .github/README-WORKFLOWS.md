@@ -110,7 +110,10 @@ See `deploy/README.md` for server and Cloudflare details.
 
 The Dependabot-only `Auto Merge` job is an automation consumer of those gates,
 not a required status check itself; normal contributor pull requests
-intentionally skip it.
+intentionally skip it. Dependabot pull requests remain pending while GitHub
+reports an unstable merge state and are never merged directly. Third-party
+Actions are pinned to immutable commit SHAs, with release-version comments
+retained for maintenance.
 
 ## Local automation checks
 

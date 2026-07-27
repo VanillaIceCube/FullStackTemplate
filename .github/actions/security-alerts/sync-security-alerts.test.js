@@ -368,6 +368,11 @@ test("synchronization preserves canonical project fields and completes supersede
   assert.deepEqual(result, { created: 0, updated: 1, closed: 1 });
   assert.equal(issueUpdates[0].issue_number, 10);
   assert.equal(issueUpdates[0].state, undefined);
+  assert.match(
+    issueUpdates[0].body,
+    /\[dependabot:1\]\(https:\/\/example\.test\/1\)/,
+  );
+  assert.doesNotMatch(issueUpdates[0].body, /\]\(undefined\)/);
   assert.equal(issueUpdates[1].issue_number, 11);
   assert.equal(issueUpdates[1].state, "closed");
   assert.equal(issueUpdates[1].state_reason, "completed");
@@ -542,6 +547,25 @@ test("source refs remain parseable and lifecycle notes are replaced idempotently
   assert.equal(second.match(/fullstacktemplate-security-alert-lifecycle/g)?.length, 1);
   assert.match(second, /Closed with updated context/);
   assert.doesNotMatch(second, /Closed once/);
+});
+
+test("Dependabot alert compaction preserves the source URL used in issue links", () => {
+  const repositoryRoot = path.resolve(__dirname, "../../..");
+  const action = fs.readFileSync(
+    path.join(
+      repositoryRoot,
+      ".github",
+      "actions",
+      "security-alerts",
+      "action.yml",
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    action,
+    /const compactDependabotAlert = \(alert\) => \(\{[\s\S]*?url: alert\.html_url,/,
+  );
 });
 
 test("alert workflows scope RoboCop to alert and issue APIs while reserving the personal token for Projects", () => {
