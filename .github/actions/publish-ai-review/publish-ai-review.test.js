@@ -582,5 +582,7 @@ test("keeps the visually inspectable Markdown examples synchronized", () => {
   ].join("\n");
   const fixturePath = path.join(__dirname, "review-output-examples.md");
 
-  assert.equal(fs.readFileSync(fixturePath, "utf8"), examples);
+  const fixture = fs.readFileSync(fixturePath, "utf8").replaceAll("\r\n", "\n");
+
+  assert.equal(fixture, examples);
 });

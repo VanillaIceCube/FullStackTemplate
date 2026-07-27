@@ -1,8 +1,8 @@
 # FullStackTemplate
-A reusable React, Material UI, Django REST Framework, Docker, authentication,
-sharing, notification, CI/CD, and deployment foundation. It keeps the working
-versions and patterns from Notoli and MacroMapper without introducing a
-dependency-upgrade project.
+An authentication-first React, Material UI, Django REST Framework, Docker,
+notification, CI/CD, and deployment foundation. It keeps the proven stack and
+automation patterns from Notoli without carrying an opinionated application
+domain.
 
 ## Before the first pull request
 Start here. The pull-request workflow deliberately exposes missing reviewer
@@ -85,20 +85,19 @@ Review the initializer diff, replace the starter SVG mark, then complete the
 GitHub settings above before opening the first PR.
 
 ## What is included
-- React 19, Vite, Material UI, responsive application shell, and component
-  showcase
+- React 19, Create React App, Material UI, and a responsive application shell
 - Django REST Framework, custom user model, and versioned migrations
 - Email-first registration and JWT login/refresh
 - Forgot-password and tokenized reset email delivery through Resend
 - Protected routes and automatic session renewal
-- Generic, working `Workspace → Collection → Item` CRUD example
-- Owner/collaborator sharing with strict workspace access boundaries
-- In-app activity notifications with read, clear, and navigation behavior
-- Reusable drawers, dialogs, snackbars, empty/loading/error states, inline
-  editing, drag-and-drop ordering, and mobile gestures
+- Header with a generic navigation drawer, notifications, profile details, and
+  logout
+- Recipient-scoped notification APIs with read and clear actions
+- One intentionally minimal protected Material UI Paper ready to replace with
+  application-specific content
 - Docker images, Docker Compose, same-origin Nginx proxy, local HTTPS, GHCR,
   SSH deployment, and migrations
-- Ruff, Biome, Prettier, React/Django tests, CodeQL, dependency review, malware
+- Ruff, ESLint, Prettier, React/Django tests, CodeQL, dependency review, malware
   review, Dependabot, and auto-merge gates
 - Three AI reviewer identities and scheduled security-alert-to-Project
   aggregation
@@ -121,8 +120,8 @@ docker compose exec -T backend python manage.py migrate
 ```
 
 Open `https://fullstacktemplate.localhost`, register, and log in. The protected
-home page is a reusable Material UI component showcase; **Open workspace
-example** exercises sharing, ordering, and notifications.
+home page contains the reusable application header and a minimal placeholder
+Paper.
 
 If ports 80/443/8000/3000 are occupied, set the
 `FULLSTACKTEMPLATE_*_PORT` values in `deploy/.env` and use the chosen HTTPS
@@ -177,7 +176,6 @@ malware, and AI review gates.
 
 ## Documentation
 - [GitHub Apps, Project, reviewers, and branch rules](docs/GITHUB_SETUP.md)
-- [Sharing and notification architecture](docs/SHARING_AND_NOTIFICATIONS.md)
 - [Cloudflare, DigitalOcean, Resend, Docker, and deployment](deploy/README.md)
 - [Backend API and email settings](backend/README.md)
 - [Frontend routes and component conventions](frontend/README.md)

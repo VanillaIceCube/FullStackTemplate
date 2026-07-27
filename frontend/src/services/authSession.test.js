@@ -7,7 +7,7 @@ function makeResponse({ ok, status = 200, json }) {
 describe('authSession', () => {
   beforeEach(() => {
     sessionStorage.clear();
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('getResponseErrorMessage', () => {
@@ -134,9 +134,13 @@ describe('authSession', () => {
     });
 
     test('when sessionStorage throws, it surfaces a storage error', () => {
-      vi.stubGlobal('sessionStorage', {
-        setItem: () => {
-          throw new Error('blocked');
+      const originalSessionStorage = global.sessionStorage;
+      Object.defineProperty(global, 'sessionStorage', {
+        configurable: true,
+        value: {
+          setItem: () => {
+            throw new Error('blocked');
+          },
         },
       });
 
@@ -144,7 +148,10 @@ describe('authSession', () => {
         persistAuthSession({ access: 'A', refresh: 'R', username: 'u', email: 'e@example.com' }),
       ).toThrow('Unable to access browser session storage.');
 
-      vi.unstubAllGlobals();
+      Object.defineProperty(global, 'sessionStorage', {
+        configurable: true,
+        value: originalSessionStorage,
+      });
     });
   });
 });

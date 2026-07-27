@@ -4,8 +4,8 @@ import { register } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
 import Register from './Register';
 
-vi.mock('../../services/authApiClient', () => ({
-  register: vi.fn(),
+jest.mock('../../services/authApiClient', () => ({
+  register: jest.fn(),
 }));
 
 describe('Register', () => {
@@ -14,7 +14,7 @@ describe('Register', () => {
   });
 
   test('creates an account and stores the session', async () => {
-    const showSnackbar = vi.fn();
+    const showSnackbar = jest.fn();
     register.mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -43,7 +43,7 @@ describe('Register', () => {
   });
 
   test('rejects mismatched passwords locally', async () => {
-    const showSnackbar = vi.fn();
+    const showSnackbar = jest.fn();
     renderWithProviders(<Register showSnackbar={showSnackbar} />, {
       routeEntries: ['/register'],
     });

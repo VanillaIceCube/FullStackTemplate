@@ -6,9 +6,9 @@ generic GitHub Project.
 ## Pull-request CI
 `.github/workflows/ci-orchestrator.yml` coordinates:
 
-- Frontend Prettier and Biome checks
+- Frontend Prettier and ESLint checks
 - Backend Ruff checks and formatting
-- React/Vitest tests
+- React/Jest tests
 - Django tests
 - Node tests for repository automation
 - CodeQL for Python, JavaScript/TypeScript, and GitHub Actions

@@ -13,13 +13,14 @@ describe('App', () => {
     expect(await screen.findByRole('heading', { name: 'Login' })).toBeInTheDocument();
   });
 
-  test('shows the protected component library to signed-in users', async () => {
+  test('shows the protected application shell to signed-in users', async () => {
     sessionStorage.setItem('accessToken', 'token');
     render(<App />);
 
-    expect(
-      await screen.findByRole('heading', { name: 'Full-stack component library' }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('fullstacktemplate')).toBeInTheDocument();
+    expect(await screen.findByText('Full Stack Template')).toBeInTheDocument();
+    expect(screen.getByText(/Lorem ipsum dolor sit amet/)).toBeInTheDocument();
+    expect(screen.getByLabelText('notifications')).toBeInTheDocument();
+    expect(screen.getByLabelText('user profile')).toBeInTheDocument();
+    expect(screen.getByLabelText('menu')).toBeInTheDocument();
   });
 });

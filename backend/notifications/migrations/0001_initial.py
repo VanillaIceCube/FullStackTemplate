@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("workspaces", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -26,23 +25,14 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("workspace_name", models.CharField(blank=True, max_length=255)),
                 (
                     "event_type",
                     models.CharField(
                         choices=[
-                            ("collaborator_added", "Collaborator added"),
-                            ("collaborator_removed", "Collaborator removed"),
-                            ("collection_created", "Collection created"),
-                            ("collection_updated", "Collection updated"),
-                            ("collection_deleted", "Collection deleted"),
-                            ("item_created", "Item created"),
-                            ("item_updated", "Item updated"),
-                            ("item_completed", "Item completed"),
-                            ("item_deleted", "Item deleted"),
-                            ("workspace_updated", "Workspace updated"),
-                            ("workspace_deleted", "Workspace deleted"),
+                            ("general", "General"),
+                            ("system", "System"),
                         ],
+                        default="general",
                         max_length=40,
                     ),
                 ),
@@ -63,41 +53,11 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "collection",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="notifications",
-                        to="workspaces.collection",
-                    ),
-                ),
-                (
-                    "item",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="notifications",
-                        to="workspaces.item",
-                    ),
-                ),
-                (
                     "recipient",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="notifications",
                         to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                (
-                    "workspace",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="notifications",
-                        to="workspaces.workspace",
                     ),
                 ),
             ],

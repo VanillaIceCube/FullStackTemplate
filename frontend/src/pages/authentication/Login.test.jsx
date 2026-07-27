@@ -4,8 +4,8 @@ import { login } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
 import Login from './Login';
 
-vi.mock('../../services/authApiClient', () => ({
-  login: vi.fn(),
+jest.mock('../../services/authApiClient', () => ({
+  login: jest.fn(),
 }));
 
 describe('Login', () => {
@@ -14,7 +14,7 @@ describe('Login', () => {
   });
 
   test('logs in and stores the returned session', async () => {
-    const showSnackbar = vi.fn();
+    const showSnackbar = jest.fn();
     login.mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -36,7 +36,7 @@ describe('Login', () => {
   });
 
   test('shows a pending session-expired message', () => {
-    const showSnackbar = vi.fn();
+    const showSnackbar = jest.fn();
     sessionStorage.setItem(
       'pendingSnackbar',
       JSON.stringify({ severity: 'error', message: 'Please sign in again.' }),

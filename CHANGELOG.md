@@ -40,6 +40,13 @@ All notable changes to this project are documented in this file.
 - Removed the Dependabot-only auto-merge job from required status checks so normal pull requests are not blocked by its intentional skip.
 - Replaced the inherited Create React App toolchain that introduced high and critical transitive dependency vulnerabilities.
 ### Changed
+- Reduced the authenticated frontend to a reusable header, navigation drawer,
+  notifications, profile/logout controls, and one placeholder Material UI
+  Paper.
+- Replaced Vite, Vitest, and Biome with Notoli's Create React App,
+  react-scripts, Jest, ESLint, and Prettier conventions.
+- Decoupled persisted notifications from the removed sample domain while
+  preserving recipient-scoped read and clear APIs.
 - Standardized all three AI reviewers on one shared 512 KiB Git diff budget and
   bounded each review's output-token reservation.
 - Changed Project setup to link the copied Project to the target repository and
@@ -53,3 +60,7 @@ All notable changes to this project are documented in this file.
   non-Docker development.
 - Adapted Notoli's application-specific boards, lists, and notes into the
   reusable Workspace, Collection, and Item domain.
+### Removed
+- Removed the Workspace, Collection, and Item backend, starter data, sharing,
+  ordering, mobile gestures, component showcase, and related frontend routes,
+  services, documentation, and tests.

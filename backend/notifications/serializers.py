@@ -19,8 +19,6 @@ class UserSummarySerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     actor_details = UserSummarySerializer(source="actor", read_only=True)
-    collection_name = serializers.CharField(source="collection.name", read_only=True)
-    item_text = serializers.CharField(source="item.item", read_only=True)
 
     class Meta:
         model = Notification
@@ -34,12 +32,6 @@ class NotificationSerializer(serializers.ModelSerializer):
             "read_at",
             "actor",
             "actor_details",
-            "workspace",
-            "workspace_name",
-            "collection",
-            "collection_name",
-            "item",
-            "item_text",
             "target_path",
         )
         read_only_fields = (
@@ -51,11 +43,5 @@ class NotificationSerializer(serializers.ModelSerializer):
             "read_at",
             "actor",
             "actor_details",
-            "workspace",
-            "workspace_name",
-            "collection",
-            "collection_name",
-            "item",
-            "item_text",
             "target_path",
         )
