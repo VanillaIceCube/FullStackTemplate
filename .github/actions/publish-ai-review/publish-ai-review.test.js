@@ -458,7 +458,7 @@ test("does not repeat an unavailable review for the same persona and commit", as
 test("reviewer identities explain truncated reviews before their checks fail", () => {
   const actionPath = path.resolve(__dirname, "../get-pr-diff/action.yml");
   const action = fs.readFileSync(actionPath, "utf8");
-  assert.match(action, /default: "1048576"/);
+  assert.match(action, /default: "524288"/);
   assert.match(action, /echo "max_bytes=\$MAX_BYTES"/);
   assert.match(action, /echo "truncated=\$TRUNCATED"/);
   assert.doesNotMatch(action, /exit 1/);
@@ -493,6 +493,18 @@ test("reviewer identities explain truncated reviews before their checks fail", (
         ?.length >= 3,
     );
   }
+});
+
+test("OpenAI review requests reserve a bounded output budget", () => {
+  const actionPath = path.resolve(__dirname, "../openai-chat/action.yml");
+  const action = fs.readFileSync(actionPath, "utf8");
+
+  assert.match(action, /max_output_tokens:[\s\S]*?default: "16000"/);
+  assert.match(
+    action,
+    /MAX_OUTPUT_TOKENS: \$\{\{ inputs\.max_output_tokens \}\}/,
+  );
+  assert.match(action, /max_output_tokens: \$max_output_tokens/);
 });
 
 test("keeps the visually inspectable Markdown examples synchronized", () => {

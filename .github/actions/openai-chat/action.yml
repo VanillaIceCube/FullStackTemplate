@@ -21,6 +21,10 @@ inputs:
     description: OpenAI model name.
     required: false
     default: "gpt-5.6-luna"
+  max_output_tokens:
+    description: Maximum combined reasoning and visible output token budget.
+    required: false
+    default: "16000"
 outputs:
   content:
     description: Assistant response content.
@@ -36,6 +40,7 @@ runs:
         PROMPT_PREFIX: ${{ inputs.prompt_prefix }}
         SYSTEM_PROMPT: ${{ inputs.system_prompt }}
         MODEL: ${{ inputs.model }}
+        MAX_OUTPUT_TOKENS: ${{ inputs.max_output_tokens }}
         DIFF_PATH: ${{ inputs.diff_path }}
       run: |
         set -euo pipefail
@@ -90,11 +95,13 @@ runs:
           --rawfile prompt prompt.txt \
           --arg model "$MODEL" \
           --arg system_prompt "$SYSTEM_PROMPT" \
+          --argjson max_output_tokens "$MAX_OUTPUT_TOKENS" \
           '
           {
             model: $model,
             instructions: $system_prompt,
-            input: $prompt
+            input: $prompt,
+            max_output_tokens: $max_output_tokens
           }
           ' > body.json
 
