@@ -2,6 +2,9 @@
 All notable changes to this project are documented in this file.
 ## 2026-07-26
 ### Added
+- Added a shared local TLS ingress that routes Notoli, MacroMapper, and
+  FullStackTemplate by `.localhost` hostname while one container owns ports
+  80 and 443.
 - Added first-class `fullstacktemplate.localhost` support for Django, Nginx, Docker, local password-reset links, and browser access.
 - Added a PowerShell helper that generates a local TLS certificate with `mkcert` or OpenSSL.
 - Added the FullStackTemplate React and Material UI application shell.
@@ -21,6 +24,9 @@ All notable changes to this project are documented in this file.
   security alert aggregation, branch rules, Cloudflare, DigitalOcean, GHCR,
   Resend, and production deployment.
 ### Fixed
+- Prevented port-free `fullstacktemplate.localhost` authentication requests
+  from falling through to Notoli's backend when all three local applications
+  are running.
 - Made workspace, collection, and item creator metadata immutable so API
   clients cannot reassign `created_by` or grant access outside the workspace
   collaboration boundary.

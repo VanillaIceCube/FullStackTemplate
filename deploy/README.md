@@ -183,20 +183,47 @@ docker compose exec -T backend python manage.py migrate
 Open `https://fullstacktemplate.localhost`.
 
 The Compose project is named `fullstacktemplate`. Defaults are ports
-80/443/8000/3000. To run several apps locally, override ports in `deploy/.env`,
-for example:
+80/443/8000/3000. To run several apps locally, give each application proxy a
+unique internal host port in its local `deploy/.env`. The current three-app
+layout is:
 
 ```text
-FULLSTACKTEMPLATE_HTTP_PORT=8080
-FULLSTACKTEMPLATE_HTTPS_PORT=8443
-FULLSTACKTEMPLATE_BACKEND_PORT=8001
-FULLSTACKTEMPLATE_FRONTEND_PORT=3001
-DJANGO_FRONTEND_BASE_URL=https://fullstacktemplate.localhost:8443
+Notoli:            HTTP 8082, HTTPS 8442, backend 8000, frontend 3000
+MacroMapper:       HTTP 8080, HTTPS 8443, backend 8001, frontend 3001
+FullStackTemplate: HTTP 8081, HTTPS 8444, backend 8002, frontend 3002
 ```
 
-Then open `https://fullstacktemplate.localhost:8443`. Different
-`[application].localhost` names make the apps distinct; host ports still need
-to be unique when multiple Compose stacks run on one machine.
+After all application stacks are running, start the shared local ingress:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ./deploy/local-ingress/start.ps1
+```
+
+The script:
+
+- rebinds Notoli's proxy from ports 80/443 to 8082/8442 without changing the
+  Notoli repository;
+- starts `local-app-ingress` as the sole owner of ports 80/443;
+- forwards encrypted traffic by TLS SNI to the matching application proxy, so
+  each application continues to terminate its own certificate and own all
+  HTTP routing.
+
+Open:
+
+- `https://notoli.localhost`
+- `https://macromapper.localhost`
+- `https://fullstacktemplate.localhost`
+
+Stop the shared ingress and restore Notoli's original port bindings with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ./deploy/local-ingress/stop.ps1
+```
+
+To add a generated application, assign its proxy an unused HTTPS host port and
+add one upstream and hostname mapping to
+`deploy/local-ingress/nginx.conf`. This changes the shared ingress only; no
+existing application's repository needs routing changes.
 
 ## Routing and persistence
 Nginx routes:

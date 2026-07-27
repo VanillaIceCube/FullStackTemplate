@@ -123,9 +123,25 @@ Open `https://fullstacktemplate.localhost`, register, and log in. The protected
 home page contains the reusable application header and a minimal placeholder
 Paper.
 
-If ports 80/443/8000/3000 are occupied, set the
-`FULLSTACKTEMPLATE_*_PORT` values in `deploy/.env` and use the chosen HTTPS
-port, for example `https://fullstacktemplate.localhost:8443`.
+When Notoli, MacroMapper, and FullStackTemplate run together, keep their
+application proxies on ports 8442, 8443, and 8444, then start the shared local
+ingress:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ./deploy/local-ingress/start.ps1
+```
+
+The ingress owns ports 80 and 443 and routes TLS by hostname, so all three apps
+remain available without ports:
+
+- `https://notoli.localhost`
+- `https://macromapper.localhost`
+- `https://fullstacktemplate.localhost`
+
+Run
+`powershell -ExecutionPolicy Bypass -File ./deploy/local-ingress/stop.ps1` to
+stop the shared ingress and restore Notoli as the direct owner of ports 80 and
+443.
 
 `deploy/.env`, `deploy/db.sqlite3`, and certificate keys are ignored. Do not
 commit them.
