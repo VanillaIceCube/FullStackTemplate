@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project are documented in this file.
 ## 2026-07-27
+### Added
+- Added and documented a Notoli-matching main-branch ruleset that requires
+  pull requests, resolved review threads, and the complete CI and AI review
+  check set while blocking force pushes and deletion.
 ### Changed
 - Restored Notoli's yellow-and-gray theme across authentication, the
   application header, navigation drawer, profile and notification surfaces,
