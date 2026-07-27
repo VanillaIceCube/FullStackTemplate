@@ -102,15 +102,16 @@ See `deploy/README.md` for server and Cloudflare details.
 ## Dependabot
 `.github/dependabot.yml` checks npm, pip, GitHub Actions, and Docker dependencies daily. Patch and minor Dependabot updates can auto-merge only after the lint, test, CodeQL, vulnerability, and malware gates succeed.
 
-The Dependabot-only `Auto Merge` job is an automation consumer of those gates,
-not a required status check itself; normal contributor pull requests
-intentionally skip it. Dependabot pull requests remain pending while GitHub
-reports an unstable merge state and are never merged directly. Third-party
-Actions are pinned to immutable commit SHAs, with release-version comments
-retained for maintenance. Credential-handling GitHub Actions are pinned the
-same way. When a complete pull-request diff exceeds an AI reviewer's configured
-budget, that reviewer's GitHub App posts an explicit incomplete-review comment
-under its own identity and then fails the check without publishing a verdict.
+The main-branch ruleset mirrors Notoli and includes the orchestrator-level
+`Auto Merge` context among its required checks. Normal contributor pull
+requests intentionally skip that Dependabot-only job without performing a
+merge. Dependabot pull requests remain pending while GitHub reports an unstable
+merge state and are never merged directly. Third-party Actions are pinned to
+immutable commit SHAs, with release-version comments retained for maintenance.
+Credential-handling GitHub Actions are pinned the same way. When a complete
+pull-request diff exceeds an AI reviewer's configured budget, that reviewer's
+GitHub App posts an explicit incomplete-review comment under its own identity
+and then fails the check without publishing a verdict.
 All three reviewers inherit the same 512 KiB diff budget from
 `.github/actions/get-pr-diff/action.yml`; reviewer workflows do not override it.
 OpenAI review requests also cap combined reasoning and visible output at 16,000

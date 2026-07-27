@@ -99,18 +99,20 @@ Run each `Alert: ...` workflow manually once after the first successful CI run.
 No-alert runs should succeed without creating issues.
 
 ## 4. Branch rules after the first PR
-Wait until one pull request has produced the actual check names, then add a
-ruleset for `main`:
+Wait until one pull request has produced the actual check names, then mirror
+Notoli's active `Main Branch Protection` ruleset for the default branch:
 
-- require a pull request before merging;
-- require the independent lint, test, CodeQL, vulnerability, and malware
-  checks;
-- require the AI reviewer checks if you want them to block merges;
-- require branches to be up to date;
-- block force pushes and branch deletion.
+- require a pull request before merging and require all review threads to be
+  resolved;
+- allow merge commits, squash merges, and rebases;
+- require the lint, test, CodeQL, vulnerability, malware, AI reviewer, and
+  orchestrator-level `Auto Merge` contexts;
+- do not require the branch to be up to date before merging;
+- block force pushes and branch deletion;
+- configure no bypass actors.
 
-Do not require the Dependabot-only `Auto Merge` check; ordinary contributor
-pull requests intentionally skip it.
+The `Auto Merge` job performs work only for eligible Dependabot pull requests.
+It is skipped on ordinary contributor pull requests.
 
 ## 5. Deployment configuration
 The complete deployment variables and secrets are in
