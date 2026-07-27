@@ -114,8 +114,9 @@ intentionally skip it. Dependabot pull requests remain pending while GitHub
 reports an unstable merge state and are never merged directly. Third-party
 Actions are pinned to immutable commit SHAs, with release-version comments
 retained for maintenance. Credential-handling GitHub Actions are pinned the
-same way. AI reviewer jobs fail closed instead of publishing a verdict when
-their complete pull-request diff exceeds the configured review budget.
+same way. When a complete pull-request diff exceeds an AI reviewer's configured
+budget, the workflow skips the model and normal publisher, posts an explicit
+incomplete `COMMENT`, and withholds its verdict.
 
 ## Local automation checks
 

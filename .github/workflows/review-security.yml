@@ -150,6 +150,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
 
       - name: Collect prior RoboCop reviews
+        if: steps.pr-diff.outputs.truncated != 'true'
         uses: ./.github/actions/collect-prior-ai-reviews
         with:
           github_token: ${{ steps.app-token.outputs.token }}
@@ -157,6 +158,7 @@ jobs:
           output_path: ${{ runner.temp }}/security-prior-reviews.json
 
       - name: Combine security evidence and diff
+        if: steps.pr-diff.outputs.truncated != 'true'
         shell: bash
         env:
           EVIDENCE_PATH: ${{ runner.temp }}/security-evidence.json
@@ -176,6 +178,7 @@ jobs:
           } > "$CONTEXT_PATH"
 
       - name: Call RoboCop
+        if: steps.pr-diff.outputs.truncated != 'true'
         id: openai
         uses: ./.github/actions/openai-chat
         with:
@@ -238,8 +241,26 @@ jobs:
             Security evidence follows:
 
       - name: Publish RoboCop native review
+        if: steps.pr-diff.outputs.truncated != 'true'
         uses: ./.github/actions/publish-ai-review
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           review_json: ${{ steps.openai.outputs.content }}
           persona_name: "RoboCop"
+
+      - name: Publish incomplete RoboCop review
+        if: steps.pr-diff.outputs.truncated == 'true'
+        uses: ./.github/actions/publish-ai-review
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          persona_name: "RoboCop"
+          review_json: |
+            {
+              "event": "COMMENT",
+              "summary": "**REVIEW INCOMPLETE. SECURITY VERDICT: WITHHELD.** The complete change exceeds the automated review budget. Partial evidence will not be misrepresented as full security clearance.",
+              "unchanged": false,
+              "findings": [],
+              "evidence": ["The complete diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; the automated review budget is 60000 bytes."],
+              "actions": ["Split the change into smaller pull requests or intentionally raise the reviewed diff budget, then rerun the security review."],
+              "comments": []
+            }

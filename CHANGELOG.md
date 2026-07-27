@@ -31,8 +31,8 @@
   reports an unstable merge state.
 - Pinned third-party and credential-handling GitHub Actions to immutable commit
   SHAs.
-- Prevented AI reviewers from publishing complete-review verdicts when their
-  pull-request diff was truncated.
+- Required AI reviewers to publish an explicit incomplete comment and withhold
+  their verdict when the complete pull-request diff is truncated.
 - Corrected the GitHub Project initializer to copy and verify Notoli's exact
   custom fields, option sets, views, filters, grouping, sorting, and supported
   workflows instead of creating an approximate Project manually.
