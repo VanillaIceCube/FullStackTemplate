@@ -297,6 +297,18 @@ class WorkspaceApiTests(APITestCase):
         self.workspace.refresh_from_db()
         self.assertEqual(self.workspace.name, "Owner Workspace")
 
+    def test_workspace_creator_cannot_be_reassigned(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.patch(
+            f"/api/workspaces/{self.workspace.id}/",
+            {"created_by": self.outsider.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.workspace.refresh_from_db()
+        self.assertEqual(self.workspace.created_by_id, self.owner.id)
+
     def test_delete_workspace_denied_for_outsider(self):
         self.client.force_authenticate(user=self.outsider)
         response = self.client.delete(f"/api/workspaces/{self.workspace.id}/")
@@ -611,6 +623,26 @@ class CollectionApiTests(APITestCase):
             response.status_code,
             status.HTTP_404_NOT_FOUND,
             f"Expected 404 when outsider updates collection, got {response.status_code}: {response.data}",
+        )
+
+    def test_collection_creator_cannot_be_reassigned(self):
+        self.client.force_authenticate(user=self.collaborator)
+        response = self.client.patch(
+            f"/api/collections/{self.collection.id}/",
+            {"created_by": self.outsider.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.collection.refresh_from_db()
+        self.assertEqual(self.collection.created_by_id, self.owner.id)
+
+        self.client.force_authenticate(user=self.outsider)
+        retrieve_response = self.client.get(f"/api/collections/{self.collection.id}/")
+        self.assertEqual(
+            retrieve_response.status_code,
+            status.HTTP_404_NOT_FOUND,
+            retrieve_response.data,
         )
 
     def test_delete_collection_denied_for_outsider(self):
@@ -1242,6 +1274,26 @@ class ItemApiTests(APITestCase):
             response.status_code,
             status.HTTP_404_NOT_FOUND,
             f"Expected 404 when outsider updates item, got {response.status_code}: {response.data}",
+        )
+
+    def test_item_creator_cannot_be_reassigned(self):
+        self.client.force_authenticate(user=self.collaborator)
+        response = self.client.patch(
+            f"/api/items/{self.item.id}/",
+            {"created_by": self.outsider.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.created_by_id, self.owner.id)
+
+        self.client.force_authenticate(user=self.outsider)
+        retrieve_response = self.client.get(f"/api/items/{self.item.id}/")
+        self.assertEqual(
+            retrieve_response.status_code,
+            status.HTTP_404_NOT_FOUND,
+            retrieve_response.data,
         )
 
     def test_delete_item_denied_for_outsider(self):

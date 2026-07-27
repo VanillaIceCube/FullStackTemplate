@@ -1,9 +1,7 @@
 # GitHub setup
-
 Complete this setup before opening the first pull request so every required workflow can run.
 
 ## 1. Create the Project
-
 Authenticate GitHub CLI with repository and Projects access:
 
 ```powershell
@@ -50,7 +48,6 @@ Notoli is the default source (`VanillaIceCube` Project `8`). A different source
 can be supplied with `-SourceProjectOwner` and `-SourceProjectNumber`.
 
 ## 2. Register the AI reviewer GitHub Apps
-
 Create three private GitHub Apps under the repository owner. Give each app only
 the listed repository permissions, generate one private key, and install it on
 this repository.
@@ -82,7 +79,6 @@ ROBOCOP_PRIVATE_KEY
 ```
 
 ## 3. Configure OpenAI and security aggregation
-
 Set:
 
 ```text
@@ -103,7 +99,6 @@ Run each `Alert: ...` workflow manually once after the first successful CI run.
 No-alert runs should succeed without creating issues.
 
 ## 4. Branch rules after the first PR
-
 Wait until one pull request has produced the actual check names, then add a
 ruleset for `main`:
 
@@ -118,7 +113,6 @@ Do not require the Dependabot-only `Auto Merge` check; ordinary contributor
 pull requests intentionally skip it.
 
 ## 5. Deployment configuration
-
 The complete deployment variables and secrets are in
 [the deployment guide](../deploy/README.md). The deploy workflow only runs on
 `env-prod` pushes or manual dispatch, so application CI can be proven before

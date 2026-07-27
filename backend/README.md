@@ -1,9 +1,7 @@
 # FullStackTemplate backend
-
 The backend is a Django REST Framework application with JWT authentication and a custom user model whose email address is unique.
 
 ## Structure
-
 - `app/`: Django settings, URL routing, ASGI, and WSGI
 - `authentication/`: custom user, registration, login, refresh, password reset, and email delivery
 - `workspaces/`: generic Workspace → Collection → Item models, sharing, access control, ordering, and REST endpoints
@@ -13,7 +11,6 @@ The backend is a Django REST Framework application with JWT authentication and a
 - `ruff.toml`: backend lint and formatting configuration
 
 ## Authentication API
-
 - `POST /auth/register/`
   - Body: `email`, `password`, and optional `username`
   - Returns: `access`, `refresh`, `username`, `email`, and a success message
@@ -30,7 +27,6 @@ The backend is a Django REST Framework application with JWT authentication and a
   - Body: `uid`, `token`, `password`
 
 ## Reusable application API
-
 All `/api/` endpoints require a JWT access token.
 
 - `/api/workspaces/`: CRUD for owned and shared workspaces
@@ -49,7 +45,6 @@ between workspaces, items cannot move between workspaces, and cross-workspace
 collection membership is rejected.
 
 ## Local setup
-
 From the repository root:
 
 ```powershell
@@ -73,7 +68,6 @@ The default database is `backend/db.sqlite3`. Override it with `DJANGO_SQLITE_PA
 The `fullstacktemplate.localhost` host is accepted by default.
 
 ## Email
-
 Local development defaults to Django's console email backend. Production can use the included Resend HTTPS backend:
 
 ```env
@@ -86,7 +80,6 @@ DJANGO_DEFAULT_FROM_EMAIL=fullstacktemplate.no-reply@example.com
 SMTP-compatible backends can instead use the documented `DJANGO_EMAIL_HOST`, `DJANGO_EMAIL_PORT`, `DJANGO_EMAIL_USE_TLS`, and `DJANGO_EMAIL_HOST_USER` settings.
 
 ## Checks
-
 ```powershell
 python backend/manage.py test
 ruff check backend

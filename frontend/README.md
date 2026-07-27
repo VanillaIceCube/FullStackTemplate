@@ -1,9 +1,7 @@
 # FullStackTemplate frontend
-
 The frontend is a Vite-powered React 19 single-page application built with Material UI and React Router.
 
 ## Routes
-
 - `/login`: email and password login
 - `/register`: account creation with an optional username
 - `/forgot-password`: password-reset email request
@@ -17,7 +15,6 @@ The frontend is a Vite-powered React 19 single-page application built with Mater
 Signed-out users who request a protected route are redirected to `/login`.
 
 ## Authentication behavior
-
 - Access and refresh tokens are stored in `sessionStorage`.
 - The profile name and email are stored for the app header.
 - API requests that receive a `401` attempt one refresh-token exchange.
@@ -33,7 +30,6 @@ Workspace and notification functions live in
 behavior live in `src/services/requestClient.js`.
 
 ## Local setup
-
 The checked-in frontend dependencies require Node.js 25, matching
 `package.json`, CI, and the production Docker image.
 
@@ -57,7 +53,6 @@ same-origin API requests working when the frontend container is accessed
 directly as well as through the origin proxy.
 
 ## Checks
-
 ```powershell
 npm test
 npm run lint:strict

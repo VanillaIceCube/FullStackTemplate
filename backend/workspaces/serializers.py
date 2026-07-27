@@ -31,7 +31,10 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         # perform_create in models.py automatically sets owner & created_by upon creation
         # this is placed here to allow you to not have to pass in owner & created_by
         # but still requires them on the database level
-        extra_kwargs = {"owner": {"required": False}, "created_by": {"required": False}}
+        extra_kwargs = {
+            "owner": {"required": False},
+            "created_by": {"read_only": True},
+        }
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -48,7 +51,7 @@ class CollectionSerializer(serializers.ModelSerializer):
         # this is placed here to allow you to not have to pass in owner & created_by
         # but still requires them on the database level
         extra_kwargs = {
-            "created_by": {"required": False},
+            "created_by": {"read_only": True},
         }
 
     def validate(self, attrs):
@@ -112,7 +115,7 @@ class ItemSerializer(serializers.ModelSerializer):
         # this is placed here to allow you to not have to pass in owner & created_by
         # but still requires them on the database level
         extra_kwargs = {
-            "created_by": {"required": False},
+            "created_by": {"read_only": True},
             "workspace": {"required": False},
         }
 

@@ -1,5 +1,4 @@
 # AGENTS.md
-
 FullStackTemplate uses manual setup steps; do not assume Django or Node dependencies are installed.
 
 When setup, routing, environment variables, deployment, or CI/CD changes, update the relevant documentation:
@@ -12,7 +11,6 @@ When setup, routing, environment variables, deployment, or CI/CD changes, update
 - User-visible or operational changes: `CHANGELOG.md`
 
 ## Changelog format
-
 Add a dated section at the top of `CHANGELOG.md` and use only the non-empty headings below, in this order:
 
 1. `### Added`
@@ -21,7 +19,6 @@ Add a dated section at the top of `CHANGELOG.md` and use only the non-empty head
 4. `### Removed`
 
 ## Local development
-
 Backend:
 
 ```powershell
@@ -62,7 +59,6 @@ Optional frontend variable:
 - `REACT_APP_API_BASE_URL` (development default: `http://localhost:8000`; leave blank in same-origin production)
 
 ## Checks
-
 Run checks in proportion to the change:
 
 ```powershell
@@ -77,7 +73,6 @@ npm run build
 ```
 
 ## Production
-
 Production is designed for `https://app.example.com` behind Cloudflare and an origin Nginx proxy.
 
 - Frontend: `/`
@@ -91,7 +86,6 @@ Production is designed for `https://app.example.com` behind Cloudflare and an or
 Review `deploy/nginx-proxy.conf`, the deploy workflow, Cloudflare settings, and all allowlist/base-URL variables whenever domains or routes change.
 
 ## GitHub automation
-
 The copied Notoli automation includes lint, tests, CodeQL, dependency review, npm malware review, Dependabot auto-merge, AI PR reviewers, deployment, and scheduled security-alert aggregation.
 
 Secret-dependent workflows must fail visibly when their credentials are unavailable. Keep GitHub App permissions and the credential separation described in `.github/README-WORKFLOWS.md`.

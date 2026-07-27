@@ -1,11 +1,9 @@
 # FullStackTemplate GitHub automation
-
 FullStackTemplate carries forward the proven CI/CD and security automation from
 Notoli and MacroMapper, adapted to the template's repository, images, and
 generic GitHub Project.
 
 ## Pull-request CI
-
 `.github/workflows/ci-orchestrator.yml` coordinates:
 
 - Frontend Prettier and Biome checks
@@ -22,7 +20,6 @@ generic GitHub Project.
 Path detection prevents unrelated application suites from running. A detector failure is treated as a CI failure instead of silently skipping checks.
 
 ## AI review apps
-
 Three GitHub Apps provide separate review identities:
 
 - Obi-Wan Code-nobi: code review
@@ -49,7 +46,6 @@ requests never receive these secrets; their independent lint, test, CodeQL,
 vulnerability, and malware checks remain authoritative.
 
 ## Security-alert aggregation
-
 The daily/manual `alert-codeql.yml`, `alert-vulnerability.yml`, and `alert-malware.yml` workflows group open alerts into managed FullStackTemplate issues and synchronize them with the FullStackTemplate Project.
 
 Additional configuration:
@@ -79,7 +75,6 @@ target repository in the GitHub UI as described in
 [`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md).
 
 ## Deployment
-
 `.github/workflows/ci-deploy.yml` runs on `env-prod` pushes or manually. It:
 
 1. Builds and pushes `fullstacktemplate-backend` and `fullstacktemplate-frontend` to GHCR.
@@ -105,7 +100,6 @@ Repository secrets:
 See `deploy/README.md` for server and Cloudflare details.
 
 ## Dependabot
-
 `.github/dependabot.yml` checks npm, pip, GitHub Actions, and Docker dependencies daily. Patch and minor Dependabot updates can auto-merge only after the lint, test, CodeQL, vulnerability, and malware gates succeed.
 
 The Dependabot-only `Auto Merge` job is an automation consumer of those gates,
@@ -124,7 +118,6 @@ tokens so they do not reserve the model's full output allowance against project
 rate limits.
 
 ## Local automation checks
-
 ```powershell
 node --test .github/actions/publish-ai-review/publish-ai-review.test.js .github/actions/security-alerts/sync-security-alerts.test.js
 docker run --rm -v "${PWD}:/repo" --workdir /repo rhysd/actionlint:latest -color

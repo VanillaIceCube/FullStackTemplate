@@ -1,17 +1,14 @@
 # FullStackTemplate
-
 A reusable React, Material UI, Django REST Framework, Docker, authentication,
 sharing, notification, CI/CD, and deployment foundation. It keeps the working
 versions and patterns from Notoli and MacroMapper without introducing a
 dependency-upgrade project.
 
 ## Before the first pull request
-
 Start here. The pull-request workflow deliberately exposes missing reviewer
 configuration, so add these GitHub repository settings before asking CI to run.
 
 ### Required CI and reviewer secrets
-
 Add under **Settings → Secrets and variables → Actions → Secrets**:
 
 ```text
@@ -41,7 +38,6 @@ correct minimum permissions, install them on the repository, and create the
 matching GitHub Project.
 
 ### Required security aggregation settings
-
 ```text
 Variable: SECURITY_ALERTS_PROJECT_ID
 Secret:   SECURITY_ALERTS_TOKEN
@@ -55,14 +51,12 @@ Code scanning and Dependabot alerts must also be enabled in repository
 settings.
 
 ### Deployment settings can wait
-
 The deploy workflow runs only from `env-prod` or manual dispatch. It needs the
 DigitalOcean, Cloudflare, and Resend values listed in
 [deploy/README.md](deploy/README.md), but those do not block the first
 application pull request.
 
 ## Create an application from this template
-
 After creating a repository from FullStackTemplate, clone it and run:
 
 ```powershell
@@ -91,7 +85,6 @@ Review the initializer diff, replace the starter SVG mark, then complete the
 GitHub settings above before opening the first PR.
 
 ## What is included
-
 - React 19, Vite, Material UI, responsive application shell, and component
   showcase
 - Django REST Framework, custom user model, and versioned migrations
@@ -112,7 +105,6 @@ GitHub settings above before opening the first PR.
 - Modified MIT License restricted to non-commercial use
 
 ## Run locally in Docker
-
 Requirements: Docker Desktop and either `mkcert` or OpenSSL.
 
 ```powershell
@@ -140,7 +132,6 @@ port, for example `https://fullstacktemplate.localhost:8443`.
 commit them.
 
 ## Run without Docker
-
 Requirements: Python 3.12 and Node.js 25. Docker remains the simplest option
 when those exact versions are not already installed.
 
@@ -163,7 +154,6 @@ npm start
 Open `http://fullstacktemplate.localhost:3000`.
 
 ## Validate changes
-
 ```powershell
 Set-Location frontend
 npm run format:check
@@ -186,7 +176,6 @@ CI runs the same application and automation checks, plus CodeQL, dependency,
 malware, and AI review gates.
 
 ## Documentation
-
 - [GitHub Apps, Project, reviewers, and branch rules](docs/GITHUB_SETUP.md)
 - [Sharing and notification architecture](docs/SHARING_AND_NOTIFICATIONS.md)
 - [Cloudflare, DigitalOcean, Resend, Docker, and deployment](deploy/README.md)
@@ -197,7 +186,6 @@ malware, and AI review gates.
 - [Changelog](CHANGELOG.md)
 
 ## License
-
 FullStackTemplate uses the
 [Modified MIT License (Non-Commercial Use Only)](LICENSE.md). It permits use,
 copying, modification, and distribution for non-commercial purposes; commercial

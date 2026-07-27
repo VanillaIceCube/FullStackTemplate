@@ -1,11 +1,9 @@
 # Deployment guide
-
 The production path is Cloudflare DNS/TLS → DigitalOcean Droplet → Nginx →
 React/Django containers. The public application is always a subdomain, and
 Nginx serves the frontend and API from one origin.
 
 ## GitHub deployment settings
-
 Add these Actions secrets:
 
 ```text
@@ -56,7 +54,6 @@ port, TLS, and username values are only used if you switch to Django’s SMTP
 backend; retaining them makes that change straightforward.
 
 ## DigitalOcean
-
 1. Create an Ubuntu 24.04 Droplet with an SSH key, monitoring, backups, and a
    stable public IP.
 2. Create a non-root `deploy` user with sudo access and key-only SSH. Disable
@@ -95,7 +92,6 @@ a non-root sudo user, cloud firewalls, monitoring, and backups:
 [production-ready Droplet setup](https://docs.digitalocean.com/products/droplets/getting-started/recommended-droplet-setup/).
 
 ## Cloudflare subdomain and TLS
-
 Assume the app slug is `example-application` and the base domain is
 `example.com`.
 
@@ -127,7 +123,6 @@ and the dashboard flow for
 [Origin CA certificates](https://developers.cloudflare.com/ssl/origin-configuration/origin-ca/).
 
 ## Resend password-reset delivery
-
 The included `ResendApiEmailBackend` sends Django email through Resend’s HTTPS
 API and needs no extra Python package.
 
@@ -151,7 +146,6 @@ as password, and STARTTLS port 587:
 [Django SMTP guide](https://resend.com/docs/send-with-django-smtp).
 
 ## Run the first deployment
-
 The workflow automatically deploys pushes to `env-prod`. To stage the first
 deployment:
 
@@ -172,7 +166,6 @@ curl -I https://example-application.example.com
 Keep `env-prod` protected and update it only from reviewed `main`.
 
 ## Local Docker with `[application].localhost`
-
 The template itself uses `fullstacktemplate.localhost`. A generated repository
 uses the slug passed to `initialize-template.ps1`.
 
@@ -206,7 +199,6 @@ Then open `https://fullstacktemplate.localhost:8443`. Different
 to be unique when multiple Compose stacks run on one machine.
 
 ## Routing and persistence
-
 Nginx routes:
 
 - `/` and SPA deep links to the frontend;

@@ -1,5 +1,4 @@
 # Sharing and notifications
-
 The example domain is intentionally generic:
 
 ```text
@@ -13,7 +12,6 @@ Use it as the first real feature or as a reference implementation to replace
 with an application-specific domain.
 
 ## Ownership and access
-
 `Workspace.owner` is the administrative owner.
 `Workspace.collaborators` contains users with shared application access.
 `created_by` records who created each workspace, collection, or item.
@@ -32,7 +30,6 @@ another workspace, and an item from one workspace cannot be attached to a
 collection in another.
 
 ## API flow
-
 1. Create a workspace with `POST /api/workspaces/`.
 2. The owner shares it with
    `POST /api/workspaces/{id}/collaborators/` and body
@@ -49,7 +46,6 @@ The React example exposes the same flow through the workspace drawer, share
 dialog, collection page, and item page.
 
 ## Notification behavior
-
 Workspace activity creates persisted notifications for other affected members.
 Events include collaborator changes, workspace/collection/item changes, item
 completion, and deletion. The actor is excluded from their own notification.
@@ -70,7 +66,6 @@ Notification delivery is best-effort: a notification failure is logged but
 does not roll back the user’s primary collection or item action.
 
 ## Adapt the example
-
 When replacing the generic names:
 
 1. Preserve one clear top-level authorization boundary equivalent to
