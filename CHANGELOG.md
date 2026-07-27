@@ -9,7 +9,13 @@ All notable changes to this project are documented in this file.
   source mounts.
 - Bound development Docker ports to localhost and made documented `.env` and
   port overrides authoritative.
+### Fixed
+- Removed the stale standalone `CodeQL` required-check context that blocked
+  scope-empty pull requests while retaining the real CodeQL scope and analyzer
+  checks.
 ### Changed
+- Added `Tests / Automation Tests (Node)` to the required main-branch checks in
+  FullStackTemplate and Notoli.
 - Restored Notoli's yellow-and-gray theme across authentication, the
   application header, navigation drawer, profile and notification surfaces,
   and the protected placeholder page.

@@ -103,10 +103,11 @@ See `deploy/README.md` for server and Cloudflare details.
 `.github/dependabot.yml` checks npm, pip, GitHub Actions, and Docker dependencies daily. Patch and minor Dependabot updates can auto-merge only after the lint, test, CodeQL, vulnerability, and malware gates succeed.
 
 The main-branch ruleset mirrors Notoli and includes the orchestrator-level
-`Auto Merge` context among its required checks. Normal contributor pull
-requests intentionally skip that Dependabot-only job without performing a
-merge. Dependabot pull requests remain pending while GitHub reports an unstable
-merge state and are never merged directly. Third-party Actions are pinned to
+`Auto Merge` context among its required checks. The Dependabot-only `Auto
+Merge` job is an automation consumer of those gates; normal contributor pull
+requests intentionally skip it without performing a merge, which GitHub treats
+as successful. Dependabot pull requests remain pending while GitHub reports an
+unstable merge state and are never merged directly. Third-party Actions are pinned to
 immutable commit SHAs, with release-version comments retained for maintenance.
 Credential-handling GitHub Actions are pinned the same way. When a complete
 pull-request diff exceeds an AI reviewer's configured budget, that reviewer's
@@ -117,6 +118,16 @@ All three reviewers inherit the same 512 KiB diff budget from
 OpenAI review requests also cap combined reasoning and visible output at 16,000
 tokens so they do not reserve the model's full output allowance against project
 rate limits.
+
+## Main branch protection
+The active `main` ruleset requires pull requests, resolved review threads, the
+lint/test/CodeQL scope and analyzer/dependency checks, all three AI reviewers,
+the Automation Tests check, and the Dependabot-only `Auto Merge` context. It
+blocks force pushes and branch deletion and has no bypass actors. The
+standalone `CodeQL` context is
+intentionally not required: scope-empty pull requests skip every analyzer and
+do not create that parent result, which would otherwise leave
+`CodeQLExpected` pending forever.
 
 ## Local automation checks
 ```powershell
