@@ -7,6 +7,8 @@ All notable changes to this project are documented in this file.
   check set while blocking force pushes and deletion.
 - Added a Docker hot-reload development Compose workflow with React and Django
   source mounts.
+- Bound development Docker ports to localhost and made documented `.env` and
+  port overrides authoritative.
 ### Changed
 - Restored Notoli's yellow-and-gray theme across authentication, the
   application header, navigation drawer, profile and notification surfaces,

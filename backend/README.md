@@ -76,8 +76,8 @@ The development Compose workflow builds `backend/Dockerfile.dev`, mounts the
 backend source, and runs Django's autoreloading development server:
 
 ```powershell
-docker compose -f deploy/docker-compose.dev.yml up --build -d backend
-docker compose -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml up --build -d backend
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
 ```
 
 The development backend listens on `http://fullstacktemplate.localhost:8000`.

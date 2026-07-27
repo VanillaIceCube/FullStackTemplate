@@ -154,15 +154,17 @@ Django reload changes without rebuilding production images:
 ```powershell
 Copy-Item deploy/backend.env deploy/.env
 New-Item -ItemType File -Path deploy/db.sqlite3 -Force
-docker compose -f deploy/docker-compose.dev.yml up --build -d
-docker compose -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml up --build -d
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
 ```
 
 Open `http://fullstacktemplate.localhost:3000`. The frontend calls Django at
-`http://fullstacktemplate.localhost:8000`. Stop this workflow with:
+`http://fullstacktemplate.localhost:8000`. Both ports bind to localhost only.
+To override them, set `FULLSTACKTEMPLATE_DEV_FRONTEND_PORT` or
+`FULLSTACKTEMPLATE_DEV_BACKEND_PORT` in `deploy/.env`. Stop this workflow with:
 
 ```powershell
-docker compose -f deploy/docker-compose.dev.yml down
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml down
 ```
 
 This development workflow does not need a local certificate, Nginx proxy, or
