@@ -455,33 +455,18 @@ test("does not repeat an unavailable review for the same persona and commit", as
   ]);
 });
 
-test("review workflows withhold verdicts when the complete PR diff is truncated", () => {
+test("PR diff collection fails closed before a truncated review can publish", () => {
   const actionPath = path.resolve(__dirname, "../get-pr-diff/action.yml");
   const action = fs.readFileSync(actionPath, "utf8");
-  assert.match(action, /echo "truncated=\$TRUNCATED"/);
+  const outputIndex = action.indexOf('echo "truncated=$TRUNCATED"');
+  const guardIndex = action.indexOf('if [ "$TRUNCATED" = true ]');
 
-  const workflowRoot = path.resolve(__dirname, "../../workflows");
-  for (const workflowName of [
-    "review-code.yml",
-    "review-build.yml",
-    "review-security.yml",
-  ]) {
-    const workflow = fs.readFileSync(
-      path.join(workflowRoot, workflowName),
-      "utf8",
-    );
-    assert.match(
-      workflow,
-      /if: steps\.pr-diff\.outputs\.truncated == 'true'[\s\S]*?"event": "COMMENT"/,
-    );
-    assert.match(workflow, /review incomplete/i);
-    assert.match(workflow, /verdict(?: is|:)? withheld/i);
-    assert.ok(
-      workflow.match(
-        /if: steps\.pr-diff\.outputs\.truncated != 'true'/g,
-      )?.length >= 3,
-    );
-  }
+  assert.notEqual(outputIndex, -1);
+  assert.ok(guardIndex > outputIndex);
+  assert.match(
+    action.slice(guardIndex),
+    /AI review withheld because the complete PR diff exceeds[\s\S]*?exit 1/,
+  );
 });
 
 test("keeps the visually inspectable Markdown examples synchronized", () => {

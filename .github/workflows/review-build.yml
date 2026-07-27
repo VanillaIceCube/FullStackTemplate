@@ -84,7 +84,6 @@ jobs:
           max_bytes: "45000"
 
       - name: Build review context
-        if: steps.pr-diff.outputs.truncated != 'true'
         shell: bash
         env:
           CONTEXT_PATH: ${{ runner.temp }}/build-review-context.txt
@@ -136,7 +135,6 @@ jobs:
           } > "$CONTEXT_PATH"
 
       - name: Call Lint Eastwood
-        if: steps.pr-diff.outputs.truncated != 'true'
         id: openai
         uses: ./.github/actions/openai-chat
         with:
@@ -186,26 +184,8 @@ jobs:
             Build evidence follows:
 
       - name: Publish Lint Eastwood native review
-        if: steps.pr-diff.outputs.truncated != 'true'
         uses: ./.github/actions/publish-ai-review
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           review_json: ${{ steps.openai.outputs.content }}
           persona_name: "Lint Eastwood"
-
-      - name: Publish incomplete Lint Eastwood review
-        if: steps.pr-diff.outputs.truncated == 'true'
-        uses: ./.github/actions/publish-ai-review
-        with:
-          github_token: ${{ steps.app-token.outputs.token }}
-          persona_name: "Lint Eastwood"
-          review_json: |
-            {
-              "event": "COMMENT",
-              "summary": "**Review incomplete; verdict withheld.** The full change is larger than this reviewer can inspect safely in one pass, so no clean-build approval is being issued.",
-              "unchanged": false,
-              "findings": [],
-              "evidence": ["The complete diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; the automated review budget is 45000 bytes."],
-              "actions": ["Split the change into smaller pull requests or intentionally raise the reviewed diff budget, then rerun the review."],
-              "comments": []
-            }

@@ -1,5 +1,5 @@
 name: Get PR Diff
-description: Generate a unified PR diff and report when it exceeds the review budget.
+description: Generate a complete unified PR diff and fail closed if it is too large.
 inputs:
   base_sha:
     description: Base commit SHA for the PR.
@@ -107,3 +107,8 @@ runs:
           echo "diff_bytes=$ACTUAL_BYTES"
           echo "truncated=$TRUNCATED"
         } >> "$GITHUB_OUTPUT"
+
+        if [ "$TRUNCATED" = true ]; then
+          echo "::error::AI review withheld because the complete PR diff exceeds the ${MAX_BYTES}-byte review limit."
+          exit 1
+        fi
