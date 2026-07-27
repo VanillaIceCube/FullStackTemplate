@@ -99,18 +99,28 @@ Run each `Alert: ...` workflow manually once after the first successful CI run.
 No-alert runs should succeed without creating issues.
 
 ## 4. Branch rules after the first PR
-Wait until one pull request has produced the actual check names, then add a
-ruleset for `main`:
+Wait until one pull request has produced the actual check names, then add the
+Notoli-inspired ruleset for `main`:
 
 - require a pull request before merging;
-- require the independent lint, test, CodeQL, vulnerability, and malware
-  checks;
-- require the AI reviewer checks if you want them to block merges;
-- require branches to be up to date;
-- block force pushes and branch deletion.
+- require the independent lint, test, CodeQL scope, CodeQL analyzer,
+  automation-test, vulnerability, and malware checks;
+- require the AI reviewer checks;
+- require all review threads to be resolved;
+- allow merge commits, squash merges, and rebases;
+- block force pushes and branch deletion;
+- configure no bypass actors.
 
-Do not require the Dependabot-only `Auto Merge` check; ordinary contributor
-pull requests intentionally skip it.
+Do not require a standalone `CodeQL` context. FullStackTemplate's reusable
+CodeQL workflow emits `CodeQL / Detect CodeQL Scope` and the three analyzer
+contexts. When a pull request is outside all CodeQL paths, those analyzers are
+skipped and GitHub does not create a standalone `CodeQL` result, so requiring
+that parent context would leave a permanent `CodeQLExpected` check pending.
+
+Do not require branches to be up to date before merging. The Dependabot-only
+`Auto Merge` check may remain required because GitHub treats its ordinary-PR
+`skipped` conclusion as successful; it performs work only for eligible
+Dependabot pull requests.
 
 ## 5. Deployment configuration
 The complete deployment variables and secrets are in

@@ -1,7 +1,13 @@
 # Changelog
 All notable changes to this project are documented in this file.
 ## 2026-07-27
+### Fixed
+- Removed the stale standalone `CodeQL` required-check context that blocked
+  scope-empty pull requests while retaining the real CodeQL scope and analyzer
+  checks.
 ### Changed
+- Added `Tests / Automation Tests (Node)` to the required main-branch checks in
+  FullStackTemplate and Notoli.
 - Restored Notoli's yellow-and-gray theme across authentication, the
   application header, navigation drawer, profile and notification surfaces,
   and the protected placeholder page.
