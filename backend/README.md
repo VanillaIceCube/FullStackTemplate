@@ -71,6 +71,19 @@ The default database is `backend/db.sqlite3`. Override it with
 `DJANGO_SQLITE_PATH`. The `fullstacktemplate.localhost` host is accepted by
 default.
 
+## Docker hot reload
+The development Compose workflow builds `backend/Dockerfile.dev`, mounts the
+backend source, and runs Django's autoreloading development server:
+
+```powershell
+docker compose -f deploy/docker-compose.dev.yml up --build -d backend
+docker compose -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
+```
+
+The development backend listens on `http://fullstacktemplate.localhost:8000`.
+Use the production Dockerfile and Compose file when testing Gunicorn, Nginx,
+HTTPS, or deployment-shaped behavior.
+
 ## Email
 Local development defaults to Django's console email backend. Production can
 use the included Resend HTTPS backend:

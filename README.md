@@ -146,6 +146,29 @@ stop the shared ingress and restore Notoli as the direct owner of ports 80 and
 `deploy/.env`, `deploy/db.sqlite3`, and certificate keys are ignored. Do not
 commit them.
 
+## Run Docker hot-reload development
+Use the development Compose file when iterating on source code. It mounts the
+frontend and backend directories into development containers, so React and
+Django reload changes without rebuilding production images:
+
+```powershell
+Copy-Item deploy/backend.env deploy/.env
+New-Item -ItemType File -Path deploy/db.sqlite3 -Force
+docker compose -f deploy/docker-compose.dev.yml up --build -d
+docker compose -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
+```
+
+Open `http://fullstacktemplate.localhost:3000`. The frontend calls Django at
+`http://fullstacktemplate.localhost:8000`. Stop this workflow with:
+
+```powershell
+docker compose -f deploy/docker-compose.dev.yml down
+```
+
+This development workflow does not need a local certificate, Nginx proxy, or
+shared local ingress. Use the production Compose workflow above when testing
+the HTTPS proxy and deployment-shaped containers.
+
 ## Run without Docker
 Requirements: Python 3.12 and Node.js 25. Docker remains the simplest option
 when those exact versions are not already installed.

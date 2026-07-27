@@ -55,6 +55,19 @@ The production frontend image uses `nginx.conf` to serve the CRA `build`
 directory and forward `/auth/`, `/api/`, and `/admin/` to the Compose backend
 service.
 
+## Docker hot reload
+From the repository root, run:
+
+```powershell
+docker compose -f deploy/docker-compose.dev.yml up --build -d
+```
+
+The development image uses `Dockerfile.dev`, mounts `frontend/`, and keeps
+`node_modules` in a Docker volume. React watches the mounted source and reloads
+without rebuilding the production image. Open
+`http://fullstacktemplate.localhost:3000`; the development API runs at
+`http://fullstacktemplate.localhost:8000`.
+
 ## Checks
 ```powershell
 npm test -- --runInBand

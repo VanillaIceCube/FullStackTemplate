@@ -5,6 +5,8 @@ All notable changes to this project are documented in this file.
 - Added and documented a Notoli-matching main-branch ruleset that requires
   pull requests, resolved review threads, and the complete CI and AI review
   check set while blocking force pushes and deletion.
+- Added a Docker hot-reload development Compose workflow with React and Django
+  source mounts.
 ### Changed
 - Restored Notoli's yellow-and-gray theme across authentication, the
   application header, navigation drawer, profile and notification surfaces,
