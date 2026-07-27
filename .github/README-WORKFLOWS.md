@@ -71,9 +71,11 @@ The Project must contain:
 - Numeric `Estimate`
 - `Start date` and `End date`
 
-`scripts/create-github-project.ps1` creates and links the Project and its
-custom fields. Finish the Status options, views, and built-in Project workflows
-in GitHub's web interface as described in
+`scripts/create-github-project.ps1` copies Notoli's Project structure, links it
+to the target repository, verifies its fields, views, and supported workflows,
+and sets `SECURITY_ALERTS_PROJECT_ID`. GitHub excludes the repository-scoped
+`Auto-add to project` workflow from Project copies, so configure it for the
+target repository in the GitHub UI as described in
 [`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md).
 
 ## Deployment

@@ -47,7 +47,9 @@ Variable: SECURITY_ALERTS_PROJECT_ID
 Secret:   SECURITY_ALERTS_TOKEN
 ```
 
-The Project ID is printed by `scripts/create-github-project.ps1`.
+The Project initializer copies Notoli's Project structure, links the new
+repository, verifies its fields/views/workflows, and sets
+`SECURITY_ALERTS_PROJECT_ID` automatically.
 `SECURITY_ALERTS_TOKEN` is a separate user token with access to that Project.
 Code scanning and Dependabot alerts must also be enabled in repository
 settings.

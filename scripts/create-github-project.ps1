@@ -1,4 +1,4 @@
-[CmdletBinding()]
+[CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
@@ -8,7 +8,12 @@ param(
     [ValidateNotNullOrEmpty()]
     [string]$Repository,
 
-    [string]$ProjectTitle = "$Repository Project"
+    [string]$ProjectTitle = $Repository,
+
+    [string]$SourceProjectOwner = 'VanillaIceCube',
+
+    [ValidateRange(1, [int]::MaxValue)]
+    [int]$SourceProjectNumber = 8
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,137 +27,343 @@ if ($LASTEXITCODE -ne 0) {
     throw 'GitHub CLI is not authenticated. Run gh auth login, then gh auth refresh -s project.'
 }
 
-function Invoke-GitHubGraphQL {
+function Invoke-Gh {
     param(
         [Parameter(Mandatory = $true)]
-        [string]$Query,
-
-        [Parameter(Mandatory = $true)]
-        [hashtable]$Variables
+        [string[]]$Arguments
     )
 
-    $payload = @{
-        query = $Query
-        variables = $Variables
-    } | ConvertTo-Json -Depth 20 -Compress
-
-    $rawResponse = $payload | gh api graphql --input -
+    $output = & gh @Arguments
     if ($LASTEXITCODE -ne 0) {
-        throw 'A GitHub GraphQL request failed.'
+        throw "GitHub CLI failed: gh $($Arguments -join ' ')"
     }
-
-    return $rawResponse | ConvertFrom-Json
+    return $output
 }
 
-$identityQuery = @'
-query($owner: String!, $repository: String!) {
-  repository(owner: $owner, name: $repository) { id }
-  organization(login: $owner) { id }
-  user(login: $owner) { id }
-}
-'@
-
-$identity = Invoke-GitHubGraphQL -Query $identityQuery -Variables @{
-    owner = $Owner
-    repository = $Repository
-}
-
-if (-not $identity.data.repository.id) {
-    throw "Could not resolve $Owner/$Repository."
-}
-
-$ownerId = if ($identity.data.organization.id) {
-    $identity.data.organization.id
-} else {
-    $identity.data.user.id
-}
-
-if (-not $ownerId) {
-    throw "Could not resolve project owner $Owner."
-}
-
-$createProjectMutation = @'
-mutation($ownerId: ID!, $repositoryId: ID!, $title: String!) {
-  createProjectV2(input: {
-    ownerId: $ownerId,
-    repositoryId: $repositoryId,
-    title: $title
-  }) {
-    projectV2 { id number url }
-  }
-}
-'@
-
-$projectResponse = Invoke-GitHubGraphQL -Query $createProjectMutation -Variables @{
-    ownerId = $ownerId
-    repositoryId = $identity.data.repository.id
-    title = $ProjectTitle
-}
-
-if (-not $projectResponse.data.createProjectV2.projectV2.id) {
-    throw 'GitHub did not return a new Project ID.'
-}
-
-$project = $projectResponse.data.createProjectV2.projectV2
-$createFieldMutation = @'
-mutation(
-  $projectId: ID!,
-  $name: String!,
-  $dataType: ProjectV2CustomFieldType!,
-  $options: [ProjectV2SingleSelectFieldOptionInput!]
-) {
-  createProjectV2Field(input: {
-    projectId: $projectId,
-    name: $name,
-    dataType: $dataType,
-    singleSelectOptions: $options
-  }) {
-    projectV2Field { __typename }
-  }
-}
-'@
-
-function New-SingleSelectField {
+function Get-Project {
     param(
-        [string]$Name,
-        [string[]]$Options
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectOwner,
+
+        [Parameter(Mandatory = $true)]
+        [int]$ProjectNumber
     )
 
-    $colors = @('GRAY', 'BLUE', 'GREEN', 'YELLOW', 'ORANGE', 'RED', 'PURPLE', 'PINK')
-    $optionObjects = for ($index = 0; $index -lt $Options.Count; $index++) {
-        @{
-            name = $Options[$index]
-            description = ''
-            color = $colors[$index % $colors.Count]
+    $rawProject = Invoke-Gh -Arguments @(
+        'project', 'view', "$ProjectNumber",
+        '--owner', $ProjectOwner,
+        '--format', 'json'
+    )
+    return ($rawProject | ConvertFrom-Json)
+}
+
+function Get-ProjectFieldSignature {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectOwner,
+
+        [Parameter(Mandatory = $true)]
+        [int]$ProjectNumber
+    )
+
+    $rawFields = Invoke-Gh -Arguments @(
+        'project', 'field-list', "$ProjectNumber",
+        '--owner', $ProjectOwner,
+        '--limit', '100',
+        '--format', 'json'
+    )
+    $fieldResponse = $rawFields | ConvertFrom-Json
+
+    $fields = foreach ($field in ($fieldResponse.fields | Sort-Object -Property name)) {
+        [ordered]@{
+            name = $field.name
+            type = $field.type
+            options = @($field.options | ForEach-Object { $_.name })
         }
     }
-    Invoke-GitHubGraphQL -Query $createFieldMutation -Variables @{
-        projectId = $project.id
-        name = $Name
-        dataType = 'SINGLE_SELECT'
-        options = @($optionObjects)
-    } | Out-Null
+
+    return ($fields | ConvertTo-Json -Depth 10 -Compress)
 }
 
-New-SingleSelectField -Name 'Domain' -Options @('Frontend', 'Backend', 'CI/CD', 'Infrastructure', 'Product')
-New-SingleSelectField -Name 'Type' -Options @('Feature', 'Bug', 'Chore', 'Security', 'Documentation')
-New-SingleSelectField -Name 'Priority' -Options @('P0', 'P1', 'P2', 'P3')
-New-SingleSelectField -Name 'Size' -Options @('XS', 'S', 'M', 'L', 'XL')
+function Get-ProjectLayout {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectId
+    )
 
-foreach ($field in @(
-    @{ Name = 'Estimate'; Type = 'NUMBER' },
-    @{ Name = 'Start date'; Type = 'DATE' },
-    @{ Name = 'End date'; Type = 'DATE' }
-)) {
-    Invoke-GitHubGraphQL -Query $createFieldMutation -Variables @{
-        projectId = $project.id
-        name = $field.Name
-        dataType = $field.Type
-        options = $null
-    } | Out-Null
+    $query = @'
+query($projectId: ID!) {
+  node(id: $projectId) {
+    ... on ProjectV2 {
+      views(first: 50) {
+        nodes {
+          name
+          layout
+          filter
+          fields(first: 50) {
+            nodes {
+              __typename
+              ... on ProjectV2Field { name }
+              ... on ProjectV2SingleSelectField { name }
+              ... on ProjectV2IterationField { name }
+            }
+          }
+          groupByFields(first: 20) {
+            nodes {
+              __typename
+              ... on ProjectV2Field { name }
+              ... on ProjectV2SingleSelectField { name }
+              ... on ProjectV2IterationField { name }
+            }
+          }
+          sortByFields(first: 20) {
+            nodes {
+              direction
+              field {
+                __typename
+                ... on ProjectV2Field { name }
+                ... on ProjectV2SingleSelectField { name }
+                ... on ProjectV2IterationField { name }
+              }
+            }
+          }
+          verticalGroupByFields(first: 20) {
+            nodes {
+              __typename
+              ... on ProjectV2Field { name }
+              ... on ProjectV2SingleSelectField { name }
+              ... on ProjectV2IterationField { name }
+            }
+          }
+        }
+      }
+      workflows(first: 50) {
+        nodes {
+          name
+          enabled
+        }
+      }
+    }
+  }
+}
+'@
+
+    $rawLayout = Invoke-Gh -Arguments @(
+        'api', 'graphql',
+        '-F', "projectId=$ProjectId",
+        '-f', "query=$query"
+    )
+    $layout = ($rawLayout | ConvertFrom-Json).data.node
+
+    if (-not $layout) {
+        throw "Could not read Project layout for $ProjectId."
+    }
+
+    return $layout
 }
 
-Write-Output "Created $($project.url)"
-Write-Output "Set repository variable SECURITY_ALERTS_PROJECT_ID to $($project.id)"
-Write-Output 'In the Project UI, change Status options to Backlog, Ready, In Progress, In Review, and Done.'
-Write-Output 'Then create the views and built-in workflows listed in docs/GITHUB_SETUP.md.'
+function Get-ViewSignature {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Layout
+    )
+
+    $views = foreach ($view in ($Layout.views.nodes | Sort-Object -Property name)) {
+        $sortFields = foreach ($sortField in $view.sortByFields.nodes) {
+            [ordered]@{
+                direction = $sortField.direction
+                field = $sortField.field.name
+            }
+        }
+
+        [ordered]@{
+            name = $view.name
+            layout = $view.layout
+            filter = $view.filter
+            fields = @($view.fields.nodes.name | Sort-Object)
+            groupByFields = @($view.groupByFields.nodes.name | Sort-Object)
+            sortByFields = @($sortFields)
+            verticalGroupByFields = @(
+                $view.verticalGroupByFields.nodes.name | Sort-Object
+            )
+        }
+    }
+
+    return ($views | ConvertTo-Json -Depth 20 -Compress)
+}
+
+function Get-CopiedWorkflowSignature {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Layout
+    )
+
+    $workflows = @(
+        $Layout.workflows.nodes |
+            Where-Object { $_.name -ne 'Auto-add to project' } |
+            Sort-Object -Property name
+    )
+    return ($workflows | ConvertTo-Json -Depth 10 -Compress)
+}
+
+function Test-ProjectLinkedRepository {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryWithOwner
+    )
+
+    $query = @'
+query($projectId: ID!) {
+  node(id: $projectId) {
+    ... on ProjectV2 {
+      repositories(first: 100) {
+        nodes { nameWithOwner }
+      }
+    }
+  }
+}
+'@
+
+    $rawResponse = Invoke-Gh -Arguments @(
+        'api', 'graphql',
+        '-F', "projectId=$ProjectId",
+        '-f', "query=$query"
+    )
+    $repositories = ($rawResponse | ConvertFrom-Json).data.node.repositories.nodes
+    return $RepositoryWithOwner -in $repositories.nameWithOwner
+}
+
+$sourceProject = Get-Project `
+    -ProjectOwner $SourceProjectOwner `
+    -ProjectNumber $SourceProjectNumber
+$sourceFields = Get-ProjectFieldSignature `
+    -ProjectOwner $SourceProjectOwner `
+    -ProjectNumber $SourceProjectNumber
+$sourceLayout = Get-ProjectLayout -ProjectId $sourceProject.id
+
+$existingProjectsRaw = Invoke-Gh -Arguments @(
+    'project', 'list',
+    '--owner', $Owner,
+    '--limit', '100',
+    '--format', 'json'
+)
+$existingProjects = ($existingProjectsRaw | ConvertFrom-Json).projects
+$matchingProjects = @(
+    $existingProjects | Where-Object { $_.title -eq $ProjectTitle }
+)
+
+if ($matchingProjects.Count -gt 1) {
+    $matches = $matchingProjects.url -join ', '
+    throw "Multiple Projects named '$ProjectTitle' exist: $matches. No duplicate was created."
+}
+
+$project = $null
+$reuseExistingProject = $false
+if ($matchingProjects.Count -eq 1) {
+    $project = $matchingProjects[0]
+    if (
+        -not (
+            Test-ProjectLinkedRepository `
+                -ProjectId $project.id `
+                -RepositoryWithOwner "$Owner/$Repository"
+        )
+    ) {
+        throw "Project '$ProjectTitle' already exists but is not linked to $Owner/$($Repository): $($project.url)"
+    }
+    $reuseExistingProject = $true
+}
+
+$target = "$Owner/$Repository Project '$ProjectTitle'"
+$action = if ($reuseExistingProject) {
+    'Verify and finish the existing linked Project'
+} else {
+    "Copy $SourceProjectOwner Project $SourceProjectNumber"
+}
+if (-not $PSCmdlet.ShouldProcess($target, $action)) {
+    if ($reuseExistingProject) {
+        Write-Output "Would reuse $($project.url)."
+    } else {
+        Write-Output "Would copy $($sourceProject.url) to $Owner as '$ProjectTitle'."
+        Write-Output "Would link the copied Project to $Owner/$Repository."
+    }
+    Write-Output 'Would verify fields, views, and configured workflows.'
+    Write-Output 'Would set repository variable SECURITY_ALERTS_PROJECT_ID.'
+    return
+}
+
+if (-not $reuseExistingProject) {
+    $copyRaw = Invoke-Gh -Arguments @(
+        'project', 'copy', "$SourceProjectNumber",
+        '--source-owner', $SourceProjectOwner,
+        '--target-owner', $Owner,
+        '--title', $ProjectTitle,
+        '--format', 'json'
+    )
+    $project = $copyRaw | ConvertFrom-Json
+
+    if (-not $project.id -or -not $project.number -or -not $project.url) {
+        throw 'GitHub did not return the copied Project ID, number, and URL.'
+    }
+}
+
+$description = "$Repository is a full-stack React and Django application. This Project tracks features, bugs, UX, backend work, deployment, security, and CI/CD."
+$readme = @"
+This board is used to plan and track work for $Repository.
+
+Issues here cover product features, bugs, UI improvements, backend changes, refactors, security, deployment, and long-term ideas. The goal is to keep development organized while the application grows from the reusable FullStackTemplate foundation.
+"@
+
+Invoke-Gh -Arguments @(
+    'project', 'edit', "$($project.number)",
+    '--owner', $Owner,
+    '--title', $ProjectTitle,
+    '--description', $description,
+    '--readme', $readme,
+    '--visibility', 'PUBLIC'
+) | Out-Null
+
+if (-not $reuseExistingProject) {
+    Invoke-Gh -Arguments @(
+        'project', 'link', "$($project.number)",
+        '--owner', $Owner,
+        '--repo', "$Owner/$Repository"
+    ) | Out-Null
+}
+
+$targetFields = Get-ProjectFieldSignature `
+    -ProjectOwner $Owner `
+    -ProjectNumber $project.number
+$targetLayout = Get-ProjectLayout -ProjectId $project.id
+
+if ($targetFields -cne $sourceFields) {
+    throw "Copied Project fields do not match $($sourceProject.title)."
+}
+
+if ((Get-ViewSignature -Layout $targetLayout) -cne (Get-ViewSignature -Layout $sourceLayout)) {
+    throw "Copied Project views do not match $($sourceProject.title)."
+}
+
+if (
+    (Get-CopiedWorkflowSignature -Layout $targetLayout) -cne
+    (Get-CopiedWorkflowSignature -Layout $sourceLayout)
+) {
+    throw "Copied Project workflows do not match $($sourceProject.title)."
+}
+
+Invoke-Gh -Arguments @(
+    'variable', 'set', 'SECURITY_ALERTS_PROJECT_ID',
+    '--repo', "$Owner/$Repository",
+    '--body', $project.id
+) | Out-Null
+
+if ($reuseExistingProject) {
+    Write-Output "Reused existing linked Project $($project.url)"
+} else {
+    Write-Output "Created and linked $($project.url)"
+}
+Write-Output "Verified fields, views, and copied workflows against $($sourceProject.url)"
+Write-Output 'Set repository variable SECURITY_ALERTS_PROJECT_ID.'
+Write-Output "GitHub does not copy the repository-scoped 'Auto-add to project' workflow; configure it for the target repository as documented in docs/GITHUB_SETUP.md."

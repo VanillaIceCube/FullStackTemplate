@@ -25,6 +25,9 @@
 
 ### Fixed
 
+- Corrected the GitHub Project initializer to copy and verify Notoli's exact
+  custom fields, option sets, views, filters, grouping, sorting, and supported
+  workflows instead of creating an approximate Project manually.
 - Fixed the npm malware gate so an initial frontend lockfile can be reviewed when the base branch has no lockfile.
 - Fixed dependency-review reporting for large initial lockfiles by keeping detailed package JSON in the check logs and annotations.
 - Removed the Dependabot-only auto-merge job from required status checks so normal pull requests are not blocked by its intentional skip.
@@ -32,6 +35,8 @@
 
 ### Changed
 
+- Changed Project setup to link the copied Project to the target repository and
+  set `SECURITY_ALERTS_PROJECT_ID` automatically.
 - Changed local setup documentation and environment templates to use `fullstacktemplate.localhost`.
 - Adapted application names, domains, image names, environment names, workflow prompts, and deployment paths from Notoli to FullStackTemplate.
 - Limited npm malware advisory queries to the changed package versions instead of downloading the full npm malware catalog.

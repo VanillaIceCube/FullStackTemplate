@@ -14,28 +14,40 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/create-github-proj
   -Repository YOUR_REPOSITORY
 ```
 
-The script creates and links a GitHub Project, adds `Domain`, `Type`,
-`Priority`, `Size`, `Estimate`, `Start date`, and `End date`, and prints its
-node ID. The current GitHub GraphQL API can create Projects and fields, but
-Project views and built-in workflows still need to be configured in the web
-interface.
+The script uses Notoli's Project as the reusable Project template. It:
 
-In the Project:
+1. Refuses to create a duplicate Project with the same title.
+2. Copies Notoli's views, custom fields, configured workflows, and insights
+   without copying its linked issues.
+3. Rewrites the Project description and README for the target repository.
+4. Links the copied Project to the target repository.
+5. Verifies the copied fields, views, and supported workflows against Notoli.
+6. Sets the target repository variable `SECURITY_ALERTS_PROJECT_ID`.
 
-1. Change `Status` options to `Backlog`, `Ready`, `In Progress`, `In Review`,
-   and `Done`.
-2. Create a board view grouped by `Status`.
-3. Create a table view showing `Status`, `Domain`, `Type`, `Priority`, `Size`,
-   `Estimate`, `Start date`, and `End date`.
-4. Create a security view filtered to `Type:Security`.
-5. Enable the built-in workflow that adds repository issues and pull requests
-   to the Project.
-6. Enable the built-in workflow that sets newly added items to `Backlog`.
-7. Copy the printed Project node ID into repository variable
-   `SECURITY_ALERTS_PROJECT_ID`.
+The copied fields match Notoli:
 
-GitHub documents the supported Project mutations in its
-[Projects GraphQL reference](https://docs.github.com/en/graphql/reference/projects).
+- `Status`: `Backlog`, `Ready`, `In Progress`, `In Review`, `Done`
+- `Domain`: `Frontend`, `Backend`, `UX/UI`, `Data Model`, `Deployment`, `CI/CD`
+- `Type`: `Bug`, `Feature`, `Enhancement`, `Refactor`, `Chore`, `Research`,
+  `Security`
+- `Priority`: `P0`, `P1`, `P2`, `P3`
+- `Size`: `XS`, `S`, `M`, `L`, `XL`
+- `Estimate`, `Start date`, and `End date`
+
+The copied views match Notoli's `Kanban`, `Detailed Kanban`, `New Issues`,
+`Updated Issues`, `Issue Picker`, and `Roadmap` layouts, including their visible
+fields, filters, grouping, and sorting.
+
+GitHub does not copy the repository-scoped `Auto-add to project` workflow.
+After the script completes, open the new Project's **Workflows** page and
+configure `Auto-add to project` for the target repository. The remaining
+configured workflows, including `Auto-add sub-issues to project`, are copied
+and verified by the script.
+GitHub documents this behavior in
+[Copying an existing project](https://docs.github.com/en/issues/planning-and-tracking-with-projects/creating-projects/copying-an-existing-project).
+
+Notoli is the default source (`VanillaIceCube` Project `8`). A different source
+can be supplied with `-SourceProjectOwner` and `-SourceProjectNumber`.
 
 ## 2. Register the AI reviewer GitHub Apps
 
