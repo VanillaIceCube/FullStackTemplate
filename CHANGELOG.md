@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project are documented in this file.
 ## 2026-07-27
+### Added
+- Added and documented a Notoli-matching main-branch ruleset that requires
+  pull requests, resolved review threads, and the complete CI and AI review
+  check set while blocking force pushes and deletion.
+- Added a Docker hot-reload development Compose workflow with React and Django
+  source mounts.
+- Bound development Docker ports to localhost and made documented `.env` and
+  port overrides authoritative.
 ### Fixed
 - Removed the stale standalone `CodeQL` required-check context that blocked
   scope-empty pull requests while retaining the real CodeQL scope and analyzer
