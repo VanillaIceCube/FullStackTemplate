@@ -1,7 +1,8 @@
 # FullStackTemplate frontend
 The frontend is a Create React App-powered React 19 single-page application
 built with Material UI and React Router. Its intentionally small authenticated
-shell is ready for an application-specific feature set.
+shell is ready for an application-specific feature set and retains Notoli's
+yellow-and-gray visual theme.
 
 ## Routes
 - `/login`: email and password login

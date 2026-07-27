@@ -75,7 +75,7 @@ export default function ResetPassword({ showSnackbar }) {
         >
           Reset Password
         </Button>
-        <Typography variant="caption" sx={{ textAlign: 'center' }}>
+        <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
           <Box
             component="button"
             type="button"

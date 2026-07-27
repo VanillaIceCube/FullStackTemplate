@@ -266,6 +266,14 @@ export default function AppHeader({ title, setDrawerOpen }) {
                               event.stopPropagation();
                               handleClearNotification(notification.id);
                             }}
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              ml: 1,
+                              alignSelf: 'center',
+                              flexShrink: 0,
+                              color: 'var(--secondary-color)',
+                            }}
                           >
                             <ClearIcon fontSize="small" />
                           </IconButton>
@@ -289,12 +297,50 @@ export default function AppHeader({ title, setDrawerOpen }) {
             anchorEl={profileAnchorEl}
             open={Boolean(profileAnchorEl)}
             onClose={() => setProfileAnchorEl(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            slotProps={{
+              paper: {
+                sx: {
+                  backgroundColor: 'var(--secondary-background-color)',
+                  color: 'var(--secondary-color)',
+                  boxShadow: 3,
+                  border: '2.5px solid var(--background-color)',
+                  borderRadius: 1.5,
+                  minWidth: 220,
+                },
+              },
+            }}
           >
-            <MenuItem disableRipple>
-              <ListItemText primary={profilePrimary} secondary={profileSecondary} />
-            </MenuItem>
-            <Divider />
             <MenuItem
+              disableRipple
+              sx={{
+                cursor: 'default',
+                '&:hover': { backgroundColor: 'transparent' },
+                py: 0.75,
+              }}
+            >
+              <ListItemText
+                primary={profilePrimary}
+                secondary={profileSecondary}
+                slotProps={{
+                  primary: { sx: { fontWeight: 'bold', color: 'var(--secondary-color)' } },
+                  secondary: { sx: { color: 'var(--secondary-color)', opacity: 1 } },
+                }}
+              />
+            </MenuItem>
+            <Divider
+              variant="middle"
+              sx={{ my: 0.25, mx: 1, borderBottomWidth: 2, bgcolor: 'var(--secondary-color)' }}
+            />
+            <MenuItem
+              sx={{
+                py: 0.5,
+                px: 1.5,
+                minHeight: 'auto',
+                fontWeight: 'bold',
+                color: 'var(--secondary-color)',
+              }}
               onClick={() => {
                 setProfileAnchorEl(null);
                 logout();

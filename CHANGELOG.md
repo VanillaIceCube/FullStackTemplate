@@ -1,5 +1,12 @@
 # Changelog
 All notable changes to this project are documented in this file.
+## 2026-07-27
+### Changed
+- Restored Notoli's yellow-and-gray theme across authentication, the
+  application header, navigation drawer, profile and notification surfaces,
+  and the protected placeholder page.
+- Removed the persistent translucent selection overlay from the drawer's Home
+  item.
 ## 2026-07-26
 ### Added
 - Added a shared local TLS ingress that routes Notoli, MacroMapper, and
