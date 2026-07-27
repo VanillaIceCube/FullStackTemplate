@@ -43,7 +43,7 @@ jobs:
 
       - name: Collect security evidence
         id: evidence
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           CODEQL_RESULT: ${{ inputs.codeql_result || 'unknown' }}
           DEPENDENCY_VULNERABILITY_RESULT: ${{ inputs.dependency_vulnerability_result || 'unknown' }}
@@ -142,7 +142,7 @@ jobs:
 
       - name: Create RoboCop GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         with:
           app-id: ${{ vars.ROBOCOP_APP_ID }}
           private-key: ${{ secrets.ROBOCOP_PRIVATE_KEY }}

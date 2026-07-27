@@ -113,7 +113,9 @@ not a required status check itself; normal contributor pull requests
 intentionally skip it. Dependabot pull requests remain pending while GitHub
 reports an unstable merge state and are never merged directly. Third-party
 Actions are pinned to immutable commit SHAs, with release-version comments
-retained for maintenance.
+retained for maintenance. Credential-handling GitHub Actions are pinned the
+same way. AI reviewer jobs fail closed instead of publishing a verdict when
+their complete pull-request diff exceeds the configured review budget.
 
 ## Local automation checks
 

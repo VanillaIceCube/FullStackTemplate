@@ -581,7 +581,10 @@ test("alert workflows scope RoboCop to alert and issue APIs while reserving the 
       path.join(repositoryRoot, ".github", "workflows", workflowName),
       "utf8",
     );
-    assert.match(workflow, /uses: actions\/create-github-app-token@v2/);
+    assert.match(
+      workflow,
+      /uses: actions\/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2/,
+    );
     assert.match(workflow, /permission-issues: write/);
     assert.match(workflow, /permission-security-events: read/);
     assert.match(

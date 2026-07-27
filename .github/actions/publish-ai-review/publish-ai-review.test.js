@@ -455,6 +455,20 @@ test("does not repeat an unavailable review for the same persona and commit", as
   ]);
 });
 
+test("PR diff collection fails closed before a truncated review can publish", () => {
+  const actionPath = path.resolve(__dirname, "../get-pr-diff/action.yml");
+  const action = fs.readFileSync(actionPath, "utf8");
+  const outputIndex = action.indexOf('echo "truncated=$TRUNCATED"');
+  const guardIndex = action.indexOf('if [ "$TRUNCATED" = true ]');
+
+  assert.notEqual(outputIndex, -1);
+  assert.ok(guardIndex > outputIndex);
+  assert.match(
+    action.slice(guardIndex),
+    /AI review withheld because the complete PR diff exceeds[\s\S]*?exit 1/,
+  );
+});
+
 test("keeps the visually inspectable Markdown examples synchronized", () => {
   const examples = [
     "# AI review format examples",

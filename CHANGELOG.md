@@ -29,7 +29,10 @@
   coverage for generated security-issue links.
 - Prevented Dependabot automation from merging pull requests while GitHub
   reports an unstable merge state.
-- Pinned third-party GitHub Actions to immutable commit SHAs.
+- Pinned third-party and credential-handling GitHub Actions to immutable commit
+  SHAs.
+- Prevented AI reviewers from publishing complete-review verdicts when their
+  pull-request diff was truncated.
 - Corrected the GitHub Project initializer to copy and verify Notoli's exact
   custom fields, option sets, views, filters, grouping, sorting, and supported
   workflows instead of creating an approximate Project manually.

@@ -28,7 +28,7 @@ jobs:
 
       - name: Create Obi-Wan Code-nobi GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         with:
           app-id: ${{ vars.OBI_WAN_CODE_NOBI_APP_ID }}
           private-key: ${{ secrets.OBI_WAN_CODE_NOBI_PRIVATE_KEY }}
@@ -189,7 +189,7 @@ jobs:
             - If a finding comes from repository context, a deleted or unchanged line, or any line not shown as "A<line>:", put it in "findings" and do not add an inline comment for it.
             - Use "evidence" only for facts that materially justify the verdict. Do not inventory every file reviewed or mention prior-review bookkeeping.
             - Use "actions" only when the author must fix, clarify, or verify something. Do not repeat the finding.
-            - If the diff is truncated, add that limitation to "evidence".
+            - The diff collection step fails before review when the complete diff exceeds its review budget; never claim to have reviewed omitted diff content.
             - Put the complete verdict wording in "summary". Do not generate Markdown headings, bullet prefixes, or automation notes; the shared publisher owns section layout.
             - Inline comments should state the problem, its impact, and the required action in as few sentences as practical. Do not repeat the review summary or use emojis, catchphrases, or persona jokes.
 
