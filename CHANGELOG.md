@@ -2,6 +2,9 @@
 All notable changes to this project are documented in this file.
 ## 2026-07-27
 ### Added
+- Added a Notoli-matching GitHub repository setup guide covering merge methods,
+  auto-merge, Actions permissions, fork approvals, security controls, alert
+  labels, the `SECURITY_ALERTS_TOKEN` secret, and the complete main ruleset.
 - Added and documented a Notoli-matching main-branch ruleset that requires
   pull requests, resolved review threads, and the complete CI and AI review
   check set while blocking force pushes and deletion.
@@ -14,6 +17,9 @@ All notable changes to this project are documented in this file.
   scope-empty pull requests while retaining the real CodeQL scope and analyzer
   checks.
 ### Changed
+- Matched FullStackTemplate's live repository settings to Notoli by enabling
+  read/write default workflow permissions, pull-request approvals by Actions,
+  the standalone `CodeQL` required context, and security-alert labels.
 - Added `Tests / Automation Tests (Node)` to the required main-branch checks in
   FullStackTemplate and Notoli.
 - Restored Notoli's yellow-and-gray theme across authentication, the

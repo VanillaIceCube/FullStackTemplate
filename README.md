@@ -8,6 +8,13 @@ domain.
 Start here. The pull-request workflow deliberately exposes missing reviewer
 configuration, so add these GitHub repository settings before asking CI to run.
 
+The complete Notoli-matching repository baseline is in
+[the GitHub setup guide](docs/GITHUB_SETUP.md#0-match-the-repository-settings).
+It covers merge methods, auto-merge, Actions permissions, fork approvals,
+Dependabot, secret scanning, CodeQL, required labels, and the main-branch
+ruleset. Apply it before opening the first pull request; repository settings are
+not copied automatically when a repository is created from this template.
+
 ### Required CI and reviewer secrets
 Add under **Settings → Secrets and variables → Actions → Secrets**:
 
@@ -47,8 +54,10 @@ The Project initializer copies Notoli's Project structure, links the new
 repository, verifies its fields/views/workflows, and sets
 `SECURITY_ALERTS_PROJECT_ID` automatically.
 `SECURITY_ALERTS_TOKEN` is a separate user token with access to that Project.
-Code scanning and Dependabot alerts must also be enabled in repository
-settings.
+It is not copied from Notoli and must be created in the new repository. Code
+scanning, Dependabot alerts/security updates, secret scanning, and push
+protection must also be enabled in repository settings; the exact switches are
+listed in the setup guide.
 
 ### Deployment settings can wait
 The deploy workflow runs only from `env-prod` or manual dispatch. It needs the

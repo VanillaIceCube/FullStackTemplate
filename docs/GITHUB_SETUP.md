@@ -1,6 +1,61 @@
 # GitHub setup
 Complete this setup before opening the first pull request so every required workflow can run.
 
+## 0. Match the repository settings
+FullStackTemplate is configured to match the live Notoli repository. Apply this
+baseline to a new repository before opening its first pull request.
+
+### General
+
+- Keep the default branch named `main`.
+- Keep the repository public with Issues, Projects, Wiki, and Discussions
+  enabled. Downloads remain disabled.
+- Enable merge commits, squash merges, and rebase merges.
+- Enable **Allow auto-merge**. Keep automatic head-branch deletion disabled,
+  keep **Allow update branch** disabled, and leave commit signoff disabled.
+- Keep the default merge titles/messages (`PR_TITLE`, `MERGE_MESSAGE`,
+  `COMMIT_OR_PR_TITLE`, and `COMMIT_MESSAGES`).
+
+### Actions → General
+
+- Enable Actions and allow all actions and reusable workflows.
+- Set workflow permissions to **Read and write permissions**.
+- Enable **Allow GitHub Actions to create and approve pull requests**.
+- Set fork pull-request approval to **Require approval for first-time
+  contributors**.
+
+The repository and workflow permissions are intentionally different: the
+repository default matches Notoli, while individual workflows still request
+the narrowest permissions they need.
+
+### Security → Code security and analysis
+
+Enable the following repository controls:
+
+- Dependency graph
+- Dependabot alerts
+- Dependabot security updates
+- Secret scanning
+- Secret scanning push protection
+
+Do not enable GitHub's default CodeQL setup for this template. CodeQL is
+already supplied by the pinned workflows under `.github/workflows/`; those
+workflows upload the results to **Security → Code scanning**. The template
+uses the same `actions`, JavaScript/TypeScript, and Python coverage as Notoli.
+
+### Labels used by security automation
+
+Create these labels with the following descriptions so the scheduled alert
+workflows can group and update their managed issues:
+
+| Label | Description |
+| --- | --- |
+| `dependencies` | Dependabot-authored dependency update PRs |
+| `codeql` | Grouped CodeQL security alerts. |
+| `vulnerability` | Grouped non-urgent Dependabot vulnerability alerts. |
+| `malware` | Grouped Dependabot malware alerts. |
+| `codex` | Work generated or assisted by Codex |
+
 ## 1. Create the Project
 Authenticate GitHub CLI with repository and Projects access:
 
@@ -94,7 +149,10 @@ token. The three scheduled/manual alert workflows use RoboCop to read alerts
 and manage repository issues, while this token adds and updates those issues in
 the Project.
 
-Enable GitHub code scanning, Dependabot alerts, and Actions for the repository.
+Enable the repository settings in [the baseline above](#0-match-the-repository-settings),
+then install RoboCop with the permissions listed in this guide. Add the
+`SECURITY_ALERTS_TOKEN` secret before running an alert workflow; it cannot be
+copied from Notoli because it is a credential.
 Run each `Alert: ...` workflow manually once after the first successful CI run.
 No-alert runs should succeed without creating issues.
 
@@ -103,7 +161,7 @@ Wait until one pull request has produced the actual check names, then add the
 Notoli-inspired ruleset for `main`:
 
 - require a pull request before merging;
-- require the independent lint, test, CodeQL scope, CodeQL analyzer,
+- require the independent lint, test, standalone `CodeQL`, CodeQL scope, CodeQL analyzer,
   automation-test, vulnerability, and malware checks;
 - require the AI reviewer checks;
 - require all review threads to be resolved;
@@ -111,11 +169,10 @@ Notoli-inspired ruleset for `main`:
 - block force pushes and branch deletion;
 - configure no bypass actors.
 
-Do not require a standalone `CodeQL` context. FullStackTemplate's reusable
-CodeQL workflow emits `CodeQL / Detect CodeQL Scope` and the three analyzer
-contexts. When a pull request is outside all CodeQL paths, those analyzers are
-skipped and GitHub does not create a standalone `CodeQL` result, so requiring
-that parent context would leave a permanent `CodeQLExpected` check pending.
+Require the standalone `CodeQL` context as Notoli does, together with
+`CodeQL / Detect CodeQL Scope` and the three analyzer contexts. Validate the
+actual check names from the first CI run before saving the ruleset; GitHub
+status checks are matched by exact name.
 
 Do not require branches to be up to date before merging. The Dependabot-only
 `Auto Merge` check may remain required because GitHub treats its ordinary-PR
