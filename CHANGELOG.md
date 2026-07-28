@@ -2,6 +2,8 @@
 All notable changes to this project are documented in this file.
 ## 2026-07-27
 ### Added
+- Added required Dependabot-secret setup for the three AI reviewers so trusted
+  dependency pull requests run the same reviewer gates as other repository PRs.
 - Added a Notoli-derived GitHub repository setup guide covering merge methods,
   auto-merge, Actions permissions, fork approvals, security controls, alert
   labels, the `SECURITY_ALERTS_TOKEN` secret, and the complete main ruleset.
@@ -17,6 +19,9 @@ All notable changes to this project are documented in this file.
   scope-empty pull requests while retaining the real CodeQL scope and analyzer
   checks.
 ### Changed
+- Restored the three AI reviewer child checks and `Auto Merge` as required
+  main-branch gates, matching Notoli's review policy while retaining the
+  template's compatible CodeQL check set.
 - Matched FullStackTemplate's live repository settings to Notoli while keeping
   a read-only default Actions permission, disabling default pull-request
   approvals by Actions, and omitting the standalone `CodeQL` context that the

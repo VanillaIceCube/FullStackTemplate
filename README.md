@@ -17,7 +17,8 @@ ruleset. Apply it before opening the first pull request; repository settings are
 not copied automatically when a repository is created from this template.
 
 ### Required CI and reviewer secrets
-Add under **Settings → Secrets and variables → Actions → Secrets**:
+Add these under both **Settings → Secrets and variables → Actions → Secrets**
+and **Settings → Secrets and variables → Dependabot → Secrets**:
 
 ```text
 OPENAI_API_KEY
@@ -25,6 +26,11 @@ OBI_WAN_CODE_NOBI_PRIVATE_KEY
 LINT_EASTWOOD_PRIVATE_KEY
 ROBOCOP_PRIVATE_KEY
 ```
+
+GitHub isolates workflows triggered by Dependabot from the Actions secret
+store. Keeping the same four values in the Dependabot store lets its pull
+requests run the required AI reviews; GitHub does not provide a way to copy
+secret values between the two stores.
 
 Add under **Actions → Variables**:
 
