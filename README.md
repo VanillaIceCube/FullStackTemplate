@@ -213,6 +213,11 @@ malware, AI review gates, and a stable `Auto Merge` status check. The latter
 reports every pull request while a separate Dependabot-only job enables
 auto-merge for eligible dependency updates.
 
+Obi-Wan's review adds an advisory **Major upgrade brief** to Dependabot
+semver-major updates. It separates supplied upstream information, repository
+impact, verification evidence, and a confidence-qualified recommendation; it
+is not an extra merge gate.
+
 ## Documentation
 - [GitHub Apps, Project, reviewers, and branch rules](docs/GITHUB_SETUP.md)
 - [Cloudflare, DigitalOcean, Resend, Docker, and deployment](deploy/README.md)

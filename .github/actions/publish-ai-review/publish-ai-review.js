@@ -95,6 +95,45 @@ function cleanFindings(values) {
     .filter((finding) => finding.body);
 }
 
+function cleanMajorUpgradeBrief(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const dependency = compactText(value.dependency);
+  const upstreamChanges = cleanList(value.upstream_changes);
+  const breakingChanges = cleanList(value.breaking_changes);
+  const migrationSteps = cleanList(value.migration_steps);
+  const repositoryImpact = compactText(value.repository_impact);
+  const verification = cleanList(value.verification);
+  const recommendation = compactText(value.recommendation);
+  const confidence = compactText(value.confidence);
+
+  if (
+    !dependency &&
+    upstreamChanges.length === 0 &&
+    breakingChanges.length === 0 &&
+    migrationSteps.length === 0 &&
+    !repositoryImpact &&
+    verification.length === 0 &&
+    !recommendation &&
+    !confidence
+  ) {
+    return null;
+  }
+
+  return {
+    dependency,
+    upstreamChanges,
+    breakingChanges,
+    migrationSteps,
+    repositoryImpact,
+    verification,
+    recommendation,
+    confidence,
+  };
+}
+
 function renderFinding(finding) {
   if (!finding.path) return `- ${finding.body}`;
   const target =
@@ -108,6 +147,7 @@ function renderReviewBody({
   findings = [],
   evidence = [],
   actions = [],
+  majorUpgradeBrief,
 }) {
   const format = personaFormat(personaName);
   const sections = [
@@ -118,6 +158,48 @@ function renderReviewBody({
   const renderedFindings = cleanFindings(findings);
   const renderedEvidence = cleanList(evidence);
   const renderedActions = cleanList(actions);
+  const renderedMajorUpgradeBrief = cleanMajorUpgradeBrief(majorUpgradeBrief);
+
+  if (renderedMajorUpgradeBrief) {
+    const brief = renderedMajorUpgradeBrief;
+    sections.push("", "## Major upgrade brief", "");
+    if (brief.dependency) sections.push(`- **Dependency:** ${brief.dependency}`);
+    if (brief.upstreamChanges.length > 0) {
+      sections.push(
+        "- **Upstream changes:**",
+        ...brief.upstreamChanges.map((item) => `  - ${item}`),
+      );
+    }
+    if (brief.breakingChanges.length > 0) {
+      sections.push(
+        "- **Breaking changes:**",
+        ...brief.breakingChanges.map((item) => `  - ${item}`),
+      );
+    }
+    if (brief.migrationSteps.length > 0) {
+      sections.push(
+        "- **Migration steps:**",
+        ...brief.migrationSteps.map((item) => `  - ${item}`),
+      );
+    }
+    if (brief.repositoryImpact) {
+      sections.push(`- **Repository impact:** ${brief.repositoryImpact}`);
+    }
+    if (brief.verification.length > 0) {
+      sections.push(
+        "- **Verification:**",
+        ...brief.verification.map((item) => `  - ${item}`),
+      );
+    }
+    if (brief.recommendation) {
+      const confidence = brief.confidence
+        ? ` (confidence: ${brief.confidence})`
+        : "";
+      sections.push(`- **Recommendation:** ${brief.recommendation}${confidence}`);
+    } else if (brief.confidence) {
+      sections.push(`- **Confidence:** ${brief.confidence}`);
+    }
+  }
 
   if (renderedFindings.length > 0) {
     sections.push(
@@ -295,12 +377,14 @@ async function publishAiReview({
   const findings = cleanFindings(parsed.findings);
   const evidence = cleanList(parsed.evidence);
   const actions = cleanList(parsed.actions);
+  const majorUpgradeBrief = cleanMajorUpgradeBrief(parsed.major_upgrade_brief);
   let body = renderReviewBody({
     personaName,
     summary,
     findings,
     evidence,
     actions,
+    majorUpgradeBrief,
   });
 
   const owner = context.repo.owner;
@@ -422,7 +506,8 @@ async function publishAiReview({
     (declaredUnchanged || suppressed > 0 || repeatedBody) &&
     comments.length === 0 &&
     unplacedComments.length === 0 &&
-    decisionUnchanged
+    decisionUnchanged &&
+    !majorUpgradeBrief
   ) {
     body = renderReviewBody({ personaName, summary });
   } else {
@@ -433,6 +518,7 @@ async function publishAiReview({
         findings: [...findings, ...unplacedComments],
         evidence,
         actions,
+        majorUpgradeBrief,
       });
     }
     if (suppressed > 0 && typeof core.info === "function") {

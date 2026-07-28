@@ -176,6 +176,44 @@ test("renders only populated findings, evidence, and action groups", () => {
   );
 });
 
+test("renders a structured major-upgrade brief without treating it as a finding", () => {
+  assert.equal(
+    renderReviewBody({
+      personaName: "Obi-Wan Code-nobi",
+      summary: "**Approved.** The update is ready for the normal gates to decide.",
+      majorUpgradeBrief: {
+        dependency: "react-router 6.30.4 → 7.18.1 (npm)",
+        upstream_changes: ["The Dependabot description links to the v7 release notes."],
+        breaking_changes: ["No breaking change was identified in the supplied evidence."],
+        migration_steps: ["Verify the repository's existing router usage against the linked notes."],
+        repository_impact: "The lockfile and package manifest are the only changed repository files.",
+        verification: ["Frontend tests passed."],
+        recommendation: "Merge after the normal required checks pass.",
+        confidence: "medium",
+      },
+    }),
+    [
+      "## \ud83e\udded Obi-Wan Code-nobi",
+      "",
+      "**Approved.** The update is ready for the normal gates to decide.",
+      "",
+      "## Major upgrade brief",
+      "",
+      "- **Dependency:** react-router 6.30.4 → 7.18.1 (npm)",
+      "- **Upstream changes:**",
+      "  - The Dependabot description links to the v7 release notes.",
+      "- **Breaking changes:**",
+      "  - No breaking change was identified in the supplied evidence.",
+      "- **Migration steps:**",
+      "  - Verify the repository's existing router usage against the linked notes.",
+      "- **Repository impact:** The lockfile and package manifest are the only changed repository files.",
+      "- **Verification:**",
+      "  - Frontend tests passed.",
+      "- **Recommendation:** Merge after the normal required checks pass. (confidence: medium)",
+    ].join("\n"),
+  );
+});
+
 test("renders an infrastructure-only RoboCop comment without implying approval", () => {
   assert.equal(
     renderReviewBody({
@@ -365,6 +403,42 @@ test("keeps the model-authored summary when it declares no new material", async 
     }),
   );
   assert.equal(createdReviews[0].event, "APPROVE");
+});
+
+test("preserves a major-upgrade brief on an unchanged review", async () => {
+  const { createdReviews, github } = createGitHubMock({
+    priorReviews: [
+      {
+        id: 42,
+        state: "APPROVED",
+        submitted_at: "2026-07-12T00:00:00Z",
+        body: "Previous approval",
+        user: { login: "obi-wan-code-nobi-reviewer[bot]" },
+      },
+    ],
+  });
+  const { core } = createCore();
+
+  await publishAiReview({
+    github,
+    context: context(),
+    core,
+    personaName: "Obi-Wan Code-nobi",
+    raw: JSON.stringify(
+      review({
+        unchanged: true,
+        summary: "**Approved.** The earlier verdict remains sound.",
+        major_upgrade_brief: {
+          dependency: "react-router 6.30.4 → 7.18.1 (npm)",
+          recommendation: "Merge after the required checks pass.",
+          confidence: "medium",
+        },
+      }),
+    ),
+  });
+
+  assert.match(createdReviews[0].body, /## Major upgrade brief/);
+  assert.match(createdReviews[0].body, /react-router 6\.30\.4 → 7\.18\.1/);
 });
 
 test("logs malformed comments internally instead of adding automation notes", async () => {
