@@ -121,11 +121,13 @@ See `deploy/README.md` for server and Cloudflare details.
 `.github/dependabot.yml` checks npm, pip, GitHub Actions, and Docker dependencies daily. Patch and minor Dependabot updates can auto-merge only after the lint, test, CodeQL, vulnerability, and malware gates succeed.
 
 The main-branch ruleset mirrors Notoli and includes the orchestrator-level
-`Auto Merge` context among its required checks. The Dependabot-only `Auto
-Merge` job is an automation consumer of those gates; normal contributor pull
-requests intentionally skip it without performing a merge, which GitHub treats
-as successful. Dependabot pull requests remain pending while GitHub reports an
-unstable merge state and are never merged directly. Third-party Actions are pinned to
+`Auto Merge` context among its required checks. CI emits that top-level context
+for every pull request: it reports not-applicable for ordinary contributors and
+records the independent-gate result for Dependabot. A separate Dependabot-only
+job enables auto-merge for eligible updates, so its nested reusable-workflow
+check name never becomes a branch-protection dependency. Dependabot pull
+requests remain pending while GitHub reports an unstable merge state and are
+never merged directly. Third-party Actions are pinned to
 immutable commit SHAs, with release-version comments retained for maintenance.
 Credential-handling GitHub Actions are pinned the same way. When a complete
 pull-request diff exceeds an AI reviewer's configured budget, that reviewer's

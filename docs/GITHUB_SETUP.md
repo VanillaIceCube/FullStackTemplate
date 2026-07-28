@@ -209,11 +209,12 @@ Auto Merge
 
 The reviewers run for trusted same-repository pull requests, including
 Dependabot pull requests once [the Dependabot secrets](#3-configure-secrets-for-dependabot-triggered-reviews)
-are present. The `Auto Merge` job performs work only for eligible Dependabot
-updates; its skipped conclusion succeeds for ordinary pull requests. Fork pull
-requests intentionally receive no sensitive secrets, so they cannot satisfy
-these required reviewer child checks. Bring a fork change into a trusted
-same-repository branch before merging it.
+are present. CI always emits the required top-level `Auto Merge` context: it
+reports not-applicable for ordinary pull requests and records gate eligibility
+for Dependabot. A separate Dependabot-only job enables auto-merge for eligible
+updates. Fork pull requests intentionally receive no sensitive secrets, so they
+cannot satisfy these required reviewer child checks. Bring a fork change into a
+trusted same-repository branch before merging it.
 
 Do not require branches to be up to date before merging.
 

@@ -15,6 +15,9 @@ All notable changes to this project are documented in this file.
 - Bound development Docker ports to localhost and made documented `.env` and
   port overrides authoritative.
 ### Fixed
+- Emitted a stable top-level `Auto Merge` check on every pull request so the
+  required ruleset context no longer mismatches the nested Dependabot
+  auto-merge workflow check.
 - Removed the stale standalone `CodeQL` required-check context that blocked
   scope-empty pull requests while retaining the real CodeQL scope and analyzer
   checks.

@@ -209,7 +209,9 @@ node --test .github/actions/publish-ai-review/publish-ai-review.test.js `
 ```
 
 CI runs the same application and automation checks, plus CodeQL, dependency,
-malware, and AI review gates.
+malware, AI review gates, and a stable `Auto Merge` status check. The latter
+reports every pull request while a separate Dependabot-only job enables
+auto-merge for eligible dependency updates.
 
 ## Documentation
 - [GitHub Apps, Project, reviewers, and branch rules](docs/GITHUB_SETUP.md)
