@@ -2,8 +2,10 @@
 Complete this setup before opening the first pull request so every required workflow can run.
 
 ## 0. Match the repository settings
-FullStackTemplate is configured to match the live Notoli repository. Apply this
-baseline to a new repository before opening its first pull request.
+FullStackTemplate starts from the live Notoli repository baseline. Apply this
+configuration to a new repository before opening its first pull request. The
+template intentionally keeps a read-only Actions default and omits the
+standalone `CodeQL` required check; see the rationale below.
 
 ### General
 
@@ -19,8 +21,9 @@ baseline to a new repository before opening its first pull request.
 ### Actions → General
 
 - Enable Actions and allow all actions and reusable workflows.
-- Set workflow permissions to **Read and write permissions**.
-- Enable **Allow GitHub Actions to create and approve pull requests**.
+- Set workflow permissions to **Read repository contents and packages
+  permissions** (read-only default).
+- Leave **Allow GitHub Actions to create and approve pull requests** disabled.
 - Set fork pull-request approval to **Require approval for first-time
   contributors**.
 
@@ -161,7 +164,7 @@ Wait until one pull request has produced the actual check names, then add the
 Notoli-inspired ruleset for `main`:
 
 - require a pull request before merging;
-- require the independent lint, test, standalone `CodeQL`, CodeQL scope, CodeQL analyzer,
+- require the independent lint, test, CodeQL scope, CodeQL analyzer,
   automation-test, vulnerability, and malware checks;
 - require the AI reviewer checks;
 - require all review threads to be resolved;
@@ -169,10 +172,13 @@ Notoli-inspired ruleset for `main`:
 - block force pushes and branch deletion;
 - configure no bypass actors.
 
-Require the standalone `CodeQL` context as Notoli does, together with
-`CodeQL / Detect CodeQL Scope` and the three analyzer contexts. Validate the
-actual check names from the first CI run before saving the ruleset; GitHub
-status checks are matched by exact name.
+Do not require a standalone `CodeQL` context. FullStackTemplate's reusable
+CodeQL workflow emits `CodeQL / Detect CodeQL Scope` and the three analyzer
+contexts. Scope-empty pull requests skip the analyzers and do not emit a
+standalone parent check, so requiring that context would leave a permanent
+pending check. This is an intentional compatibility difference from Notoli's
+current ruleset. Validate the actual check names from the first CI run before
+saving the ruleset; GitHub status checks are matched by exact name.
 
 Do not require branches to be up to date before merging. The Dependabot-only
 `Auto Merge` check may remain required because GitHub treats its ordinary-PR

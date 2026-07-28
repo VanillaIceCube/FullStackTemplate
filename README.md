@@ -8,9 +8,10 @@ domain.
 Start here. The pull-request workflow deliberately exposes missing reviewer
 configuration, so add these GitHub repository settings before asking CI to run.
 
-The complete Notoli-matching repository baseline is in
+The complete Notoli-derived repository baseline is in
 [the GitHub setup guide](docs/GITHUB_SETUP.md#0-match-the-repository-settings).
-It covers merge methods, auto-merge, Actions permissions, fork approvals,
+It covers merge methods, auto-merge, least-privilege Actions permissions, fork
+approvals,
 Dependabot, secret scanning, CodeQL, required labels, and the main-branch
 ruleset. Apply it before opening the first pull request; repository settings are
 not copied automatically when a repository is created from this template.
