@@ -136,7 +136,25 @@ LINT_EASTWOOD_PRIVATE_KEY
 ROBOCOP_PRIVATE_KEY
 ```
 
-## 3. Configure OpenAI and security aggregation
+## 3. Configure secrets for Dependabot-triggered reviews
+Dependabot-triggered workflows receive only **Dependabot** secrets, not the
+normal **Actions** secrets. To run the same required AI reviewers for trusted
+Dependabot pull requests, add these four values again under **Settings →
+Secrets and variables → Dependabot → Secrets**:
+
+```text
+OPENAI_API_KEY
+OBI_WAN_CODE_NOBI_PRIVATE_KEY
+LINT_EASTWOOD_PRIVATE_KEY
+ROBOCOP_PRIVATE_KEY
+```
+
+Use the same values as their Actions-secret counterparts. GitHub never reveals
+or copies secret values between the stores, so this is a deliberate manual
+setup step. Repository variables, including the OpenAI project and GitHub App
+IDs, remain configured under **Actions → Variables**.
+
+## 4. Configure OpenAI and security aggregation
 Set:
 
 ```text
@@ -159,14 +177,14 @@ copied from Notoli because it is a credential.
 Run each `Alert: ...` workflow manually once after the first successful CI run.
 No-alert runs should succeed without creating issues.
 
-## 4. Branch rules after the first PR
+## 5. Branch rules after the first PR
 Wait until one pull request has produced the actual check names, then add the
 Notoli-inspired ruleset for `main`:
 
 - require a pull request before merging;
 - require the independent lint, test, CodeQL scope, CodeQL analyzer,
   automation-test, vulnerability, and malware checks;
-- require the AI reviewer checks;
+- require the three AI reviewer child checks and the `Auto Merge` check;
 - require all review threads to be resolved;
 - allow merge commits, squash merges, and rebases;
 - block force pushes and branch deletion;
@@ -180,12 +198,26 @@ pending check. This is an intentional compatibility difference from Notoli's
 current ruleset. Validate the actual check names from the first CI run before
 saving the ruleset; GitHub status checks are matched by exact name.
 
-Do not require branches to be up to date before merging. The Dependabot-only
-`Auto Merge` check may remain required because GitHub treats its ordinary-PR
-`skipped` conclusion as successful; it performs work only for eligible
-Dependabot pull requests.
+The required AI reviewer contexts are:
 
-## 5. Deployment configuration
+```text
+AI Code Review / Obi-Wan Code-nobi code review
+AI Build Sheriff Review / Lint Eastwood build sheriff review
+AI Security Review / RoboCop security review
+Auto Merge
+```
+
+The reviewers run for trusted same-repository pull requests, including
+Dependabot pull requests once [the Dependabot secrets](#3-configure-secrets-for-dependabot-triggered-reviews)
+are present. The `Auto Merge` job performs work only for eligible Dependabot
+updates; its skipped conclusion succeeds for ordinary pull requests. Fork pull
+requests intentionally receive no sensitive secrets, so they cannot satisfy
+these required reviewer child checks. Bring a fork change into a trusted
+same-repository branch before merging it.
+
+Do not require branches to be up to date before merging.
+
+## 6. Deployment configuration
 The complete deployment variables and secrets are in
 [the deployment guide](../deploy/README.md). The deploy workflow only runs on
 `env-prod` pushes or manual dispatch, so application CI can be proven before

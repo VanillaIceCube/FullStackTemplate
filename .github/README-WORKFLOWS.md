@@ -57,9 +57,11 @@ Required repository secrets:
 - `ROBOCOP_PRIVATE_KEY`
 
 Install the Apps on the generated repository with the permissions in
-[`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md). Fork and Dependabot pull
-requests never receive these secrets; their independent lint, test, CodeQL,
-vulnerability, and malware checks remain authoritative.
+[`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md). Store the same four review
+secrets in both the Actions and Dependabot secret stores. Dependabot workflows
+receive only Dependabot secrets, so this duplication lets their pull requests
+run the required reviewers. Fork pull requests never receive either store's
+secrets and cannot satisfy the required reviewer child checks.
 
 ## Security-alert aggregation
 The daily/manual `alert-codeql.yml`, `alert-vulnerability.yml`, and `alert-malware.yml` workflows group open alerts into managed FullStackTemplate issues and synchronize them with the FullStackTemplate Project.
@@ -137,13 +139,15 @@ rate limits.
 
 ## Main branch protection
 The active `main` ruleset requires pull requests, resolved review threads, the
-lint/test/CodeQL scope and analyzer/dependency checks, all three AI reviewers,
-the Automation Tests check, and the Dependabot-only `Auto Merge` context. It
-blocks force pushes and branch deletion and has no bypass actors. The
-standalone `CodeQL` context is intentionally not required because the
-scope-aware workflow does not emit that parent check for scope-empty pull
-requests. This is an intentional compatibility difference from Notoli; validate
-exact check names after the first CI run when creating the ruleset.
+lint/test/CodeQL scope and analyzer/dependency checks, the Automation Tests
+check, all three AI reviewer child checks, and `Auto Merge`. The reviewers run
+for trusted same-repository pull requests, including Dependabot once its four
+review secrets are configured. The ruleset blocks force pushes and branch
+deletion and has no bypass actors. The standalone `CodeQL` context is
+intentionally not required because the scope-aware workflow does not emit that
+parent check for scope-empty pull requests. This is an intentional compatibility
+difference from Notoli; validate exact check names after the first CI run when
+creating the ruleset.
 
 ## Local automation checks
 ```powershell
