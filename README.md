@@ -204,7 +204,8 @@ python manage.py makemigrations --check --dry-run
 python manage.py test
 
 Set-Location ..
-node --test .github/actions/publish-ai-review/publish-ai-review.test.js `
+node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js `
+  .github/actions/publish-ai-review/publish-ai-review.test.js `
   .github/actions/security-alerts/sync-security-alerts.test.js
 ```
 
@@ -212,6 +213,11 @@ CI runs the same application and automation checks, plus CodeQL, dependency,
 malware, AI review gates, and a stable `Auto Merge` status check. The latter
 reports every pull request while a separate Dependabot-only job enables
 auto-merge for eligible dependency updates.
+
+Obi-Wan's review adds an advisory **Major upgrade brief** to Dependabot
+semver-major updates. It retrieves upstream GitHub Release notes where
+available, then separates that external evidence from repository impact,
+and a plain recommendation; it is not an extra merge gate.
 
 ## Documentation
 - [GitHub Apps, Project, reviewers, and branch rules](docs/GITHUB_SETUP.md)

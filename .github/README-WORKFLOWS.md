@@ -33,6 +33,15 @@ recreate these settings, labels, and the `SECURITY_ALERTS_TOKEN` secret; see
 - AI code, build, and security reviews for trusted same-repository pull requests
 - Dependabot auto-merge after all independent gates pass
 
+For a Dependabot semver-major update, Obi-Wan also publishes a structured
+**Major upgrade brief**. It uses Dependabot's exact package/version metadata,
+release notes retrieved from GitHub Releases where available, package-registry
+metadata for npm and PyPI packages to locate those release notes, the supplied
+Dependabot pull-request description, and the repository diff. It keeps only
+the concrete upstream change, repository impact, and recommendation.
+The brief is advisory: it does not add a required status check or replace the
+existing lint, test, CodeQL, vulnerability, malware, or reviewer gates.
+
 Path detection prevents unrelated application suites from running. A detector failure is treated as a CI failure instead of silently skipping checks.
 
 ## AI review apps
@@ -153,6 +162,6 @@ creating the ruleset.
 
 ## Local automation checks
 ```powershell
-node --test .github/actions/publish-ai-review/publish-ai-review.test.js .github/actions/security-alerts/sync-security-alerts.test.js
+node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js .github/actions/publish-ai-review/publish-ai-review.test.js .github/actions/security-alerts/sync-security-alerts.test.js
 docker run --rm -v "${PWD}:/repo" --workdir /repo rhysd/actionlint:latest -color
 ```

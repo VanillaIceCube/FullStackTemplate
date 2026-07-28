@@ -95,6 +95,33 @@ function cleanFindings(values) {
     .filter((finding) => finding.body);
 }
 
+function cleanMajorUpgradeBrief(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const dependency = compactText(value.dependency);
+  const upstreamSummary = compactText(value.upstream_summary);
+  const repositoryImpact = compactText(value.repository_impact);
+  const recommendation = compactText(value.recommendation);
+
+  if (
+    !dependency &&
+    !upstreamSummary &&
+    !repositoryImpact &&
+    !recommendation
+  ) {
+    return null;
+  }
+
+  return {
+    dependency,
+    upstreamSummary,
+    repositoryImpact,
+    recommendation,
+  };
+}
+
 function renderFinding(finding) {
   if (!finding.path) return `- ${finding.body}`;
   const target =
@@ -108,6 +135,7 @@ function renderReviewBody({
   findings = [],
   evidence = [],
   actions = [],
+  majorUpgradeBrief,
 }) {
   const format = personaFormat(personaName);
   const sections = [
@@ -118,6 +146,20 @@ function renderReviewBody({
   const renderedFindings = cleanFindings(findings);
   const renderedEvidence = cleanList(evidence);
   const renderedActions = cleanList(actions);
+  const renderedMajorUpgradeBrief = cleanMajorUpgradeBrief(majorUpgradeBrief);
+
+  if (renderedMajorUpgradeBrief) {
+    const brief = renderedMajorUpgradeBrief;
+    sections.push("", "## Major upgrade brief", "");
+    if (brief.dependency) sections.push(`- **Dependency:** ${brief.dependency}`);
+    if (brief.upstreamSummary) sections.push(`- **Upstream:** ${brief.upstreamSummary}`);
+    if (brief.repositoryImpact) {
+      sections.push(`- **This repository:** ${brief.repositoryImpact}`);
+    }
+    if (brief.recommendation) {
+      sections.push(`- **Recommendation:** ${brief.recommendation}`);
+    }
+  }
 
   if (renderedFindings.length > 0) {
     sections.push(
@@ -295,12 +337,14 @@ async function publishAiReview({
   const findings = cleanFindings(parsed.findings);
   const evidence = cleanList(parsed.evidence);
   const actions = cleanList(parsed.actions);
+  const majorUpgradeBrief = cleanMajorUpgradeBrief(parsed.major_upgrade_brief);
   let body = renderReviewBody({
     personaName,
     summary,
     findings,
     evidence,
     actions,
+    majorUpgradeBrief,
   });
 
   const owner = context.repo.owner;
@@ -422,7 +466,8 @@ async function publishAiReview({
     (declaredUnchanged || suppressed > 0 || repeatedBody) &&
     comments.length === 0 &&
     unplacedComments.length === 0 &&
-    decisionUnchanged
+    decisionUnchanged &&
+    !majorUpgradeBrief
   ) {
     body = renderReviewBody({ personaName, summary });
   } else {
@@ -433,6 +478,7 @@ async function publishAiReview({
         findings: [...findings, ...unplacedComments],
         evidence,
         actions,
+        majorUpgradeBrief,
       });
     }
     if (suppressed > 0 && typeof core.info === "function") {

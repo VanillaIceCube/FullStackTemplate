@@ -212,7 +212,13 @@ Dependabot pull requests once [the Dependabot secrets](#3-configure-secrets-for-
 are present. CI always emits the required top-level `Auto Merge` context: it
 reports not-applicable for ordinary pull requests and records gate eligibility
 for Dependabot. A separate Dependabot-only job enables auto-merge for eligible
-updates. Fork pull requests intentionally receive no sensitive secrets, so they
+updates. Obi-Wan adds an advisory **Major upgrade brief** for Dependabot
+semver-major updates. It reports exact Dependabot metadata alongside supplied
+Dependabot information, externally retrieved GitHub Release notes where
+available, repository-diff, and verification evidence. It explicitly marks
+unknown information only when it affects the recommendation. The brief is part of Obi-Wan's
+normal review and adds no required check. Fork pull requests intentionally
+receive no sensitive secrets, so they
 cannot satisfy these required reviewer child checks. Bring a fork change into a
 trusted same-repository branch before merging it.
 

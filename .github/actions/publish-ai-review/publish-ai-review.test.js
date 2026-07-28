@@ -176,6 +176,33 @@ test("renders only populated findings, evidence, and action groups", () => {
   );
 });
 
+test("renders a structured major-upgrade brief without treating it as a finding", () => {
+  assert.equal(
+    renderReviewBody({
+      personaName: "Obi-Wan Code-nobi",
+      summary: "**Approved.** The update is ready for the normal gates to decide.",
+      majorUpgradeBrief: {
+        dependency: "react-router 6.30.4 → 7.18.1 (npm)",
+        upstream_summary: "[v7 release notes](https://github.com/remix-run/react-router/releases/tag/react-router%407.18.1) document the upgrade's public changes.",
+        repository_impact: "The lockfile and package manifest are the only changed repository files.",
+        recommendation: "Merge after the normal required checks pass.",
+      },
+    }),
+    [
+      "## \ud83e\udded Obi-Wan Code-nobi",
+      "",
+      "**Approved.** The update is ready for the normal gates to decide.",
+      "",
+      "## Major upgrade brief",
+      "",
+      "- **Dependency:** react-router 6.30.4 → 7.18.1 (npm)",
+      "- **Upstream:** [v7 release notes](https://github.com/remix-run/react-router/releases/tag/react-router%407.18.1) document the upgrade's public changes.",
+      "- **This repository:** The lockfile and package manifest are the only changed repository files.",
+      "- **Recommendation:** Merge after the normal required checks pass.",
+    ].join("\n"),
+  );
+});
+
 test("renders an infrastructure-only RoboCop comment without implying approval", () => {
   assert.equal(
     renderReviewBody({
@@ -367,6 +394,41 @@ test("keeps the model-authored summary when it declares no new material", async 
   assert.equal(createdReviews[0].event, "APPROVE");
 });
 
+test("preserves a major-upgrade brief on an unchanged review", async () => {
+  const { createdReviews, github } = createGitHubMock({
+    priorReviews: [
+      {
+        id: 42,
+        state: "APPROVED",
+        submitted_at: "2026-07-12T00:00:00Z",
+        body: "Previous approval",
+        user: { login: "obi-wan-code-nobi-reviewer[bot]" },
+      },
+    ],
+  });
+  const { core } = createCore();
+
+  await publishAiReview({
+    github,
+    context: context(),
+    core,
+    personaName: "Obi-Wan Code-nobi",
+    raw: JSON.stringify(
+      review({
+        unchanged: true,
+        summary: "**Approved.** The earlier verdict remains sound.",
+        major_upgrade_brief: {
+          dependency: "react-router 6.30.4 → 7.18.1 (npm)",
+          recommendation: "Merge after the required checks pass.",
+        },
+      }),
+    ),
+  });
+
+  assert.match(createdReviews[0].body, /## Major upgrade brief/);
+  assert.match(createdReviews[0].body, /react-router 6\.30\.4 → 7\.18\.1/);
+});
+
 test("logs malformed comments internally instead of adding automation notes", async () => {
   const { createdReviews, github } = createGitHubMock();
   const { core, warnings } = createCore();
@@ -505,6 +567,21 @@ test("OpenAI review requests reserve a bounded output budget", () => {
     /MAX_OUTPUT_TOKENS: \$\{\{ inputs\.max_output_tokens \}\}/,
   );
   assert.match(action, /max_output_tokens: \$max_output_tokens/);
+});
+
+test("Obi-Wan collects bounded external evidence for Dependabot major updates", () => {
+  const workflowPath = path.resolve(__dirname, "../../workflows/review-code.yml");
+  const workflow = fs.readFileSync(workflowPath, "utf8");
+
+  assert.match(workflow, /Collect upstream major-upgrade evidence/);
+  assert.match(workflow, /version-update:semver-major/);
+  assert.match(
+    workflow,
+    /collect-upstream-major-upgrade-evidence\.js/,
+  );
+  assert.match(workflow, /collectUpstreamMajorUpgradeEvidence/);
+  assert.match(workflow, /github\.rest\.repos\.getReleaseByTag/);
+  assert.match(workflow, /upstream-major-upgrade-evidence\.json/);
 });
 
 test("keeps the visually inspectable Markdown examples synchronized", () => {
