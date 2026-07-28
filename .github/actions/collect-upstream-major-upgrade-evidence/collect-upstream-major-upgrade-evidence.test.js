@@ -97,3 +97,88 @@ test("bounds upstream release notes without losing the source record", async () 
     "A release no\n[truncated to 12 characters]",
   );
 });
+
+test("discovers a GitHub release from PyPI project metadata", async () => {
+  const releaseCalls = [];
+  const evidence = await collectUpstreamMajorUpgradeEvidence({
+    dependencyNames: "gunicorn",
+    packageEcosystem: "pip",
+    previousVersion: "22.0.0",
+    newVersion: "23.0.0",
+    fetchJson: async () => ({
+      info: {
+        project_urls: {
+          Documentation: "https://docs.example.test",
+          Source: "https://github.com/benoitc/gunicorn",
+        },
+      },
+    }),
+    getReleaseByTag: async (request) => {
+      releaseCalls.push(request);
+      return { tag_name: "23.0.0", html_url: "https://github.com/benoitc/gunicorn/releases/tag/23.0.0" };
+    },
+  });
+
+  assert.deepEqual(releaseCalls, [
+    { owner: "benoitc", repo: "gunicorn", tag: "23.0.0" },
+  ]);
+  assert.equal(evidence.release_sources[0].repository, "benoitc/gunicorn");
+});
+
+test("records missing GitHub Action releases without failing the collector", async () => {
+  const evidence = await collectUpstreamMajorUpgradeEvidence({
+    dependencyNames: "actions/checkout",
+    packageEcosystem: "github-actions",
+    previousVersion: "4.0.0",
+    newVersion: "5.0.0",
+    fetchJson: async () => {
+      throw new Error("should not be called");
+    },
+    getReleaseByTag: async () => {
+      const error = new Error("not found");
+      error.status = 404;
+      throw error;
+    },
+  });
+
+  assert.deepEqual(evidence.release_sources, []);
+  assert.deepEqual(evidence.retrieval_notes, [
+    "No GitHub Release matching actions/checkout@5.0.0 or v5.0.0 was found.",
+  ]);
+});
+
+test("records GitHub API failures and unsupported ecosystems as degraded evidence", async () => {
+  const apiFailure = await collectUpstreamMajorUpgradeEvidence({
+    dependencyNames: "actions/checkout",
+    packageEcosystem: "github-actions",
+    previousVersion: "4.0.0",
+    newVersion: "5.0.0",
+    fetchJson: async () => {
+      throw new Error("should not be called");
+    },
+    getReleaseByTag: async () => {
+      const error = new Error("rate limited");
+      error.status = 429;
+      throw error;
+    },
+  });
+  const unsupported = await collectUpstreamMajorUpgradeEvidence({
+    dependencyNames: "example",
+    packageEcosystem: "nuget",
+    previousVersion: "1.0.0",
+    newVersion: "2.0.0",
+    fetchJson: async () => {
+      throw new Error("should not be called");
+    },
+    getReleaseByTag: async () => {
+      throw new Error("should not be called");
+    },
+  });
+
+  assert.deepEqual(apiFailure.retrieval_notes, [
+    "Could not read GitHub release actions/checkout@5.0.0: rate limited",
+  ]);
+  assert.deepEqual(unsupported.retrieval_notes, [
+    "No supported external release collector is configured for package ecosystem nuget.",
+  ]);
+});
