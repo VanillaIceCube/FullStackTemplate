@@ -204,7 +204,8 @@ python manage.py makemigrations --check --dry-run
 python manage.py test
 
 Set-Location ..
-node --test .github/actions/publish-ai-review/publish-ai-review.test.js `
+node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js `
+  .github/actions/publish-ai-review/publish-ai-review.test.js `
   .github/actions/security-alerts/sync-security-alerts.test.js
 ```
 

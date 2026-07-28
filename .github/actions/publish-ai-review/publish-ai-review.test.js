@@ -577,15 +577,11 @@ test("Obi-Wan collects bounded external evidence for Dependabot major updates", 
   assert.match(workflow, /version-update:semver-major/);
   assert.match(
     workflow,
-    /^\s*`https:\/\/registry\.npmjs\.org\/\$\{encodeURIComponent\(dependency\)\}\/\$\{encodeURIComponent\(newVersion\)\}`,$/m,
+    /collect-upstream-major-upgrade-evidence\.js/,
   );
-  assert.match(
-    workflow,
-    /^\s*`https:\/\/pypi\.org\/pypi\/\$\{encodeURIComponent\(dependency\)\}\/\$\{encodeURIComponent\(newVersion\)}\/json`,$/m,
-  );
+  assert.match(workflow, /collectUpstreamMajorUpgradeEvidence/);
   assert.match(workflow, /github\.rest\.repos\.getReleaseByTag/);
   assert.match(workflow, /upstream-major-upgrade-evidence\.json/);
-  assert.match(workflow, /maxReleaseNoteCharacters = 12000/);
 });
 
 test("keeps the visually inspectable Markdown examples synchronized", () => {

@@ -19,6 +19,9 @@ All notable changes to this project are documented in this file.
 - Bound development Docker ports to localhost and made documented `.env` and
   port overrides authoritative.
 ### Fixed
+- Made the upstream major-upgrade collector executable under mocked registry
+  and GitHub-release responses, including npm's string and object repository
+  metadata forms and degraded lookup paths.
 - Emitted a stable top-level `Auto Merge` check on every pull request so the
   required ruleset context no longer mismatches the nested Dependabot
   auto-merge workflow check.
