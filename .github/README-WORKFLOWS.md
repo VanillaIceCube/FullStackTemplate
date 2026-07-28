@@ -3,6 +3,22 @@ FullStackTemplate carries forward the proven CI/CD and security automation from
 Notoli and MacroMapper, adapted to the template's repository, images, and
 generic GitHub Project.
 
+## Repository settings baseline
+The live FullStackTemplate repository uses the Notoli baseline with intentional
+least-privilege differences: auto-merge is enabled; merge commits, squash
+merges, and rebases are allowed; Actions allow all actions with a read-only
+default workflow permission; and GitHub Actions cannot create or approve pull
+requests by default. Fork pull requests require approval from first-time
+contributors. Workflows request write permissions explicitly when required.
+
+Code security uses the repository's enabled Dependabot alerts/security updates,
+secret scanning, and push protection controls. CodeQL default setup remains
+unconfigured because the pinned CodeQL workflows in this repository provide the
+scanner. The `dependencies`, `codeql`, `vulnerability`, `malware`, and `codex`
+labels are used by the alert and operational automation. New repositories must
+recreate these settings, labels, and the `SECURITY_ALERTS_TOKEN` secret; see
+[`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md).
+
 ## Pull-request CI
 `.github/workflows/ci-orchestrator.yml` coordinates:
 
@@ -124,10 +140,10 @@ The active `main` ruleset requires pull requests, resolved review threads, the
 lint/test/CodeQL scope and analyzer/dependency checks, all three AI reviewers,
 the Automation Tests check, and the Dependabot-only `Auto Merge` context. It
 blocks force pushes and branch deletion and has no bypass actors. The
-standalone `CodeQL` context is
-intentionally not required: scope-empty pull requests skip every analyzer and
-do not create that parent result, which would otherwise leave
-`CodeQLExpected` pending forever.
+standalone `CodeQL` context is intentionally not required because the
+scope-aware workflow does not emit that parent check for scope-empty pull
+requests. This is an intentional compatibility difference from Notoli; validate
+exact check names after the first CI run when creating the ruleset.
 
 ## Local automation checks
 ```powershell
