@@ -183,13 +183,9 @@ test("renders a structured major-upgrade brief without treating it as a finding"
       summary: "**Approved.** The update is ready for the normal gates to decide.",
       majorUpgradeBrief: {
         dependency: "react-router 6.30.4 → 7.18.1 (npm)",
-        upstream_changes: ["The Dependabot description links to the v7 release notes."],
-        breaking_changes: ["No breaking change was identified in the supplied evidence."],
-        migration_steps: ["Verify the repository's existing router usage against the linked notes."],
+        upstream_summary: "[v7 release notes](https://github.com/remix-run/react-router/releases/tag/react-router%407.18.1) document the upgrade's public changes.",
         repository_impact: "The lockfile and package manifest are the only changed repository files.",
-        verification: ["Frontend tests passed."],
         recommendation: "Merge after the normal required checks pass.",
-        confidence: "medium",
       },
     }),
     [
@@ -200,16 +196,9 @@ test("renders a structured major-upgrade brief without treating it as a finding"
       "## Major upgrade brief",
       "",
       "- **Dependency:** react-router 6.30.4 → 7.18.1 (npm)",
-      "- **Upstream changes:**",
-      "  - The Dependabot description links to the v7 release notes.",
-      "- **Breaking changes:**",
-      "  - No breaking change was identified in the supplied evidence.",
-      "- **Migration steps:**",
-      "  - Verify the repository's existing router usage against the linked notes.",
-      "- **Repository impact:** The lockfile and package manifest are the only changed repository files.",
-      "- **Verification:**",
-      "  - Frontend tests passed.",
-      "- **Recommendation:** Merge after the normal required checks pass. (confidence: medium)",
+      "- **Upstream:** [v7 release notes](https://github.com/remix-run/react-router/releases/tag/react-router%407.18.1) document the upgrade's public changes.",
+      "- **This repository:** The lockfile and package manifest are the only changed repository files.",
+      "- **Recommendation:** Merge after the normal required checks pass.",
     ].join("\n"),
   );
 });
@@ -431,7 +420,6 @@ test("preserves a major-upgrade brief on an unchanged review", async () => {
         major_upgrade_brief: {
           dependency: "react-router 6.30.4 → 7.18.1 (npm)",
           recommendation: "Merge after the required checks pass.",
-          confidence: "medium",
         },
       }),
     ),
@@ -579,6 +567,19 @@ test("OpenAI review requests reserve a bounded output budget", () => {
     /MAX_OUTPUT_TOKENS: \$\{\{ inputs\.max_output_tokens \}\}/,
   );
   assert.match(action, /max_output_tokens: \$max_output_tokens/);
+});
+
+test("Obi-Wan collects bounded external evidence for Dependabot major updates", () => {
+  const workflowPath = path.resolve(__dirname, "../../workflows/review-code.yml");
+  const workflow = fs.readFileSync(workflowPath, "utf8");
+
+  assert.match(workflow, /Collect upstream major-upgrade evidence/);
+  assert.match(workflow, /version-update:semver-major/);
+  assert.match(workflow, /registry\.npmjs\.org/);
+  assert.match(workflow, /pypi\.org\/pypi/);
+  assert.match(workflow, /github\.rest\.repos\.getReleaseByTag/);
+  assert.match(workflow, /upstream-major-upgrade-evidence\.json/);
+  assert.match(workflow, /maxReleaseNoteCharacters = 12000/);
 });
 
 test("keeps the visually inspectable Markdown examples synchronized", () => {

@@ -101,36 +101,24 @@ function cleanMajorUpgradeBrief(value) {
   }
 
   const dependency = compactText(value.dependency);
-  const upstreamChanges = cleanList(value.upstream_changes);
-  const breakingChanges = cleanList(value.breaking_changes);
-  const migrationSteps = cleanList(value.migration_steps);
+  const upstreamSummary = compactText(value.upstream_summary);
   const repositoryImpact = compactText(value.repository_impact);
-  const verification = cleanList(value.verification);
   const recommendation = compactText(value.recommendation);
-  const confidence = compactText(value.confidence);
 
   if (
     !dependency &&
-    upstreamChanges.length === 0 &&
-    breakingChanges.length === 0 &&
-    migrationSteps.length === 0 &&
+    !upstreamSummary &&
     !repositoryImpact &&
-    verification.length === 0 &&
-    !recommendation &&
-    !confidence
+    !recommendation
   ) {
     return null;
   }
 
   return {
     dependency,
-    upstreamChanges,
-    breakingChanges,
-    migrationSteps,
+    upstreamSummary,
     repositoryImpact,
-    verification,
     recommendation,
-    confidence,
   };
 }
 
@@ -164,40 +152,12 @@ function renderReviewBody({
     const brief = renderedMajorUpgradeBrief;
     sections.push("", "## Major upgrade brief", "");
     if (brief.dependency) sections.push(`- **Dependency:** ${brief.dependency}`);
-    if (brief.upstreamChanges.length > 0) {
-      sections.push(
-        "- **Upstream changes:**",
-        ...brief.upstreamChanges.map((item) => `  - ${item}`),
-      );
-    }
-    if (brief.breakingChanges.length > 0) {
-      sections.push(
-        "- **Breaking changes:**",
-        ...brief.breakingChanges.map((item) => `  - ${item}`),
-      );
-    }
-    if (brief.migrationSteps.length > 0) {
-      sections.push(
-        "- **Migration steps:**",
-        ...brief.migrationSteps.map((item) => `  - ${item}`),
-      );
-    }
+    if (brief.upstreamSummary) sections.push(`- **Upstream:** ${brief.upstreamSummary}`);
     if (brief.repositoryImpact) {
-      sections.push(`- **Repository impact:** ${brief.repositoryImpact}`);
-    }
-    if (brief.verification.length > 0) {
-      sections.push(
-        "- **Verification:**",
-        ...brief.verification.map((item) => `  - ${item}`),
-      );
+      sections.push(`- **This repository:** ${brief.repositoryImpact}`);
     }
     if (brief.recommendation) {
-      const confidence = brief.confidence
-        ? ` (confidence: ${brief.confidence})`
-        : "";
-      sections.push(`- **Recommendation:** ${brief.recommendation}${confidence}`);
-    } else if (brief.confidence) {
-      sections.push(`- **Confidence:** ${brief.confidence}`);
+      sections.push(`- **Recommendation:** ${brief.recommendation}`);
     }
   }
 

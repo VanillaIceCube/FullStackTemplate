@@ -49,6 +49,150 @@ jobs:
         with:
           github-token: ${{ github.token }}
 
+      - name: Collect upstream major-upgrade evidence
+        id: upstream-major-upgrade
+        if: steps.dependabot-metadata.outputs.update-type == 'version-update:semver-major'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+          PREVIOUS_VERSION: ${{ steps.dependabot-metadata.outputs.previous-version }}
+          NEW_VERSION: ${{ steps.dependabot-metadata.outputs.new-version }}
+          PACKAGE_ECOSYSTEM: ${{ steps.dependabot-metadata.outputs.package-ecosystem }}
+        with:
+          script: |
+            const fs = require("node:fs");
+
+            const maxReleaseNoteCharacters = 12000;
+            const dependencyNames = (process.env.DEPENDENCY_NAMES || "")
+              .split(",")
+              .map((name) => name.trim())
+              .filter(Boolean);
+            const ecosystem = process.env.PACKAGE_ECOSYSTEM || "unknown";
+            const oldVersion = process.env.PREVIOUS_VERSION || "unknown";
+            const newVersion = process.env.NEW_VERSION || "unknown";
+            const evidence = {
+              source: "Upstream package registries and GitHub Releases",
+              package_ecosystem: ecosystem,
+              dependency_names: dependencyNames,
+              previous_version: oldVersion,
+              new_version: newVersion,
+              release_sources: [],
+              retrieval_notes: [],
+            };
+
+            const truncate = (value, limit = maxReleaseNoteCharacters) => {
+              const text = String(value || "").trim();
+              if (text.length <= limit) return text;
+              return `${text.slice(0, limit)}\n[truncated to ${limit} characters]`;
+            };
+
+            const githubRepository = (value) => {
+              const text = String(value || "")
+                .trim()
+                .replace(/^git\+/, "")
+                .replace(/^git@github\.com:/, "https://github.com/")
+                .replace(/\.git$/, "");
+              try {
+                const url = new URL(text);
+                if (!["github.com", "www.github.com"].includes(url.hostname)) return "";
+                const parts = url.pathname.split("/").filter(Boolean);
+                return parts.length >= 2 ? `${parts[0]}/${parts[1]}` : "";
+              } catch {
+                return /^[\w.-]+\/[\w.-]+$/.test(text) ? text : "";
+              }
+            };
+
+            const githubRelease = async (repository) => {
+              if (!repository) return;
+              const [owner, repo] = repository.split("/");
+              for (const tag of new Set([newVersion, `v${newVersion}`])) {
+                try {
+                  const { data } = await github.rest.repos.getReleaseByTag({
+                    owner,
+                    repo,
+                    tag,
+                  });
+                  evidence.release_sources.push({
+                    kind: "GitHub Release",
+                    repository,
+                    tag: data.tag_name,
+                    title: data.name || "",
+                    published_at: data.published_at || "",
+                    url: data.html_url || "",
+                    release_notes: truncate(data.body),
+                  });
+                  return;
+                } catch (error) {
+                  if (error.status !== 404) {
+                    evidence.retrieval_notes.push(
+                      `Could not read GitHub release ${repository}@${tag}: ${error.message}`,
+                    );
+                    return;
+                  }
+                }
+              }
+              evidence.retrieval_notes.push(
+                `No GitHub Release matching ${repository}@${newVersion} or v${newVersion} was found.`,
+              );
+            };
+
+            const registryJson = async (url) => {
+              const response = await fetch(url, {
+                headers: {
+                  Accept: "application/json",
+                  "User-Agent": "FullStackTemplate-major-upgrade-review",
+                },
+              });
+              if (!response.ok) {
+                throw new Error(`${response.status} ${response.statusText}`);
+              }
+              return response.json();
+            };
+
+            for (const dependency of dependencyNames) {
+              try {
+                if (ecosystem === "github-actions") {
+                  await githubRelease(githubRepository(dependency));
+                  continue;
+                }
+
+                if (ecosystem === "npm") {
+                  const metadata = await registryJson(
+                    `https://registry.npmjs.org/${encodeURIComponent(dependency)}/${encodeURIComponent(newVersion)}`,
+                  );
+                  const repository = githubRepository(metadata.repository?.url);
+                  await githubRelease(repository);
+                  continue;
+                }
+
+                if (ecosystem === "pip") {
+                  const metadata = await registryJson(
+                    `https://pypi.org/pypi/${encodeURIComponent(dependency)}/${encodeURIComponent(newVersion)}/json`,
+                  );
+                  const projectUrls = metadata.info?.project_urls || {};
+                  const repository = githubRepository(
+                    Object.values(projectUrls).find((url) => githubRepository(url)) ||
+                      metadata.info?.home_page,
+                  );
+                  await githubRelease(repository);
+                  continue;
+                }
+
+                evidence.retrieval_notes.push(
+                  `No supported external release collector is configured for package ecosystem ${ecosystem}.`,
+                );
+              } catch (error) {
+                evidence.retrieval_notes.push(
+                  `Could not collect upstream metadata for ${dependency}@${newVersion}: ${error.message}`,
+                );
+              }
+            }
+
+            fs.writeFileSync(
+              `${process.env.RUNNER_TEMP}/upstream-major-upgrade-evidence.json`,
+              JSON.stringify(evidence, null, 2),
+            );
+
       - name: Get PR diff
         id: pr-diff
         uses: ./.github/actions/get-pr-diff
@@ -71,6 +215,7 @@ jobs:
           DEPENDABOT_NEW_VERSION: ${{ steps.dependabot-metadata.outputs.new-version }}
           DEPENDABOT_PACKAGE_ECOSYSTEM: ${{ steps.dependabot-metadata.outputs.package-ecosystem }}
           PR_BODY: ${{ github.event.pull_request.body }}
+          UPSTREAM_EVIDENCE_PATH: ${{ runner.temp }}/upstream-major-upgrade-evidence.json
         run: |
           set -euo pipefail
 
@@ -151,6 +296,9 @@ jobs:
               printf 'new-version: %s\n' "$DEPENDABOT_NEW_VERSION"
               printf 'package-ecosystem: %s\n' "$DEPENDABOT_PACKAGE_ECOSYSTEM"
               echo
+              echo '--- Externally collected upstream release evidence ---'
+              cat "$UPSTREAM_EVIDENCE_PATH"
+              echo
               echo '--- Dependabot pull-request description (untrusted upstream evidence, max 12000 characters) ---'
               if [ "${#PR_BODY}" -gt 12000 ]; then
                 printf '%s\n' "${PR_BODY:0:12000}"
@@ -194,7 +342,7 @@ jobs:
             - Vary the opening and phrasing from prior reviews. Do not reuse a stock sentence, fixed catchphrase, exact movie quote, or force a metaphor merely to sound in character.
             - Technical findings and inline comments must remain direct and professional. Actions may carry a light mentor-like flourish only when the required step stays unambiguous.
             - When the context contains `=== DEPENDABOT MAJOR UPGRADE EVIDENCE ===`, include a concise `major_upgrade_brief`. This brief informs the human reviewer; it does not create an additional merge gate or override the independent CI/security gates.
-            - In that brief, distinguish supplied upstream evidence, repository-diff evidence, and your inference. Do not invent release notes, breaking changes, migration steps, links, or test results. Say that information is unavailable when the supplied evidence does not support it.
+            - In that brief, distinguish externally collected upstream-release evidence, supplied Dependabot text, repository-diff evidence, and your inference. Do not invent release notes, breaking changes, migration steps, links, or test results. Say that information is unavailable when the supplied evidence does not support it.
 
             Return ONLY strict JSON:
             {
@@ -208,13 +356,9 @@ jobs:
               "actions": ["concrete next step for the author"],
               "major_upgrade_brief": {
                 "dependency": "package old-version → new-version (ecosystem)",
-                "upstream_changes": ["facts from supplied Dependabot/release-note evidence, or state unavailable"],
-                "breaking_changes": ["supplied breaking-change fact, or state unavailable"],
-                "migration_steps": ["evidence-backed repository-relevant migration step, or state unavailable"],
-                "repository_impact": "what the repository diff and current code usage show",
-                "verification": ["test/build/diff evidence, or state unavailable"],
-                "recommendation": "clear merge or follow-up recommendation that does not replace required checks",
-                "confidence": "high | medium | low"
+                "upstream_summary": "what changed in the upstream release, citing the supplied GitHub Release or Dependabot source link",
+                "repository_impact": "specific affected repository files/usages and migration work, or no application-code migration identified",
+                "recommendation": "plain merge or follow-up recommendation; mention uncertainty only when it changes that recommendation"
               },
               "comments": [
                 { "path": "relative/file/path", "line": 123, "body": "inline review comment" }
@@ -231,7 +375,7 @@ jobs:
             - If a finding comes from repository context, a deleted or unchanged line, or any line not shown as "A<line>:", put it in "findings" and do not add an inline comment for it.
             - Use "evidence" only for facts that materially justify the verdict. Do not inventory every file reviewed or mention prior-review bookkeeping.
             - Use "actions" only when the author must fix, clarify, or verify something. Do not repeat the finding.
-            - Set "major_upgrade_brief" to null unless the Dependabot major-upgrade evidence section is present. For that section, include the exact metadata dependency and versions, cite only supplied evidence in the relevant fields, and use `unknown from supplied evidence` rather than guessing.
+            - Set "major_upgrade_brief" to null unless the Dependabot major-upgrade evidence section is present. For that section, include only the dependency, an evidence-backed upstream summary with a source link, concrete repository impact, and a plain recommendation. Do not include confidence scores, generic test summaries, empty headings, routine package metadata, or boilerplate. If external release notes are unavailable, say so only when that uncertainty changes the recommendation.
             - The diff collection step fails before review when the complete diff exceeds its review budget; never claim to have reviewed omitted diff content.
             - Put the complete verdict wording in "summary". Do not generate Markdown headings, bullet prefixes, or automation notes; the shared publisher owns section layout.
             - Inline comments should state the problem, its impact, and the required action in as few sentences as practical. Do not repeat the review summary or use emojis, catchphrases, or persona jokes.

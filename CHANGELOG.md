@@ -3,9 +3,9 @@ All notable changes to this project are documented in this file.
 ## 2026-07-27
 ### Added
 - Added an advisory Obi-Wan major-upgrade brief for Dependabot semver-major
-  updates, separating supplied upstream changes, repository impact,
-  verification evidence, and a confidence-qualified recommendation without
-  adding a merge gate.
+  updates, including external GitHub Release notes where available and
+  concisely reporting upstream changes, repository impact, and a
+  recommendation without adding a merge gate.
 - Added required Dependabot-secret setup for the three AI reviewers so trusted
   dependency pull requests run the same reviewer gates as other repository PRs.
 - Added a Notoli-derived GitHub repository setup guide covering merge methods,

@@ -35,11 +35,12 @@ recreate these settings, labels, and the `SECURITY_ALERTS_TOKEN` secret; see
 
 For a Dependabot semver-major update, Obi-Wan also publishes a structured
 **Major upgrade brief**. It uses Dependabot's exact package/version metadata,
-the supplied Dependabot pull-request description, the repository diff, and
-available verification evidence to separate known upstream changes from
-repository impact and reviewer inference. The brief is advisory: it does not
-add a required status check or replace the existing lint, test, CodeQL,
-vulnerability, malware, or reviewer gates.
+release notes retrieved from GitHub Releases where available, package-registry
+metadata for npm and PyPI packages to locate those release notes, the supplied
+Dependabot pull-request description, and the repository diff. It keeps only
+the concrete upstream change, repository impact, and recommendation.
+The brief is advisory: it does not add a required status check or replace the
+existing lint, test, CodeQL, vulnerability, malware, or reviewer gates.
 
 Path detection prevents unrelated application suites from running. A detector failure is treated as a CI failure instead of silently skipping checks.
 
