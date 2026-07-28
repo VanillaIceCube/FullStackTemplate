@@ -575,8 +575,8 @@ test("Obi-Wan collects bounded external evidence for Dependabot major updates", 
 
   assert.match(workflow, /Collect upstream major-upgrade evidence/);
   assert.match(workflow, /version-update:semver-major/);
-  assert.match(workflow, /registry\.npmjs\.org/);
-  assert.match(workflow, /pypi\.org\/pypi/);
+  assert.ok(workflow.includes("https://registry.npmjs.org/"));
+  assert.ok(workflow.includes("https://pypi.org/pypi/"));
   assert.match(workflow, /github\.rest\.repos\.getReleaseByTag/);
   assert.match(workflow, /upstream-major-upgrade-evidence\.json/);
   assert.match(workflow, /maxReleaseNoteCharacters = 12000/);
