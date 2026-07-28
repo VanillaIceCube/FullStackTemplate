@@ -166,7 +166,6 @@ Notoli-inspired ruleset for `main`:
 - require a pull request before merging;
 - require the independent lint, test, CodeQL scope, CodeQL analyzer,
   automation-test, vulnerability, and malware checks;
-- require the AI reviewer checks;
 - require all review threads to be resolved;
 - allow merge commits, squash merges, and rebases;
 - block force pushes and branch deletion;
@@ -179,6 +178,13 @@ standalone parent check, so requiring that context would leave a permanent
 pending check. This is an intentional compatibility difference from Notoli's
 current ruleset. Validate the actual check names from the first CI run before
 saving the ruleset; GitHub status checks are matched by exact name.
+
+AI reviewer checks remain enabled for trusted same-repository pull requests,
+but they are not required status checks because Dependabot and fork pull
+requests intentionally skip the secret-dependent reviewer jobs. The
+Dependabot-only `Auto Merge` job is also an automation consumer, not a required
+merge gate; requiring either conditional context would block otherwise healthy
+Dependabot pull requests.
 
 Do not require branches to be up to date before merging. The Dependabot-only
 `Auto Merge` check may remain required because GitHub treats its ordinary-PR

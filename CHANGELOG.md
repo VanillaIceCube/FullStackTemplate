@@ -5,8 +5,8 @@ All notable changes to this project are documented in this file.
 - Added a Notoli-derived GitHub repository setup guide covering merge methods,
   auto-merge, Actions permissions, fork approvals, security controls, alert
   labels, the `SECURITY_ALERTS_TOKEN` secret, and the complete main ruleset.
-- Added and documented a Notoli-matching main-branch ruleset that requires
-  pull requests, resolved review threads, and the complete CI and AI review
+- Added and documented a Notoli-derived main-branch ruleset that requires
+  pull requests, resolved review threads, and the independent CI/security
   check set while blocking force pushes and deletion.
 - Added a Docker hot-reload development Compose workflow with React and Django
   source mounts.

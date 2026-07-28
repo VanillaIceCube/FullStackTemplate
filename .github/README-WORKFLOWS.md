@@ -137,8 +137,11 @@ rate limits.
 
 ## Main branch protection
 The active `main` ruleset requires pull requests, resolved review threads, the
-lint/test/CodeQL scope and analyzer/dependency checks, all three AI reviewers,
-the Automation Tests check, and the Dependabot-only `Auto Merge` context. It
+lint/test/CodeQL scope and analyzer/dependency checks, and the Automation Tests
+check. AI reviewer jobs remain enabled for trusted same-repository pull
+requests, but are not required because Dependabot and fork pull requests skip
+secret-dependent reviewers. The Dependabot-only `Auto Merge` job is an
+automation consumer rather than a required merge gate. The ruleset
 blocks force pushes and branch deletion and has no bypass actors. The
 standalone `CodeQL` context is intentionally not required because the
 scope-aware workflow does not emit that parent check for scope-empty pull
