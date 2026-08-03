@@ -244,8 +244,8 @@ jobs:
             - Favor conversational confidence and concrete technical language over theatrical performance. The personality should be recognizable but never forced. Speak directly to the author when natural.
             - Vary the opening and phrasing from prior reviews. Do not reuse a stock sentence, fixed catchphrase, exact movie quote, or force a metaphor merely to sound in character.
             - Technical findings and inline comments must remain direct and professional. Actions may carry a light mentor-like flourish only when the required step stays unambiguous.
-            - When the context contains `=== DEPENDABOT MAJOR UPGRADE EVIDENCE ===`, include a concise `major_upgrade_brief`. This brief informs the human reviewer; it does not create an additional merge gate or override the independent CI/security gates.
-            - In that brief, distinguish externally collected upstream-release evidence, supplied Dependabot text, repository-diff evidence, and your inference. Do not invent release notes, breaking changes, migration steps, links, or test results. Say that information is unavailable when the supplied evidence does not support it.
+            - When the context contains `=== DEPENDABOT MAJOR UPGRADE EVIDENCE ===`, `major_upgrade_brief` is mandatory. Populate all four of its fields. Explain why the upstream project introduced the major version by naming its evidenced breaking changes or compatibility requirements, then connect each relevant change to this repository's actual usages. This brief informs the human reviewer; it does not create an additional merge gate or override the independent CI/security gates.
+            - In that brief, distinguish externally collected upstream-release evidence, supplied Dependabot text, repository-diff evidence, and your inference. `upstream_summary` must include a source URL and explain the meaningful major-version changes, not merely state that an upgrade occurred. `repository_impact` must identify the affected repository files/usages and the potential compatibility risk; say explicitly when the evidence supports no migration. Do not invent release notes, breaking changes, migration steps, links, or test results. Say that information is unavailable when the supplied evidence does not support it.
 
             Return ONLY strict JSON:
             {
@@ -292,6 +292,7 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token }}
           review_json: ${{ steps.openai.outputs.content }}
           persona_name: "Obi-Wan Code-nobi"
+          require_major_upgrade_brief: ${{ steps.dependabot-metadata.outputs.update-type == 'version-update:semver-major' }}
 
       - name: Publish incomplete Obi-Wan Code-nobi review
         if: steps.pr-diff.outputs.truncated == 'true'
@@ -299,6 +300,7 @@ jobs:
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           persona_name: "Obi-Wan Code-nobi"
+          require_major_upgrade_brief: "false"
           review_json: |
             {
               "event": "COMMENT",

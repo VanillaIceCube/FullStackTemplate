@@ -5,6 +5,7 @@ const test = require("node:test");
 const {
   collectUpstreamMajorUpgradeEvidence,
   githubRepository,
+  majorReleaseVersion,
   packageRepositoryUrl,
 } = require("./collect-upstream-major-upgrade-evidence");
 
@@ -18,6 +19,12 @@ test("normalizes npm object and string repository metadata", () => {
     "git@github.com:example/string.git",
   );
   assert.equal(githubRepository("git@github.com:example/string.git"), "example/string");
+});
+
+test("derives the first release in a semver-major line", () => {
+  assert.equal(majorReleaseVersion("7.3.0"), "7.0.0");
+  assert.equal(majorReleaseVersion("7.3.0-beta.1"), "7.0.0");
+  assert.equal(majorReleaseVersion("v7.3.0"), "");
 });
 
 test("collects a scoped npm package release from string repository metadata", async () => {
@@ -74,6 +81,29 @@ test("returns a bounded, non-failing evidence record when upstream lookup fails"
   ]);
 });
 
+test("collects the target and first-major release when they differ", async () => {
+  const releaseCalls = [];
+  const evidence = await collectUpstreamMajorUpgradeEvidence({
+    dependencyNames: "docker/build-push-action",
+    packageEcosystem: "github-actions",
+    previousVersion: "6.19.2",
+    newVersion: "7.3.0",
+    fetchJson: async () => ({}),
+    getReleaseByTag: async (request) => {
+      releaseCalls.push(request.tag);
+      if (["v7.3.0", "v7.0.0"].includes(request.tag)) {
+        return { tag_name: request.tag, html_url: `https://example.test/${request.tag}` };
+      }
+      const error = new Error("not found");
+      error.status = 404;
+      throw error;
+    },
+  });
+
+  assert.deepEqual(releaseCalls, ["7.3.0", "v7.3.0", "7.0.0", "v7.0.0"]);
+  assert.deepEqual(evidence.release_sources.map((source) => source.tag), ["v7.3.0", "v7.0.0"]);
+});
+
 test("bounds upstream release notes without losing the source record", async () => {
   const evidence = await collectUpstreamMajorUpgradeEvidence({
     dependencyNames: ["actions/checkout"],
@@ -121,6 +151,7 @@ test("discovers a GitHub release from PyPI project metadata", async () => {
 
   assert.deepEqual(releaseCalls, [
     { owner: "benoitc", repo: "gunicorn", tag: "23.0.0" },
+    { owner: "benoitc", repo: "gunicorn", tag: "v23.0.0" },
   ]);
   assert.equal(evidence.release_sources[0].repository, "benoitc/gunicorn");
 });
