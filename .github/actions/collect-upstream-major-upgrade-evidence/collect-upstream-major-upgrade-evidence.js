@@ -36,6 +36,11 @@ function packageRepositoryUrl(metadata) {
   return typeof repository === "string" ? repository : repository?.url;
 }
 
+function majorReleaseVersion(value) {
+  const match = String(value || "").match(/^(\d+)\.\d+\.\d+(?:[-+].*)?$/);
+  return match ? `${match[1]}.0.0` : "";
+}
+
 async function collectUpstreamMajorUpgradeEvidence({
   dependencyNames,
   packageEcosystem,
@@ -64,19 +69,30 @@ async function collectUpstreamMajorUpgradeEvidence({
   const collectGitHubRelease = async (repository) => {
     if (!repository) return;
     const [owner, repo] = repository.split("/");
-    for (const tag of new Set([targetVersion, `v${targetVersion}`])) {
+    const firstMajorRelease = majorReleaseVersion(targetVersion);
+    const tags = new Set([targetVersion, `v${targetVersion}`]);
+    if (firstMajorRelease) {
+      tags.add(firstMajorRelease);
+      tags.add(`v${firstMajorRelease}`);
+    }
+    let foundRelease = false;
+    for (const tag of tags) {
       try {
         const data = await getReleaseByTag({ owner, repo, tag });
-        evidence.release_sources.push({
-          kind: "GitHub Release",
-          repository,
-          tag: data.tag_name,
-          title: data.name || "",
-          published_at: data.published_at || "",
-          url: data.html_url || "",
-          release_notes: truncate(data.body, releaseNoteLimit),
-        });
-        return;
+        if (!evidence.release_sources.some(
+          (source) => source.repository === repository && source.tag === data.tag_name,
+        )) {
+          evidence.release_sources.push({
+            kind: "GitHub Release",
+            repository,
+            tag: data.tag_name,
+            title: data.name || "",
+            published_at: data.published_at || "",
+            url: data.html_url || "",
+            release_notes: truncate(data.body, releaseNoteLimit),
+          });
+        }
+        foundRelease = true;
       } catch (error) {
         if (error.status !== 404) {
           evidence.retrieval_notes.push(
@@ -86,9 +102,11 @@ async function collectUpstreamMajorUpgradeEvidence({
         }
       }
     }
-    evidence.retrieval_notes.push(
-      `No GitHub Release matching ${repository}@${targetVersion} or v${targetVersion} was found.`,
-    );
+    if (!foundRelease) {
+      evidence.retrieval_notes.push(
+        `No GitHub Release matching ${repository}@${targetVersion} or v${targetVersion} was found.`,
+      );
+    }
   };
 
   for (const dependency of dependencies) {
@@ -136,6 +154,7 @@ module.exports = {
   DEFAULT_RELEASE_NOTE_LIMIT,
   collectUpstreamMajorUpgradeEvidence,
   githubRepository,
+  majorReleaseVersion,
   packageRepositoryUrl,
   parseDependencyNames,
   truncate,

@@ -279,6 +279,7 @@ async function publishAiReview({
   core,
   raw,
   personaName = "AI reviewer",
+  requireMajorUpgradeBrief = false,
 }) {
   const reviewJson = String(raw || "").trim();
   if (
@@ -338,6 +339,26 @@ async function publishAiReview({
   const evidence = cleanList(parsed.evidence);
   const actions = cleanList(parsed.actions);
   const majorUpgradeBrief = cleanMajorUpgradeBrief(parsed.major_upgrade_brief);
+  if (requireMajorUpgradeBrief) {
+    const missing = [
+      ["dependency", majorUpgradeBrief?.dependency],
+      ["upstream_summary", majorUpgradeBrief?.upstreamSummary],
+      ["repository_impact", majorUpgradeBrief?.repositoryImpact],
+      ["recommendation", majorUpgradeBrief?.recommendation],
+    ]
+      .filter(([, value]) => !value)
+      .map(([field]) => field);
+    if (missing.length > 0) {
+      await publishUnavailableReview({
+        github,
+        context,
+        core,
+        personaName,
+        reason: `${personaName} returned an incomplete major-upgrade brief; missing ${missing.join(", ")}.`,
+      });
+      return;
+    }
+  }
   let body = renderReviewBody({
     personaName,
     summary,

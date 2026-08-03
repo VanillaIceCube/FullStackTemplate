@@ -203,6 +203,30 @@ test("renders a structured major-upgrade brief without treating it as a finding"
   );
 });
 
+test("fails visibly instead of publishing an incomplete required major-upgrade brief", async () => {
+  const { createdReviews, github } = createGitHubMock();
+  const { core, failures } = createCore();
+
+  await publishAiReview({
+    github,
+    context: context(),
+    core,
+    personaName: "Obi-Wan Code-nobi",
+    requireMajorUpgradeBrief: true,
+    raw: JSON.stringify(review({
+      major_upgrade_brief: {
+        dependency: "example 1.0.0 → 2.0.0 (npm)",
+        recommendation: "Hold for review.",
+      },
+    })),
+  });
+
+  assert.equal(failures.length, 1);
+  assert.match(failures[0], /missing upstream_summary, repository_impact/);
+  assert.equal(createdReviews.length, 1);
+  assert.match(createdReviews[0].body, /Review unavailable/);
+});
+
 test("renders an infrastructure-only RoboCop comment without implying approval", () => {
   assert.equal(
     renderReviewBody({

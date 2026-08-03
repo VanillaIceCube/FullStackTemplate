@@ -1,5 +1,11 @@
 # Changelog
 All notable changes to this project are documented in this file.
+## 2026-08-02
+### Fixed
+- Made Dependabot semver-major upgrade briefs collect the first release in the
+  new major line and fail visibly when Obi-Wan omits the upstream change,
+  repository impact, or recommendation required for an actionable review.
+
 ## 2026-07-27
 ### Added
 - Added an advisory Obi-Wan major-upgrade brief for Dependabot semver-major
