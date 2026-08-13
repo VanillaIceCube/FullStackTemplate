@@ -116,7 +116,8 @@ runs:
                     type: "web_search",
                     search_context_size: "medium"
                   }
-                ]
+                ],
+                tool_choice: "required"
               }
             else
               {}

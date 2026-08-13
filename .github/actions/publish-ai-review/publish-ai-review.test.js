@@ -669,6 +669,7 @@ test("OpenAI review requests reserve a bounded output budget", () => {
   );
   assert.match(action, /type: "web_search"/);
   assert.match(action, /search_context_size: "medium"/);
+  assert.match(action, /tool_choice: "required"/);
 });
 
 test("Obi-Wan collects bounded external evidence for Dependabot major updates", () => {
