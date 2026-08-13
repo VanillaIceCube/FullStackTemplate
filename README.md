@@ -215,9 +215,14 @@ reports every pull request while a separate Dependabot-only job enables
 auto-merge for eligible dependency updates.
 
 Obi-Wan's review adds an advisory **Major upgrade brief** to Dependabot
-semver-major updates. It retrieves upstream GitHub Release notes where
-available, then separates that external evidence from repository impact,
-and a plain recommendation; it is not an extra merge gate.
+semver-major updates. It combines upstream release evidence, primary-source
+web research, and a bounded search of tracked repository usage to explain why
+the upstream project drew a major-version boundary, whether this application
+uses the affected behavior, what the upgrade provides, and what verification
+remains. The brief keeps that explanation compact: dependency, why the upgrade
+matters, repository impact, recommendation, and sources. The verdict retains
+Obi-Wan's calm mentor voice while the structured brief stays technically
+direct; it is not an extra merge gate.
 
 ## Documentation
 - [GitHub Apps, Project, reviewers, and branch rules](docs/GITHUB_SETUP.md)

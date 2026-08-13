@@ -25,6 +25,10 @@ inputs:
     description: Maximum combined reasoning and visible output token budget.
     required: false
     default: "16000"
+  enable_web_search:
+    description: Allow the model to search the public web for current primary-source evidence.
+    required: false
+    default: "false"
 outputs:
   content:
     description: Assistant response content.
@@ -41,6 +45,7 @@ runs:
         SYSTEM_PROMPT: ${{ inputs.system_prompt }}
         MODEL: ${{ inputs.model }}
         MAX_OUTPUT_TOKENS: ${{ inputs.max_output_tokens }}
+        ENABLE_WEB_SEARCH: ${{ inputs.enable_web_search }}
         DIFF_PATH: ${{ inputs.diff_path }}
       run: |
         set -euo pipefail
@@ -95,6 +100,7 @@ runs:
           --rawfile prompt prompt.txt \
           --arg model "$MODEL" \
           --arg system_prompt "$SYSTEM_PROMPT" \
+          --arg enable_web_search "$ENABLE_WEB_SEARCH" \
           --argjson max_output_tokens "$MAX_OUTPUT_TOKENS" \
           '
           {
@@ -103,6 +109,19 @@ runs:
             input: $prompt,
             max_output_tokens: $max_output_tokens
           }
+          + if $enable_web_search == "true" then
+              {
+                tools: [
+                  {
+                    type: "web_search",
+                    search_context_size: "medium"
+                  }
+                ],
+                tool_choice: "required"
+              }
+            else
+              {}
+            end
           ' > body.json
 
         # Make API request (project is passed via header)

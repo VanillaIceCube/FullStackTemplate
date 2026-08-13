@@ -101,24 +101,54 @@ function cleanMajorUpgradeBrief(value) {
   }
 
   const dependency = compactText(value.dependency);
-  const upstreamSummary = compactText(value.upstream_summary);
-  const repositoryImpact = compactText(value.repository_impact);
+  const explicitUpgradeStory = compactText(
+    value.upgrade_story ?? value.upgradeStory,
+  );
+  const upgradeTrigger = compactText(
+    value.upgrade_trigger ?? value.upgradeTrigger,
+  );
+  const whyMajor = compactText(
+    value.why_major ??
+      value.whyMajor ??
+      value.upstream_summary ??
+      value.upstreamSummary,
+  );
+  const repositoryExposure = compactText(
+    value.repository_exposure ??
+      value.repositoryExposure ??
+      value.repository_impact ??
+      value.repositoryImpact,
+  );
+  const benefits = compactText(value.benefits);
   const recommendation = compactText(value.recommendation);
+  const explicitRepositoryImpact = compactText(
+    value.repository_impact ??
+      value.repositoryImpact ??
+      value.repository_recommendation ??
+      value.repositoryRecommendation,
+  );
+  const upgradeStory =
+    explicitUpgradeStory ||
+    cleanList([upgradeTrigger, whyMajor, benefits]).join(" ");
+  const repositoryImpact = explicitRepositoryImpact || repositoryExposure;
+  const sources = cleanList(value.sources);
 
   if (
     !dependency &&
-    !upstreamSummary &&
+    !upgradeStory &&
     !repositoryImpact &&
-    !recommendation
+    !recommendation &&
+    sources.length === 0
   ) {
     return null;
   }
 
   return {
     dependency,
-    upstreamSummary,
+    upgradeStory,
     repositoryImpact,
     recommendation,
+    sources,
   };
 }
 
@@ -151,13 +181,21 @@ function renderReviewBody({
   if (renderedMajorUpgradeBrief) {
     const brief = renderedMajorUpgradeBrief;
     sections.push("", "## Major upgrade brief", "");
-    if (brief.dependency) sections.push(`- **Dependency:** ${brief.dependency}`);
-    if (brief.upstreamSummary) sections.push(`- **Upstream:** ${brief.upstreamSummary}`);
+    if (brief.dependency)
+      sections.push(`- **Dependency:** ${brief.dependency}`);
+    if (brief.upgradeStory) {
+      sections.push(
+        `- **Why this upgrade matters:** ${brief.upgradeStory}`,
+      );
+    }
     if (brief.repositoryImpact) {
-      sections.push(`- **This repository:** ${brief.repositoryImpact}`);
+      sections.push(`- **Repository impact:** ${brief.repositoryImpact}`);
     }
     if (brief.recommendation) {
       sections.push(`- **Recommendation:** ${brief.recommendation}`);
+    }
+    if (brief.sources.length > 0) {
+      sections.push(`- **Sources:** ${brief.sources.join(", ")}`);
     }
   }
 
@@ -342,9 +380,10 @@ async function publishAiReview({
   if (requireMajorUpgradeBrief) {
     const missing = [
       ["dependency", majorUpgradeBrief?.dependency],
-      ["upstream_summary", majorUpgradeBrief?.upstreamSummary],
+      ["upgrade_story", majorUpgradeBrief?.upgradeStory],
       ["repository_impact", majorUpgradeBrief?.repositoryImpact],
       ["recommendation", majorUpgradeBrief?.recommendation],
+      ["sources", majorUpgradeBrief?.sources.length],
     ]
       .filter(([, value]) => !value)
       .map(([field]) => field);

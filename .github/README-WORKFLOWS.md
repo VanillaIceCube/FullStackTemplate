@@ -38,9 +38,15 @@ For a Dependabot semver-major update, Obi-Wan also publishes a structured
 the target release and first release of the new major line retrieved from
 GitHub Releases where available, package-registry metadata for npm and PyPI
 packages to locate those release notes, the supplied Dependabot pull-request
-description, and the repository diff. It must explain the evidenced breaking
-change or compatibility requirement, concrete repository impact, and a
-recommendation; incomplete briefs fail visibly instead of being published.
+description, primary-source web search, the repository diff, and a bounded
+exact-match search of tracked repository text with lockfiles excluded. Web
+search is enabled only for semver-major code reviews. The brief must explain
+the dependency, a cohesive upstream story covering why the update appeared,
+why it required a major release, and what the repository gains, followed by a
+repository-impact paragraph, a recommendation, and primary sources.
+Incomplete briefs fail visibly instead of being published. The verdict and
+recommendation retain Obi-Wan's calm mentor character without weakening the
+technical explanation.
 The brief is advisory: it does not add a required status check or replace the
 existing lint, test, CodeQL, vulnerability, malware, or reviewer gates.
 
