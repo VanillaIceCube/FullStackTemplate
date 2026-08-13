@@ -1,5 +1,20 @@
 # Changelog
 All notable changes to this project are documented in this file.
+## 2026-08-12
+### Added
+- Added primary-source web search and bounded tracked-repository usage evidence
+  to Obi-Wan's Dependabot semver-major reviews.
+### Fixed
+- Preserved every normalized major-upgrade field when publishing GitHub reviews
+  so upstream rationale and repository exposure are no longer dropped.
+### Changed
+- Reframed Obi-Wan's major-upgrade brief around why the update appeared, why
+  upstream required a major version, exact repository exposure, material
+  benefits, sources, and a concrete recommendation while retaining his calm
+  mentor voice.
+- Condensed the major-upgrade brief to five items: dependency, why the upgrade
+  matters, repository impact, recommendation, and sources.
+
 ## 2026-08-02
 ### Fixed
 - Made Dependabot semver-major upgrade briefs collect the first release in the

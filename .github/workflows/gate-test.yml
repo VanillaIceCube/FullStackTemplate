@@ -54,6 +54,7 @@ jobs:
             automation:
               - '.github/actions/collect-prior-ai-reviews/**'
               - '.github/actions/collect-upstream-major-upgrade-evidence/**'
+              - '.github/actions/openai-chat/**'
               - '.github/actions/publish-ai-review/**'
               - '.github/actions/security-alerts/**'
               - '.github/workflows/gate-test.yml'
