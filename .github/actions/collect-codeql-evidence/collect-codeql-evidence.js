@@ -37,8 +37,20 @@ function hasDefaultBranchBaseline(analyses, definition) {
     const categoryMatches =
       category === definition.category ||
       definition.baselineLanguages.includes(language);
+    // GitHub's analyses endpoint currently exposes completed SARIF records via
+    // commit/created/error fields, not status/conclusion. Honor lifecycle fields
+    // defensively if GitHub or another compatible provider supplies them.
+    const statusCompleted =
+      analysis.status === undefined || analysis.status === "completed";
+    const conclusionSuccessful =
+      analysis.conclusion === undefined || analysis.conclusion === "success";
     const analysisCompleted = Boolean(
-      analysis.commit_sha && analysis.created_at && !analysis.error,
+      analysis.commit_sha &&
+      analysis.created_at &&
+      Object.hasOwn(analysis, "error") &&
+      analysis.error === "" &&
+      statusCompleted &&
+      conclusionSuccessful,
     );
     return categoryMatches && analysisCompleted;
   });

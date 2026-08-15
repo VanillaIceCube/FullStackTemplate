@@ -153,6 +153,8 @@ test("rejects failed or incomplete default-branch analyses as baselines", () => 
     baseline("/language:python", "python", { error: "analysis failed" }),
     baseline("/language:python", "python", { commit_sha: "" }),
     baseline("/language:python", "python", { created_at: "" }),
+    baseline("/language:python", "python", { status: "in_progress" }),
+    baseline("/language:python", "python", { conclusion: "failure" }),
   ]) {
     const evidence = collectCodeqlEvidence({
       upstreamResult: "success",
