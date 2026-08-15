@@ -34,10 +34,13 @@ function hasDefaultBranchBaseline(analyses, definition) {
   return analyses.some((analysis) => {
     const category = String(analysis.category || "").toLowerCase();
     const language = String(analysis.language || "").toLowerCase();
-    return (
+    const categoryMatches =
       category === definition.category ||
-      definition.baselineLanguages.includes(language)
+      definition.baselineLanguages.includes(language);
+    const analysisCompleted = Boolean(
+      analysis.commit_sha && analysis.created_at && !analysis.error,
     );
+    return categoryMatches && analysisCompleted;
   });
 }
 

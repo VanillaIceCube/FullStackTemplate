@@ -12,7 +12,14 @@ const successfulCheck = (name) => ({
   output: { summary: "" },
 });
 
-const baseline = (category, language) => ({ category, language });
+const baseline = (category, language, overrides = {}) => ({
+  category,
+  language,
+  commit_sha: "abc123",
+  created_at: "2026-08-14T00:00:00Z",
+  error: "",
+  ...overrides,
+});
 
 test("accepts a frontend-only pull request with an expected Python skip", () => {
   const evidence = collectCodeqlEvidence({
@@ -139,6 +146,33 @@ test("preserves an evidence gap for a genuinely missing default-branch baseline"
     evidence.languages.python.reason,
     /no matching default-branch baseline/,
   );
+});
+
+test("rejects failed or incomplete default-branch analyses as baselines", () => {
+  for (const invalidBaseline of [
+    baseline("/language:python", "python", { error: "analysis failed" }),
+    baseline("/language:python", "python", { commit_sha: "" }),
+    baseline("/language:python", "python", { created_at: "" }),
+  ]) {
+    const evidence = collectCodeqlEvidence({
+      upstreamResult: "success",
+      scopeStatus: "success",
+      scope: { python: false, javascript: true, actions: true },
+      checkRuns: [
+        successfulCheck("Analyze JavaScript/TypeScript"),
+        successfulCheck("Analyze GitHub Actions"),
+      ],
+      defaultBranch: "main",
+      defaultBranchAnalyses: [invalidBaseline],
+    });
+
+    assert.equal(evidence.approval_eligible, false);
+    assert.equal(
+      evidence.languages.python.default_branch_baseline_present,
+      false,
+    );
+    assert.equal(evidence.languages.python.status, "evidence_gap");
+  }
 });
 
 test("preserves an evidence gap when an omitted baseline cannot be queried", () => {
