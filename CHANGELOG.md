@@ -1,5 +1,15 @@
 # Changelog
 All notable changes to this project are documented in this file.
+## 2026-08-14
+### Fixed
+- Prevented RoboCop from treating neutral CodeQL summaries for intentionally
+  path-scoped language omissions as security coverage gaps when the authoritative
+  scope and aggregate gates succeed and a default-branch baseline exists.
+### Changed
+- Added explicit CodeQL scope outputs, default-branch baseline interpretation,
+  regression coverage, and a documented adoption path for repositories created
+  from older FullStackTemplate revisions.
+
 ## 2026-08-12
 ### Added
 - Added primary-source web search and bounded tracked-repository usage evidence
