@@ -1,31 +1,46 @@
 # Changelog
+
 All notable changes to this project are documented in this file.
 
 ## 2026-08-22
+
 ### Fixed
+
+- Kept the CRA/Jest frontend test environment compatible with React Router 7's
+  `react-router/dom` export and text encoder requirements.
 - Removed the invalid root-level Docker Dependabot scan and documented that
   Docker dependency checks run from the backend and frontend directories.
 - Made security-alert Project v2 reconciliation tolerate eventual consistency
   after GitHub reports that an issue already exists on the project board.
 
 ## 2026-08-14
+
 ### Fixed
+
 - Prevented RoboCop from treating neutral CodeQL summaries for intentionally
   path-scoped language omissions as security coverage gaps when the authoritative
   scope and aggregate gates succeed and a default-branch baseline exists.
+
 ### Changed
+
 - Added explicit CodeQL scope outputs, default-branch baseline interpretation,
   regression coverage, and a documented adoption path for repositories created
   from older FullStackTemplate revisions.
 
 ## 2026-08-12
+
 ### Added
+
 - Added primary-source web search and bounded tracked-repository usage evidence
   to Obi-Wan's Dependabot semver-major reviews.
+
 ### Fixed
+
 - Preserved every normalized major-upgrade field when publishing GitHub reviews
   so upstream rationale and repository exposure are no longer dropped.
+
 ### Changed
+
 - Reframed Obi-Wan's major-upgrade brief around why the update appeared, why
   upstream required a major version, exact repository exposure, material
   benefits, sources, and a concrete recommendation while retaining his calm
@@ -34,13 +49,17 @@ All notable changes to this project are documented in this file.
   matters, repository impact, recommendation, and sources.
 
 ## 2026-08-02
+
 ### Fixed
+
 - Made Dependabot semver-major upgrade briefs collect the first release in the
   new major line and fail visibly when Obi-Wan omits the upstream change,
   repository impact, or recommendation required for an actionable review.
 
 ## 2026-07-27
+
 ### Added
+
 - Added an advisory Obi-Wan major-upgrade brief for Dependabot semver-major
   updates, including external GitHub Release notes where available and
   concisely reporting upstream changes, repository impact, and a
@@ -57,7 +76,9 @@ All notable changes to this project are documented in this file.
   source mounts.
 - Bound development Docker ports to localhost and made documented `.env` and
   port overrides authoritative.
+
 ### Fixed
+
 - Made the upstream major-upgrade collector executable under mocked registry
   and GitHub-release responses, including npm's string and object repository
   metadata forms and degraded lookup paths.
@@ -67,7 +88,9 @@ All notable changes to this project are documented in this file.
 - Removed the stale standalone `CodeQL` required-check context that blocked
   scope-empty pull requests while retaining the real CodeQL scope and analyzer
   checks.
+
 ### Changed
+
 - Restored the three AI reviewer child checks and `Auto Merge` as required
   main-branch gates, matching Notoli's review policy while retaining the
   template's compatible CodeQL check set.
@@ -84,11 +107,16 @@ All notable changes to this project are documented in this file.
   and the protected placeholder page.
 - Removed the persistent translucent selection overlay from the drawer's Home
   item.
+
 ### Removed
+
 - Removed the shared multi-application local-ingress scripts and configuration;
   FullStackTemplate now uses its own application proxy like Notoli.
+
 ## 2026-07-26
+
 ### Added
+
 - Added a shared local TLS ingress that routes Notoli, MacroMapper, and
   FullStackTemplate by `.localhost` hostname while one container owns ports
   80 and 443.
@@ -110,7 +138,9 @@ All notable changes to this project are documented in this file.
 - Added first-run documentation for CI secrets, three AI reviewer Apps,
   security alert aggregation, branch rules, Cloudflare, DigitalOcean, GHCR,
   Resend, and production deployment.
+
 ### Fixed
+
 - Prevented port-free `fullstacktemplate.localhost` authentication requests
   from falling through to Notoli's backend when all three local applications
   are running.
@@ -132,7 +162,9 @@ All notable changes to this project are documented in this file.
 - Fixed dependency-review reporting for large initial lockfiles by keeping detailed package JSON in the check logs and annotations.
 - Removed the Dependabot-only auto-merge job from required status checks so normal pull requests are not blocked by its intentional skip.
 - Replaced the inherited Create React App toolchain that introduced high and critical transitive dependency vulnerabilities.
+
 ### Changed
+
 - Reduced the authenticated frontend to a reusable header, navigation drawer,
   notifications, profile/logout controls, and one placeholder Material UI
   Paper.
@@ -153,7 +185,9 @@ All notable changes to this project are documented in this file.
   non-Docker development.
 - Adapted Notoli's application-specific boards, lists, and notes into the
   reusable Workspace, Collection, and Item domain.
+
 ### Removed
+
 - Removed the Workspace, Collection, and Item backend, starter data, sharing,
   ordering, mobile gestures, component showcase, and related frontend routes,
   services, documentation, and tests.

@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom';
 
+const { TextDecoder, TextEncoder } = require('util');
+
+global.TextDecoder = global.TextDecoder || TextDecoder;
+global.TextEncoder = global.TextEncoder || TextEncoder;
+
 jest.mock('@mui/material', () => {
   const React = require('react');
   const actual = jest.requireActual('@mui/material');

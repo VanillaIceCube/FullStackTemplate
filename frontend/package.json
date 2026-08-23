@@ -16,7 +16,7 @@
     "@testing-library/user-event": "^14.6.5",
     "react": "^19.2.3",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^6.30.4",
+    "react-router-dom": "^7.18.2",
     "react-scripts": "5.0.1",
     "web-vitals": "^6.1.1"
   },
@@ -35,6 +35,11 @@
     "lint:strict": "eslint \"src/**/*.{js,jsx}\" --max-warnings=0",
     "format": "prettier . --write",
     "format:check": "prettier . --check"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js"
+    }
   },
   "browserslist": {
     "production": [

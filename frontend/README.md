@@ -1,10 +1,12 @@
 # FullStackTemplate frontend
+
 The frontend is a Create React App-powered React 19 single-page application
 built with Material UI and React Router. Its intentionally small authenticated
 shell is ready for an application-specific feature set and retains Notoli's
 yellow-and-gray visual theme.
 
 ## Routes
+
 - `/login`: email and password login
 - `/register`: account creation with an optional username
 - `/forgot-password`: password-reset email request
@@ -15,6 +17,7 @@ yellow-and-gray visual theme.
 Signed-out users who request a protected route are redirected to `/login`.
 
 ## Authentication and shell behavior
+
 - Access and refresh tokens are stored in `sessionStorage`.
 - The profile name and email are stored for the app header.
 - API requests that receive a `401` attempt one refresh-token exchange.
@@ -32,6 +35,7 @@ refresh and unauthorized-response behavior live in
 `src/services/requestClient.js`.
 
 ## Local setup
+
 The checked-in frontend dependencies require Node.js 25, matching
 `package.json`, CI, and the production Docker image.
 
@@ -56,6 +60,7 @@ directory and forward `/auth/`, `/api/`, and `/admin/` to the Compose backend
 service.
 
 ## Docker hot reload
+
 From the repository root, run:
 
 ```powershell
@@ -71,9 +76,14 @@ default and can be changed with the `FULLSTACKTEMPLATE_DEV_*_PORT` variables
 in `deploy/.env`.
 
 ## Checks
+
 ```powershell
 npm test -- --runInBand
 npm run lint:strict
 npm run format:check
 npm run build
 ```
+
+React Router 7 exposes its DOM entry point through the `react-router/dom`
+package subpath. The CRA test setup maps that subpath for Jest and provides
+the text encoder globals required by the router's DOM exports.
