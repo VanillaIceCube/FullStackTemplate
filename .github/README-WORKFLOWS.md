@@ -151,7 +151,7 @@ Repository secrets:
 See `deploy/README.md` for server and Cloudflare details.
 
 ## Dependabot
-`.github/dependabot.yml` checks npm, pip, GitHub Actions, and Docker dependencies daily. Patch and minor Dependabot updates can auto-merge only after the lint, test, CodeQL, vulnerability, and malware gates succeed.
+`.github/dependabot.yml` checks npm, pip, GitHub Actions, and Docker dependencies daily. Docker dependencies are checked from the `/backend` and `/frontend` directories, where the repository's Dockerfiles live. Patch and minor Dependabot updates can auto-merge only after the lint, test, CodeQL, vulnerability, and malware gates succeed.
 
 The main-branch ruleset mirrors Notoli and includes the orchestrator-level
 `Auto Merge` context among its required checks. CI emits that top-level context

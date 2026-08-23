@@ -1,5 +1,13 @@
 # Changelog
 All notable changes to this project are documented in this file.
+
+## 2026-08-22
+### Fixed
+- Removed the invalid root-level Docker Dependabot scan and documented that
+  Docker dependency checks run from the backend and frontend directories.
+- Made security-alert Project v2 reconciliation tolerate eventual consistency
+  after GitHub reports that an issue already exists on the project board.
+
 ## 2026-08-14
 ### Fixed
 - Prevented RoboCop from treating neutral CodeQL summaries for intentionally
