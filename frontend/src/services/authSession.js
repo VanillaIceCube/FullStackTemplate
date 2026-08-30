@@ -33,12 +33,17 @@ export function persistAuthSession(data) {
     sessionStorage.setItem('accessToken', data.access);
     sessionStorage.setItem('refreshToken', data.refresh);
 
-    // Profile info (app bar menu). Avoid storing "undefined".
+    // Profile info (app bar menu). Avoid storing "undefined" and clear stale items.
     if (typeof data?.username === 'string' && data.username) {
       sessionStorage.setItem('username', data.username);
+    } else {
+      sessionStorage.removeItem('username');
     }
+
     if (typeof data?.email === 'string' && data.email) {
       sessionStorage.setItem('email', data.email);
+    } else {
+      sessionStorage.removeItem('email');
     }
   } catch (_err) {
     throw new Error('Unable to access browser session storage.');
