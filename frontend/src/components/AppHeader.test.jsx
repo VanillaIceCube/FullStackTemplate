@@ -118,4 +118,82 @@ describe('AppHeader', () => {
     await user.click(screen.getByText('Mark all read'));
     expect(markAllNotificationsRead).toHaveBeenCalledWith('access');
   });
+
+  test('handles individual notification navigation and clearing', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Template ready',
+          message: 'Your shell is ready.',
+          is_read: false,
+          target_path: '/',
+        },
+      ]),
+    );
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalled());
+    await user.click(screen.getByLabelText('notifications'));
+
+    await user.click(screen.getByText('Template ready'));
+    expect(markNotificationRead).toHaveBeenCalledWith(1, 'access');
+
+    // Open popover again and test clearing notification
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(screen.getByLabelText('Clear notification'));
+    expect(clearNotification).toHaveBeenCalledWith(1, 'access');
+  });
+
+  test('displays error message when marking single notification read fails', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Template ready',
+          message: 'Your shell is ready.',
+          is_read: false,
+          target_path: '/',
+        },
+      ]),
+    );
+    markNotificationRead.mockResolvedValue(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalled());
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(screen.getByText('Template ready'));
+
+    expect(await screen.findByText('Could not update that notification.')).toBeInTheDocument();
+  });
+
+  test('displays error message when clearAllNotifications fails', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Template ready',
+          message: 'Your shell is ready.',
+          is_read: true,
+          target_path: '/',
+        },
+      ]),
+    );
+    clearAllNotifications.mockResolvedValue(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalled());
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(screen.getByText('Clear all'));
+
+    expect(await screen.findByText('Could not clear notifications.')).toBeInTheDocument();
+  });
 });

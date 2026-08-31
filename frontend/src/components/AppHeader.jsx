@@ -90,7 +90,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setNotificationError('');
     try {
       const response = await operation(notificationId, accessToken);
-      if (!response.ok) throw new Error(errorMessage);
+      if (!response || !response.ok) throw new Error(errorMessage);
       return response;
     } catch (_error) {
       setNotificationError(errorMessage);
@@ -104,11 +104,17 @@ export default function AppHeader({ title, setDrawerOpen }) {
       markNotificationRead,
       'Could not update that notification.',
     );
-    if (!response) return;
-    const updated = await response.json();
-    setNotifications((current) =>
-      current.map((notification) => (notification.id === updated.id ? updated : notification)),
-    );
+    if (!response) return false;
+    try {
+      const updated = await response.json();
+      setNotifications((current) =>
+        current.map((notification) => (notification.id === updated.id ? updated : notification)),
+      );
+      return true;
+    } catch (_error) {
+      setNotificationError('Could not update that notification.');
+      return false;
+    }
   };
 
   const handleClearNotification = async (notificationId) => {
@@ -124,7 +130,10 @@ export default function AppHeader({ title, setDrawerOpen }) {
   };
 
   const handleOpenNotification = async (notification) => {
-    if (!notification.is_read) await handleMarkRead(notification.id);
+    if (!notification.is_read) {
+      const success = await handleMarkRead(notification.id);
+      if (!success) return;
+    }
     if (notification.target_path) {
       setNotificationAnchorEl(null);
       navigate(notification.target_path);
@@ -135,7 +144,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setNotificationError('');
     try {
       const response = await markAllNotificationsRead(accessToken);
-      if (!response.ok) throw new Error();
+      if (!response || !response.ok) throw new Error();
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, is_read: true })),
       );
@@ -148,7 +157,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setNotificationError('');
     try {
       const response = await clearAllNotifications(accessToken);
-      if (!response.ok) throw new Error();
+      if (!response || !response.ok) throw new Error();
       setNotifications([]);
     } catch (_error) {
       setNotificationError('Could not clear notifications.');

@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-08-31
+
+### Fixed
+
+- Hardened notification error handling, state synchronization, and failure response safety in the AppHeader component.
+
 ## 2026-08-22
 
 ### Fixed
