@@ -91,6 +91,21 @@ class RegistrationTests(APITestCase):
         self.assertEqual(duplicate.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(duplicate.data["error"], "Email already exists.")
 
+    @patch("authentication.views.validate_password")
+    def test_register_enforces_password_validation(self, mock_validate_password):
+        from django.core.exceptions import ValidationError
+
+        mock_validate_password.side_effect = ValidationError("Password is too short.")
+
+        response = self.client.post(
+            "/auth/register/",
+            {"email": "newuser@example.com", "password": "123"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "Password is too short.")
+
 
 class LoginAndRefreshTests(APITestCase):
     def setUp(self):
@@ -196,6 +211,33 @@ class PasswordResetTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Invalid or expired reset link.")
+
+    def test_reset_password_rejects_malformed_uid_variations(self):
+        for bad_uid in ["not-base64!!", "12345678", "???"]:
+            response = self.client.post(
+                "/auth/reset-password/",
+                {"uid": bad_uid, "token": "anytoken", "password": "new_password_123!"},
+                format="json",
+            )
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(response.data["error"], "Invalid or expired reset link.")
+
+    @patch("authentication.views.validate_password")
+    def test_reset_password_enforces_password_validation(self, mock_validate_password):
+        from django.core.exceptions import ValidationError
+
+        mock_validate_password.side_effect = ValidationError("Password is too common.")
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
+
+        response = self.client.post(
+            "/auth/reset-password/",
+            {"uid": uid, "token": token, "password": "password"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "Password is too common.")
 
 
 class ResendApiEmailBackendTests(APITestCase):

@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-09-01
+
+### Fixed
+
+- Enforced Django's `validate_password` rules during user registration in `RegisterView`.
+- Expanded exception handling in `ResetPasswordView` when parsing `uid` parameters to handle `ValidationError` and malformed input cleanly.
+
 ## 2026-08-22
 
 ### Fixed
