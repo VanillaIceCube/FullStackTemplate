@@ -1,0 +1,7 @@
+# Otto's Journal — Reusable Backlog & Project Learnings
+
+## 2026-08-31 - GitHub Project Metadata Baseline **Learning:** FullStackTemplate uses Notoli's Project schema as specified in `scripts/create-github-project.ps1` and `docs/GITHUB_SETUP.md`. Allowed fields and values are: Status (Backlog, Ready, In Progress, In Review, Done), Domain (Frontend, Backend, UX/UI, Data Model, Deployment, CI/CD), Type (Bug, Feature, Enhancement, Refactor, Chore, Research, Security), Priority (P0, P1, P2, P3), and Size (XS, S, M, L, XL). **Action:** Always validate Project metadata edits against these explicit field options without inventing custom statuses or domains.
+
+## 2026-08-31 - Active Specialist PR Protection **Learning:** Active implementation work in flight (such as Marty's repo-health PR #103 or Forge's auth session PR #98) should have its scope and acceptance criteria protected from mid-implementation reorganization. **Action:** Treat issues/PRs with active specialist implementation as protected active work, ensuring their Project status reflects review/progress accurately without altering their underlying goals.
+
+## 2026-08-31 - Automated Security Alert Issues **Learning:** Grouped security alert issues (e.g., #82, #81, #80) are managed directly by `.github/actions/security-alerts/sync-security-alerts.js`. **Action:** Do not manually modify source-alert comments or structure on alert issues; let the automated security workflow reconcile them based on source alert state.
