@@ -47,4 +47,41 @@ describe('Login', () => {
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Please sign in again.');
     expect(sessionStorage.getItem('pendingSnackbar')).toBeNull();
   });
+
+  test('disables submit button and input fields while submitting', async () => {
+    const showSnackbar = jest.fn();
+    let resolveLogin;
+    login.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveLogin = resolve;
+        }),
+    );
+
+    renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
+
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getByRole('button', { name: 'Login' });
+
+    await userEvent.type(emailInput, 'test@example.com');
+    await userEvent.type(passwordInput, 'secret');
+    await userEvent.click(submitButton);
+
+    expect(submitButton).toBeDisabled();
+    expect(emailInput).toBeDisabled();
+    expect(passwordInput).toBeDisabled();
+
+    resolveLogin({
+      ok: true,
+      json: async () => ({
+        access: 'a',
+        refresh: 'r',
+        username: 'test',
+        email: 'test@example.com',
+      }),
+    });
+
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
+  });
 });

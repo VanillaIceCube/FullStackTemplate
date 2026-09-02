@@ -8,6 +8,7 @@ import { readOkJson } from '../../services/authSession';
 export default function ResetPassword({ showSnackbar }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -15,6 +16,7 @@ export default function ResetPassword({ showSnackbar }) {
   const token = params.get('token') || '';
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
     if (!uid || !token) {
       showSnackbar('error', 'Invalid or expired reset link.');
       return;
@@ -24,6 +26,7 @@ export default function ResetPassword({ showSnackbar }) {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const response = await resetPassword({ uid, token, password });
       const data = await readOkJson(response, 'Password reset failed.');
@@ -36,6 +39,8 @@ export default function ResetPassword({ showSnackbar }) {
         'error',
         isNetworkError ? 'Network error.' : error?.message || 'Password reset failed.',
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -51,6 +56,7 @@ export default function ResetPassword({ showSnackbar }) {
       >
         <TextField
           fullWidth
+          disabled={isSubmitting}
           sx={{ background: 'white' }}
           label="New Password"
           type="password"
@@ -60,6 +66,7 @@ export default function ResetPassword({ showSnackbar }) {
         />
         <TextField
           fullWidth
+          disabled={isSubmitting}
           sx={{ background: 'white' }}
           label="Confirm Password"
           type="password"
@@ -69,6 +76,7 @@ export default function ResetPassword({ showSnackbar }) {
         />
         <Button
           fullWidth
+          disabled={isSubmitting}
           sx={{ backgroundColor: 'var(--secondary-color)' }}
           type="submit"
           variant="contained"

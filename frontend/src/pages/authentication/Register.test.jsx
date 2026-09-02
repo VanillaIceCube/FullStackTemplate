@@ -55,4 +55,44 @@ describe('Register', () => {
     expect(register).not.toHaveBeenCalled();
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Passwords do not match.');
   });
+
+  test('disables form inputs and button while submitting', async () => {
+    const showSnackbar = jest.fn();
+    let resolveRegister;
+    register.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRegister = resolve;
+        }),
+    );
+
+    renderWithProviders(<Register showSnackbar={showSnackbar} />, {
+      routeEntries: ['/register'],
+    });
+
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Password');
+    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    const submitButton = screen.getByRole('button', { name: 'Register' });
+
+    await userEvent.type(emailInput, 'mapper@example.com');
+    await userEvent.type(passwordInput, 'secret');
+    await userEvent.type(confirmPasswordInput, 'secret');
+    await userEvent.click(submitButton);
+
+    expect(submitButton).toBeDisabled();
+    expect(emailInput).toBeDisabled();
+
+    resolveRegister({
+      ok: true,
+      json: async () => ({
+        access: 'a',
+        refresh: 'r',
+        username: 'm',
+        email: 'mapper@example.com',
+      }),
+    });
+
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
+  });
 });

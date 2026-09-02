@@ -8,7 +8,22 @@ async function safeReadJson(response) {
 
 export async function getResponseErrorMessage(response, fallbackMessage) {
   const data = await safeReadJson(response);
-  return data?.error || data?.detail || fallbackMessage;
+  if (!data) return fallbackMessage;
+
+  if (typeof data.error === 'string' && data.error) return data.error;
+  if (typeof data.detail === 'string' && data.detail) return data.detail;
+
+  if (typeof data === 'object') {
+    for (const key of Object.keys(data)) {
+      const val = data[key];
+      if (typeof val === 'string' && val) return val;
+      if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'string' && val[0]) {
+        return val[0];
+      }
+    }
+  }
+
+  return fallbackMessage;
 }
 
 export async function readOkJson(response, fallbackMessage) {
