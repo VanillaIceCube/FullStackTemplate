@@ -35,6 +35,18 @@ describe('authSession', () => {
       );
     });
 
+    test('when response json includes field array error, it returns first field error', async () => {
+      const response = makeResponse({
+        ok: false,
+        status: 400,
+        json: async () => ({ email: ['This field is required.'] }),
+      });
+
+      await expect(getResponseErrorMessage(response, 'fallback')).resolves.toBe(
+        'This field is required.',
+      );
+    });
+
     test('when response json cannot be read, it returns fallback', async () => {
       const response = makeResponse({
         ok: false,

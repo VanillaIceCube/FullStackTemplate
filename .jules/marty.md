@@ -1,0 +1,3 @@
+## 2026-09-02 - Frontend Auth Error Parsing & Form Submission State
+**Learning:** DRF validation errors for authentication endpoints often return dictionary object payloads mapping field names to arrays (e.g., `{ "email": ["This field is required."] }`). `authSession.js`'s `getResponseErrorMessage` originally only checked `data.error` or `data.detail`, missing field-level error messages in form submit handlers.
+**Action:** Always ensure `getResponseErrorMessage` inspects nested field arrays/strings in object responses, and ensure authentication forms track an explicit `isSubmitting` state to disable controls during network operations.

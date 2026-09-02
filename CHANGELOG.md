@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-09-02
+
+### Fixed
+
+- Hardened frontend authentication forms (`Login`, `Register`, `ForgotPassword`, and `ResetPassword`) by adding `isSubmitting` state to disable input fields and submit buttons during API requests to prevent double-submissions.
+- Improved backend error message extraction in `authSession.js` (`getResponseErrorMessage`) to inspect nested field error objects and array responses (such as Django REST Framework's field validation errors).
+
 ## 2026-08-22
 
 ### Fixed
