@@ -6,9 +6,63 @@ async function safeReadJson(response) {
   }
 }
 
+function formatFieldError(key, val) {
+  let msg = val;
+  if (Array.isArray(val)) {
+    msg = val[0];
+  }
+  if (typeof msg === 'object' && msg !== null) {
+    msg = extractErrorMessage(msg, '');
+  }
+  if (typeof msg !== 'string' || !msg.trim()) {
+    return null;
+  }
+  msg = msg.trim();
+  if (key === 'error' || key === 'detail' || key === 'non_field_errors' || !key) {
+    return msg;
+  }
+  const fieldName = key.charAt(0).toUpperCase() + key.slice(1);
+  return `${fieldName}: ${msg}`;
+}
+
+export function extractErrorMessage(data, fallbackMessage) {
+  if (!data) return fallbackMessage;
+
+  if (typeof data === 'string') {
+    return data.trim() || fallbackMessage;
+  }
+
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const msg = extractErrorMessage(item, '');
+      if (msg) return msg;
+    }
+    return fallbackMessage;
+  }
+
+  if (typeof data === 'object') {
+    const priorityKeys = ['error', 'detail', 'non_field_errors'];
+    for (const key of priorityKeys) {
+      if (data[key] !== undefined && data[key] !== null) {
+        const formatted = formatFieldError(key, data[key]);
+        if (formatted) return formatted;
+      }
+    }
+
+    for (const [key, val] of Object.entries(data)) {
+      if (val !== undefined && val !== null) {
+        const formatted = formatFieldError(key, val);
+        if (formatted) return formatted;
+      }
+    }
+  }
+
+  return fallbackMessage;
+}
+
 export async function getResponseErrorMessage(response, fallbackMessage) {
   const data = await safeReadJson(response);
-  return data?.error || data?.detail || fallbackMessage;
+  return extractErrorMessage(data, fallbackMessage);
 }
 
 export async function readOkJson(response, fallbackMessage) {

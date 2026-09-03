@@ -47,4 +47,33 @@ describe('Login', () => {
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Please sign in again.');
     expect(sessionStorage.getItem('pendingSnackbar')).toBeNull();
   });
+
+  test('disables inputs and button while submitting', async () => {
+    const showSnackbar = jest.fn();
+    let resolveLogin;
+    login.mockReturnValue(
+      new Promise((resolve) => {
+        resolveLogin = resolve;
+      }),
+    );
+
+    renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+    await userEvent.click(screen.getByRole('button', { name: 'Login' }));
+
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+    expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+
+    resolveLogin({
+      ok: true,
+      json: async () => ({ access: 'token', refresh: 'ref', username: 'mapper' }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Email')).not.toBeDisabled();
+    });
+  });
 });
