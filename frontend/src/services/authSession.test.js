@@ -46,6 +46,30 @@ describe('authSession', () => {
 
       await expect(getResponseErrorMessage(response, 'fallback')).resolves.toBe('fallback');
     });
+
+    test('when response json includes non_field_errors array, it extracts error message', async () => {
+      const response = makeResponse({
+        ok: false,
+        status: 400,
+        json: async () => ({ non_field_errors: ['Unable to log in with provided credentials.'] }),
+      });
+
+      await expect(getResponseErrorMessage(response, 'fallback')).resolves.toBe(
+        'Unable to log in with provided credentials.',
+      );
+    });
+
+    test('when response json includes field-specific errors, it formats the error message', async () => {
+      const response = makeResponse({
+        ok: false,
+        status: 400,
+        json: async () => ({ email: ['Enter a valid email address.'] }),
+      });
+
+      await expect(getResponseErrorMessage(response, 'fallback')).resolves.toBe(
+        'Email: Enter a valid email address.',
+      );
+    });
   });
 
   describe('readOkJson', () => {

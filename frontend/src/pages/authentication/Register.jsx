@@ -1,4 +1,4 @@
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthPageShell from '../../components/AuthPageShell';
@@ -10,14 +10,18 @@ export default function Register({ showSnackbar }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
+    if (isSubmitting) return;
+
     if (!password || password !== confirmPassword) {
       showSnackbar('error', 'Passwords do not match.');
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const response = await register({ email, username, password });
       const data = await readOkJson(response, 'Registration failed.');
@@ -31,6 +35,8 @@ export default function Register({ showSnackbar }) {
         'error',
         isNetworkError ? 'Network error.' : error?.message || 'Registration failed.',
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -46,6 +52,7 @@ export default function Register({ showSnackbar }) {
       >
         <TextField
           fullWidth
+          disabled={isSubmitting}
           sx={{ background: 'white' }}
           label="Email"
           type="email"
@@ -55,6 +62,7 @@ export default function Register({ showSnackbar }) {
         />
         <TextField
           fullWidth
+          disabled={isSubmitting}
           sx={{ background: 'white' }}
           label="Username (optional)"
           autoComplete="username"
@@ -63,6 +71,7 @@ export default function Register({ showSnackbar }) {
         />
         <TextField
           fullWidth
+          disabled={isSubmitting}
           sx={{ background: 'white' }}
           label="Password"
           type="password"
@@ -72,6 +81,7 @@ export default function Register({ showSnackbar }) {
         />
         <TextField
           fullWidth
+          disabled={isSubmitting}
           sx={{ background: 'white' }}
           label="Confirm Password"
           type="password"
@@ -81,19 +91,21 @@ export default function Register({ showSnackbar }) {
         />
         <Button
           fullWidth
+          disabled={isSubmitting}
           sx={{ backgroundColor: 'var(--secondary-color)' }}
           type="submit"
           variant="contained"
         >
-          Register
+          {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Register'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
           Already have an account?{' '}
           <Box
             component="button"
             type="button"
+            disabled={isSubmitting}
             className="auth-link"
-            onClick={() => navigate('/login')}
+            onClick={() => !isSubmitting && navigate('/login')}
           >
             Sign in
           </Box>

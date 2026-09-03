@@ -55,4 +55,33 @@ describe('Register', () => {
     expect(register).not.toHaveBeenCalled();
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Passwords do not match.');
   });
+
+  test('disables form inputs while submitting registration', async () => {
+    const showSnackbar = jest.fn();
+    let resolveRegister;
+    register.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRegister = resolve;
+      }),
+    );
+
+    renderWithProviders(<Register showSnackbar={showSnackbar} />, { routeEntries: ['/register'] });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'Secret123!');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'Secret123!');
+    await userEvent.click(screen.getByRole('button', { name: 'Register' }));
+
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+
+    resolveRegister({
+      ok: true,
+      json: async () => ({ access: 'access-token', refresh: 'refresh-token' }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Email')).not.toBeDisabled();
+    });
+  });
 });

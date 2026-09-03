@@ -1,4 +1,4 @@
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthPageShell from '../../components/AuthPageShell';
@@ -7,9 +7,13 @@ import { readOkJson } from '../../services/authSession';
 
 export default function ForgotPassword({ showSnackbar }) {
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     try {
       const response = await forgotPassword({ email });
       const data = await readOkJson(response, 'Password reset request failed.');
@@ -25,6 +29,8 @@ export default function ForgotPassword({ showSnackbar }) {
         'error',
         isNetworkError ? 'Network error.' : error?.message || 'Password reset request failed.',
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -40,6 +46,7 @@ export default function ForgotPassword({ showSnackbar }) {
       >
         <TextField
           fullWidth
+          disabled={isSubmitting}
           sx={{ background: 'white' }}
           label="Email"
           type="email"
@@ -50,18 +57,20 @@ export default function ForgotPassword({ showSnackbar }) {
         />
         <Button
           fullWidth
+          disabled={isSubmitting}
           sx={{ backgroundColor: 'var(--secondary-color)' }}
           type="submit"
           variant="contained"
         >
-          Send Reset Link
+          {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Send Reset Link'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
           <Box
             component="button"
             type="button"
+            disabled={isSubmitting}
             className="auth-link"
-            onClick={() => navigate('/login')}
+            onClick={() => !isSubmitting && navigate('/login')}
           >
             Back to Login
           </Box>
