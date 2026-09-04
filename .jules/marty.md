@@ -1,0 +1,1 @@
+## 2026-09-04 - Local Development Backend Migrations **Learning:** The SQLite development database requires running `python backend/manage.py migrate` before end-to-end browser tests or live preview verification can succeed with API calls. **Action:** Run migrations before launching the backend development server for visual/e2e testing.

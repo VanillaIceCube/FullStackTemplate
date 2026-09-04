@@ -51,6 +51,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationError, setNotificationError] = useState('');
+  const [actionPending, setActionPending] = useState(false);
 
   const profileUsername = safeGetSessionItem('username');
   const profileEmail = safeGetSessionItem('email');
@@ -99,28 +100,38 @@ export default function AppHeader({ title, setDrawerOpen }) {
   };
 
   const handleMarkRead = async (notificationId) => {
-    const response = await updateNotification(
-      notificationId,
-      markNotificationRead,
-      'Could not update that notification.',
-    );
-    if (!response) return;
-    const updated = await response.json();
-    setNotifications((current) =>
-      current.map((notification) => (notification.id === updated.id ? updated : notification)),
-    );
+    setActionPending(true);
+    try {
+      const response = await updateNotification(
+        notificationId,
+        markNotificationRead,
+        'Could not update that notification.',
+      );
+      if (!response) return;
+      const updated = await response.json();
+      setNotifications((current) =>
+        current.map((notification) => (notification.id === updated.id ? updated : notification)),
+      );
+    } finally {
+      setActionPending(false);
+    }
   };
 
   const handleClearNotification = async (notificationId) => {
-    const response = await updateNotification(
-      notificationId,
-      clearNotification,
-      'Could not clear that notification.',
-    );
-    if (!response) return;
-    setNotifications((current) =>
-      current.filter((notification) => notification.id !== notificationId),
-    );
+    setActionPending(true);
+    try {
+      const response = await updateNotification(
+        notificationId,
+        clearNotification,
+        'Could not clear that notification.',
+      );
+      if (!response) return;
+      setNotifications((current) =>
+        current.filter((notification) => notification.id !== notificationId),
+      );
+    } finally {
+      setActionPending(false);
+    }
   };
 
   const handleOpenNotification = async (notification) => {
@@ -133,6 +144,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
 
   const handleMarkAllRead = async () => {
     setNotificationError('');
+    setActionPending(true);
     try {
       const response = await markAllNotificationsRead(accessToken);
       if (!response.ok) throw new Error();
@@ -141,17 +153,22 @@ export default function AppHeader({ title, setDrawerOpen }) {
       );
     } catch (_error) {
       setNotificationError('Could not update notifications.');
+    } finally {
+      setActionPending(false);
     }
   };
 
   const handleClearAll = async () => {
     setNotificationError('');
+    setActionPending(true);
     try {
       const response = await clearAllNotifications(accessToken);
       if (!response.ok) throw new Error();
       setNotifications([]);
     } catch (_error) {
       setNotificationError('Could not clear notifications.');
+    } finally {
+      setActionPending(false);
     }
   };
 
@@ -209,6 +226,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
                 {notifications.length > 0 && (
                   <Button
                     size="small"
+                    disabled={notificationsLoading || actionPending}
                     sx={{ color: 'var(--secondary-color)', fontWeight: 'bold' }}
                     onClick={unreadCount > 0 ? handleMarkAllRead : handleClearAll}
                   >
@@ -239,6 +257,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
                       divider={index < notifications.length - 1}
                     >
                       <ListItemButton
+                        disabled={actionPending}
                         onClick={() => handleOpenNotification(notification)}
                         sx={{
                           alignItems: 'flex-start',
@@ -261,6 +280,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
                         <Tooltip title="Clear notification">
                           <IconButton
                             aria-label="Clear notification"
+                            disabled={actionPending}
                             size="small"
                             onClick={(event) => {
                               event.stopPropagation();
