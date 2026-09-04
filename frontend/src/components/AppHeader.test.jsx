@@ -118,4 +118,102 @@ describe('AppHeader', () => {
     await user.click(screen.getByText('Mark all read'));
     expect(markAllNotificationsRead).toHaveBeenCalledWith('access');
   });
+
+  test('handles individual notification clear failure gracefully', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'System Notice',
+          message: 'Maintenance scheduled.',
+          is_read: true,
+        },
+      ]),
+    );
+    clearNotification.mockResolvedValue(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalled());
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(screen.getByLabelText('Clear notification'));
+
+    expect(clearNotification).toHaveBeenCalledWith(1, 'access');
+    expect(await screen.findByText('Could not clear that notification.')).toBeInTheDocument();
+  });
+
+  test('marks unread notification read and navigates when clicked', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'New Update',
+          message: 'Click to view.',
+          is_read: false,
+          target_path: '/',
+        },
+      ]),
+    );
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalled());
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(screen.getByText('New Update'));
+
+    expect(markNotificationRead).toHaveBeenCalledWith(1, 'access');
+  });
+
+  test('clears all notifications when all are read', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Read Notice',
+          message: 'Already read.',
+          is_read: true,
+        },
+      ]),
+    );
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalled());
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(screen.getByText('Clear all'));
+
+    expect(clearAllNotifications).toHaveBeenCalledWith('access');
+    expect(await screen.findByText('No notifications yet.')).toBeInTheDocument();
+  });
+
+  test('handles mark all read failure gracefully', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Unread Notice',
+          message: 'Needs attention.',
+          is_read: false,
+        },
+      ]),
+    );
+    markAllNotificationsRead.mockResolvedValue(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalled());
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(screen.getByText('Mark all read'));
+
+    expect(markAllNotificationsRead).toHaveBeenCalledWith('access');
+    expect(await screen.findByText('Could not update notifications.')).toBeInTheDocument();
+  });
 });
