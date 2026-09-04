@@ -1,0 +1,7 @@
+# Otto's Journal — Organizational Learnings
+
+## 2026-09-04 - Security Alert Issue Management **Learning:** Issues containing the header comment `<!-- fullstacktemplate-security-alert:vulnerability:... -->` (such as #80, #81, #82, #114) are automatically generated and managed by the scheduled `.github/actions/security-alerts` workflow. **Action:** Future Otto runs should not manually rewrite, close, or consolidate security-alert issues; allow the automated reconciliation action to remain authoritative over alert lifecycle and grouping.
+
+## 2026-09-04 - Active Specialist PR Scope Protection **Learning:** Active PRs opened by specialist agents (e.g., Marty 🦀, Nora 🐚, Forge 🔧) handle tactical component hardening, state error handling, and component refactoring in flight. **Action:** Otto must treat open specialist PRs as active work, avoiding creating duplicate backlog issues or altering issue descriptions and criteria while implementation and review are underway.
+
+## 2026-09-04 - Strategic Triage vs. Lockfile Vulnerability Grouping **Learning:** Strategic tracking issues like #39 (Dependabot triage) and #68 (Vite migration) serve as umbrella topics for framework updates, whereas vulnerability alert issues (#80, #81, #82, #114) represent lockfile CVE groupings. **Action:** Do not consolidate vulnerability alert groups into framework triage issues; maintain the separation between automated dependency vulnerability remediation and strategic architectural upgrades.
