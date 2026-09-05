@@ -24,6 +24,14 @@ describe('notificationApiClient', () => {
     });
   });
 
+  test('handles missing token without injecting malformed header', () => {
+    fetchNotifications();
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
+      headers: {},
+    });
+  });
+
   test('marks one notification read', () => {
     markNotificationRead(42, 'TOKEN');
 

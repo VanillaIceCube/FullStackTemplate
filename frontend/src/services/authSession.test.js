@@ -133,6 +133,16 @@ describe('authSession', () => {
       expect(sessionStorage.getItem('email')).toBeNull();
     });
 
+    test('when profile fields are missing or empty, it removes existing stale profile keys', () => {
+      sessionStorage.setItem('username', 'staleUser');
+      sessionStorage.setItem('email', 'stale@example.com');
+
+      persistAuthSession({ access: 'A', refresh: 'R', username: '', email: '   ' });
+
+      expect(sessionStorage.getItem('username')).toBeNull();
+      expect(sessionStorage.getItem('email')).toBeNull();
+    });
+
     test('when sessionStorage throws, it surfaces a storage error', () => {
       const originalSessionStorage = global.sessionStorage;
       Object.defineProperty(global, 'sessionStorage', {

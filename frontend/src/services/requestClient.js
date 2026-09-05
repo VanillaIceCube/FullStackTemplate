@@ -121,21 +121,64 @@ async function refreshAccessToken() {
   return refreshRequest;
 }
 
+export function normalizeHeaders(headers) {
+  if (!headers) return {};
+  if (typeof Headers !== 'undefined' && headers instanceof Headers) {
+    const result = {};
+    headers.forEach((value, key) => {
+      result[key] = value;
+    });
+    return result;
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return { ...headers };
+}
+
+function hasAuthorizationHeader(headers) {
+  return Object.keys(headers).some((key) => key.toLowerCase() === 'authorization');
+}
+
+function getStoredAccessToken() {
+  try {
+    return sessionStorage.getItem('accessToken') || null;
+  } catch (_err) {
+    return null;
+  }
+}
+
 function withAccessToken(options, accessToken) {
+  const headers = normalizeHeaders(options.headers);
+  headers.Authorization = `Bearer ${accessToken}`;
   return {
     ...options,
-    headers: { ...(options.headers || {}), Authorization: `Bearer ${accessToken}` },
+    headers,
   };
 }
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE_URL}${path}`;
-  const response = await fetch(url, options);
+  const headers = normalizeHeaders(options.headers);
+
+  const storedToken = getStoredAccessToken();
+  if (storedToken && !hasAuthorizationHeader(headers) && shouldRedirectToLogin(path)) {
+    headers.Authorization = `Bearer ${storedToken}`;
+  }
+
+  const mergedOptions = { ...options };
+  if (Object.keys(headers).length > 0) {
+    mergedOptions.headers = headers;
+  } else {
+    delete mergedOptions.headers;
+  }
+
+  const response = await fetch(url, mergedOptions);
 
   if (response?.status === 401 && shouldRedirectToLogin(path)) {
     const refreshResult = await refreshAccessToken();
     if (refreshResult.status === 'refreshed') {
-      return fetch(url, withAccessToken(options, refreshResult.accessToken));
+      return fetch(url, withAccessToken(mergedOptions, refreshResult.accessToken));
     }
     if (refreshResult.status === 'invalid') handleUnauthorized();
   }
