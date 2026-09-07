@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { register } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
@@ -11,6 +11,7 @@ jest.mock('../../services/authApiClient', () => ({
 describe('Register', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    jest.clearAllMocks();
   });
 
   test('creates an account and stores the session', async () => {
@@ -40,6 +41,44 @@ describe('Register', () => {
       username: 'mapper',
       password: 'secret',
     });
+  });
+
+  test('disables button during submission and prevents duplicate submits', async () => {
+    const showSnackbar = jest.fn();
+    let resolveRegister;
+    const registerPromise = new Promise((resolve) => {
+      resolveRegister = resolve;
+    });
+    register.mockReturnValue(registerPromise);
+
+    renderWithProviders(<Register showSnackbar={showSnackbar} />, {
+      routeEntries: ['/register'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'secret');
+
+    const submitButton = screen.getByRole('button', { name: 'Register' });
+    await userEvent.click(submitButton);
+
+    expect(submitButton).toBeDisabled();
+    expect(register).toHaveBeenCalledTimes(1);
+
+    fireEvent.submit(submitButton);
+    expect(register).toHaveBeenCalledTimes(1);
+
+    resolveRegister({
+      ok: true,
+      json: async () => ({
+        access: 'access-token',
+        refresh: 'refresh-token',
+        username: 'mapper',
+        email: 'mapper@example.com',
+      }),
+    });
+
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
   });
 
   test('rejects mismatched passwords locally', async () => {

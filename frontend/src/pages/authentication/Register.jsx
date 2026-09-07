@@ -10,14 +10,18 @@ export default function Register({ showSnackbar }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
+    if (isSubmitting) return;
+
     if (!password || password !== confirmPassword) {
       showSnackbar('error', 'Passwords do not match.');
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const response = await register({ email, username, password });
       const data = await readOkJson(response, 'Registration failed.');
@@ -31,6 +35,8 @@ export default function Register({ showSnackbar }) {
         'error',
         isNetworkError ? 'Network error.' : error?.message || 'Registration failed.',
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,6 +87,7 @@ export default function Register({ showSnackbar }) {
         />
         <Button
           fullWidth
+          disabled={isSubmitting}
           sx={{ backgroundColor: 'var(--secondary-color)' }}
           type="submit"
           variant="contained"
