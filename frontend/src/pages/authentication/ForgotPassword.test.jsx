@@ -27,4 +27,35 @@ describe('ForgotPassword', () => {
     );
     expect(forgotPassword).toHaveBeenCalledWith({ email: 'mapper@example.com' });
   });
+
+  test('prevents duplicate forgot password submission while request is pending', async () => {
+    const showSnackbar = jest.fn();
+    let resolveForgotPassword;
+    forgotPassword.mockReturnValue(
+      new Promise((resolve) => {
+        resolveForgotPassword = resolve;
+      }),
+    );
+
+    renderWithProviders(<ForgotPassword showSnackbar={showSnackbar} />, {
+      routeEntries: ['/forgot-password'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+
+    const submitButton = screen.getByRole('button', { name: 'Send Reset Link' });
+    await userEvent.click(submitButton);
+
+    expect(forgotPassword).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Sending Link…' })).toBeDisabled();
+
+    resolveForgotPassword({
+      ok: true,
+      json: async () => ({ message: 'Password reset link has been sent!' }),
+    });
+
+    await waitFor(() =>
+      expect(showSnackbar).toHaveBeenCalledWith('success', 'Password reset link has been sent!'),
+    );
+  });
 });

@@ -35,6 +35,39 @@ describe('Login', () => {
     expect(showSnackbar).toHaveBeenCalledWith('success', 'Welcome mapper!');
   });
 
+  test('prevents duplicate login submission while request is pending', async () => {
+    const showSnackbar = jest.fn();
+    let resolveLogin;
+    login.mockReturnValue(
+      new Promise((resolve) => {
+        resolveLogin = resolve;
+      }),
+    );
+
+    renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+
+    const submitButton = screen.getByRole('button', { name: 'Login' });
+    await userEvent.click(submitButton);
+
+    expect(login).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Logging in…' })).toBeDisabled();
+
+    resolveLogin({
+      ok: true,
+      json: async () => ({
+        access: 'access-token',
+        refresh: 'refresh-token',
+        username: 'mapper',
+        email: 'mapper@example.com',
+      }),
+    });
+
+    await waitFor(() => expect(sessionStorage.getItem('accessToken')).toBe('access-token'));
+  });
+
   test('shows a pending session-expired message', () => {
     const showSnackbar = jest.fn();
     sessionStorage.setItem(

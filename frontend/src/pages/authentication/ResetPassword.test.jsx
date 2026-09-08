@@ -32,6 +32,38 @@ describe('ResetPassword', () => {
     );
   });
 
+  test('prevents duplicate password reset submission while request is pending', async () => {
+    const showSnackbar = jest.fn();
+    let resolveResetPassword;
+    resetPassword.mockReturnValue(
+      new Promise((resolve) => {
+        resolveResetPassword = resolve;
+      }),
+    );
+
+    renderWithProviders(<ResetPassword showSnackbar={showSnackbar} />, {
+      routeEntries: ['/reset-password?uid=user-id&token=reset-token'],
+    });
+
+    await userEvent.type(screen.getByLabelText('New Password'), 'new-secret');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'new-secret');
+
+    const submitButton = screen.getByRole('button', { name: 'Reset Password' });
+    await userEvent.click(submitButton);
+
+    expect(resetPassword).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Resetting…' })).toBeDisabled();
+
+    resolveResetPassword({
+      ok: true,
+      json: async () => ({ message: 'Password reset successful.' }),
+    });
+
+    await waitFor(() =>
+      expect(showSnackbar).toHaveBeenCalledWith('success', 'Password reset successful.'),
+    );
+  });
+
   test('rejects a reset page without link credentials', async () => {
     const showSnackbar = jest.fn();
     renderWithProviders(<ResetPassword showSnackbar={showSnackbar} />, {

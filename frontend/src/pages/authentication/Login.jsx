@@ -8,6 +8,7 @@ import { persistAuthSession, readOkJson } from '../../services/authSession';
 export default function Login({ showSnackbar }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,6 +25,9 @@ export default function Login({ showSnackbar }) {
   }, [showSnackbar]);
 
   const handleLogin = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
     try {
       const response = await login({ email, password });
       const data = await readOkJson(response, 'Login failed.');
@@ -34,6 +38,8 @@ export default function Login({ showSnackbar }) {
       const isNetworkError =
         error instanceof TypeError || error?.message?.toLowerCase().includes('network');
       showSnackbar('error', isNetworkError ? 'Network error.' : error?.message || 'Login failed.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -50,6 +56,7 @@ export default function Login({ showSnackbar }) {
       >
         <TextField
           fullWidth
+          disabled={submitting}
           sx={{ background: 'white' }}
           label="Email"
           type="email"
@@ -60,6 +67,7 @@ export default function Login({ showSnackbar }) {
         />
         <TextField
           fullWidth
+          disabled={submitting}
           sx={{ background: 'white' }}
           label="Password"
           type="password"
@@ -70,16 +78,18 @@ export default function Login({ showSnackbar }) {
         />
         <Button
           fullWidth
+          disabled={submitting}
           sx={{ backgroundColor: 'var(--secondary-color)' }}
           type="submit"
           variant="contained"
         >
-          Login
+          {submitting ? 'Logging in…' : 'Login'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
           <Box
             component="button"
             type="button"
+            disabled={submitting}
             className="auth-link"
             onClick={() => navigate('/forgot-password')}
           >
@@ -89,6 +99,7 @@ export default function Login({ showSnackbar }) {
           <Box
             component="button"
             type="button"
+            disabled={submitting}
             className="auth-link"
             onClick={() => navigate('/register')}
           >

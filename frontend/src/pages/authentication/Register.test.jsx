@@ -42,6 +42,42 @@ describe('Register', () => {
     });
   });
 
+  test('prevents duplicate registration submission while request is pending', async () => {
+    const showSnackbar = jest.fn();
+    let resolveRegister;
+    register.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRegister = resolve;
+      }),
+    );
+
+    renderWithProviders(<Register showSnackbar={showSnackbar} />, {
+      routeEntries: ['/register'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'secret');
+
+    const submitButton = screen.getByRole('button', { name: 'Register' });
+    await userEvent.click(submitButton);
+
+    expect(register).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Registering…' })).toBeDisabled();
+
+    resolveRegister({
+      ok: true,
+      json: async () => ({
+        access: 'access-token',
+        refresh: 'refresh-token',
+        username: 'mapper',
+        email: 'mapper@example.com',
+      }),
+    });
+
+    await waitFor(() => expect(sessionStorage.getItem('accessToken')).toBe('access-token'));
+  });
+
   test('rejects mismatched passwords locally', async () => {
     const showSnackbar = jest.fn();
     renderWithProviders(<Register showSnackbar={showSnackbar} />, {

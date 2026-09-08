@@ -7,9 +7,13 @@ import { readOkJson } from '../../services/authSession';
 
 export default function ForgotPassword({ showSnackbar }) {
   const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
     try {
       const response = await forgotPassword({ email });
       const data = await readOkJson(response, 'Password reset request failed.');
@@ -25,6 +29,8 @@ export default function ForgotPassword({ showSnackbar }) {
         'error',
         isNetworkError ? 'Network error.' : error?.message || 'Password reset request failed.',
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -40,6 +46,7 @@ export default function ForgotPassword({ showSnackbar }) {
       >
         <TextField
           fullWidth
+          disabled={submitting}
           sx={{ background: 'white' }}
           label="Email"
           type="email"
@@ -50,16 +57,18 @@ export default function ForgotPassword({ showSnackbar }) {
         />
         <Button
           fullWidth
+          disabled={submitting}
           sx={{ backgroundColor: 'var(--secondary-color)' }}
           type="submit"
           variant="contained"
         >
-          Send Reset Link
+          {submitting ? 'Sending Link…' : 'Send Reset Link'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
           <Box
             component="button"
             type="button"
+            disabled={submitting}
             className="auth-link"
             onClick={() => navigate('/login')}
           >
