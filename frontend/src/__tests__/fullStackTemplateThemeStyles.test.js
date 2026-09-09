@@ -25,7 +25,7 @@ describe('FullStackTemplate theme styles', () => {
   test.each([
     'components/AppHeader.jsx',
     'components/AppNavigationDrawer.jsx',
-    'components/AuthPageShell.jsx',
+    'components/authentication/AuthPageShell.jsx',
     'pages/HomePage.jsx',
   ])('%s uses the shared yellow and gray surfaces', (relativePath) => {
     const source = readSource(relativePath);
