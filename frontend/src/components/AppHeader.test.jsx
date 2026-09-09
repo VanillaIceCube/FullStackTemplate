@@ -118,4 +118,57 @@ describe('AppHeader', () => {
     await user.click(screen.getByText('Mark all read'));
     expect(markAllNotificationsRead).toHaveBeenCalledWith('access');
   });
+
+  test('handles notification loading error and retry', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValueOnce(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await user.click(screen.getByLabelText('notifications'));
+    expect(await screen.findByText('Notifications are unavailable right now.')).toBeInTheDocument();
+
+    fetchNotifications.mockResolvedValueOnce(
+      response([
+        {
+          id: 1,
+          title: 'Template ready',
+          message: 'Your shell is ready.',
+          is_read: false,
+        },
+      ]),
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText('Template ready')).toBeInTheDocument();
+  });
+
+  test('handles individual notification clear and action errors', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Notification 1',
+          message: 'Message 1',
+          is_read: false,
+        },
+      ]),
+    );
+    clearNotification.mockResolvedValueOnce(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await user.click(screen.getByLabelText('notifications'));
+    expect(await screen.findByText('Notification 1')).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText('Clear notification'));
+    expect(await screen.findByText('Could not clear that notification.')).toBeInTheDocument();
+
+    clearNotification.mockResolvedValueOnce(response({ deleted: 1 }, true));
+    await user.click(screen.getByLabelText('Clear notification'));
+    await waitFor(() => expect(screen.queryByText('Notification 1')).not.toBeInTheDocument());
+  });
 });
