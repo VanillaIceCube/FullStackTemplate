@@ -14,9 +14,10 @@ jest.mock('./requestClient', () => ({
 describe('notificationApiClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
   });
 
-  test('lists notifications with authentication', () => {
+  test('lists notifications with explicit authentication token', () => {
     fetchNotifications('TOKEN');
 
     expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
@@ -66,6 +67,24 @@ describe('notificationApiClient', () => {
         Authorization: 'Bearer TOKEN',
         'Content-Type': 'application/json',
       },
+    });
+  });
+
+  test('falls back to sessionStorage accessToken when token parameter is omitted', () => {
+    sessionStorage.setItem('accessToken', 'SESSION_TOKEN');
+
+    fetchNotifications();
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
+      headers: { Authorization: 'Bearer SESSION_TOKEN' },
+    });
+  });
+
+  test('omits Authorization header when no token parameter or sessionStorage token exists', () => {
+    fetchNotifications();
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
+      headers: {},
     });
   });
 });
