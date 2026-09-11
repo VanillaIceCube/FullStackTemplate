@@ -27,4 +27,40 @@ describe('ForgotPassword', () => {
     );
     expect(forgotPassword).toHaveBeenCalledWith({ email: 'mapper@example.com' });
   });
+
+  test('disables submit button during submission and resets on error', async () => {
+    const showSnackbar = jest.fn();
+    let resolveForgot;
+    forgotPassword.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveForgot = resolve;
+        }),
+    );
+
+    renderWithProviders(<ForgotPassword showSnackbar={showSnackbar} />, {
+      routeEntries: ['/forgot-password'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+
+    const submitBtn = screen.getByRole('button', { name: 'Send Reset Link' });
+    await userEvent.click(submitBtn);
+
+    expect(forgotPassword).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Sending...' })).toBeDisabled();
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+
+    resolveForgot({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'Invalid email address.' }),
+    });
+
+    await waitFor(() =>
+      expect(showSnackbar).toHaveBeenCalledWith('error', 'Invalid email address.'),
+    );
+    expect(screen.getByRole('button', { name: 'Send Reset Link' })).not.toBeDisabled();
+    expect(screen.getByLabelText('Email')).not.toBeDisabled();
+  });
 });

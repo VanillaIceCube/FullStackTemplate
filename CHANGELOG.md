@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-09-11
+
+### Fixed
+
+- Added `isSubmitting` loading and double-submit prevention guards to frontend authentication form components (`Login`, `Register`, `ForgotPassword`, `ResetPassword`) to prevent duplicate in-flight API requests and disable form inputs during submission.
+
 ## 2026-08-22
 
 ### Fixed

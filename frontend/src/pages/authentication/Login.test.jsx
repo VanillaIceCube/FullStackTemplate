@@ -35,6 +35,40 @@ describe('Login', () => {
     expect(showSnackbar).toHaveBeenCalledWith('success', 'Welcome mapper!');
   });
 
+  test('disables submit button during submission and resets on error', async () => {
+    const showSnackbar = jest.fn();
+    let resolveLogin;
+    login.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveLogin = resolve;
+        }),
+    );
+
+    renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+
+    const submitBtn = screen.getByRole('button', { name: 'Login' });
+    await userEvent.click(submitBtn);
+
+    expect(login).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Logging in...' })).toBeDisabled();
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+    expect(screen.getByLabelText('Password')).toBeDisabled();
+
+    resolveLogin({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'Invalid credentials.' }),
+    });
+
+    await waitFor(() => expect(showSnackbar).toHaveBeenCalledWith('error', 'Invalid credentials.'));
+    expect(screen.getByRole('button', { name: 'Login' })).not.toBeDisabled();
+    expect(screen.getByLabelText('Email')).not.toBeDisabled();
+  });
+
   test('shows a pending session-expired message', () => {
     const showSnackbar = jest.fn();
     sessionStorage.setItem(
