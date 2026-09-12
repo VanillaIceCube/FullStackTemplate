@@ -42,6 +42,38 @@ describe('Register', () => {
     });
   });
 
+  test('disables inputs and button during submission', async () => {
+    let resolveRegister;
+    const registerPromise = new Promise((resolve) => {
+      resolveRegister = resolve;
+    });
+    register.mockReturnValue(registerPromise);
+
+    renderWithProviders(<Register showSnackbar={jest.fn()} />, {
+      routeEntries: ['/register'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'secret');
+    await userEvent.click(screen.getByRole('button', { name: 'Register' }));
+
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+    expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Register' })).toBeDisabled();
+
+    resolveRegister({
+      ok: true,
+      json: async () => ({
+        access: 'access-token',
+        refresh: 'refresh-token',
+        username: 'mapper',
+      }),
+    });
+
+    await waitFor(() => expect(screen.getByLabelText('Email')).not.toBeDisabled());
+  });
+
   test('rejects mismatched passwords locally', async () => {
     const showSnackbar = jest.fn();
     renderWithProviders(<Register showSnackbar={showSnackbar} />, {

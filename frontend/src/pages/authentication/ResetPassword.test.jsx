@@ -32,6 +32,33 @@ describe('ResetPassword', () => {
     );
   });
 
+  test('disables inputs and button during submission', async () => {
+    let resolveResetPassword;
+    const requestPromise = new Promise((resolve) => {
+      resolveResetPassword = resolve;
+    });
+    resetPassword.mockReturnValue(requestPromise);
+
+    renderWithProviders(<ResetPassword showSnackbar={jest.fn()} />, {
+      routeEntries: ['/reset-password?uid=user-id&token=reset-token'],
+    });
+
+    await userEvent.type(screen.getByLabelText('New Password'), 'new-secret');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'new-secret');
+    await userEvent.click(screen.getByRole('button', { name: 'Reset Password' }));
+
+    expect(screen.getByLabelText('New Password')).toBeDisabled();
+    expect(screen.getByLabelText('Confirm Password')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Reset Password' })).toBeDisabled();
+
+    resolveResetPassword({
+      ok: true,
+      json: async () => ({ message: 'Password reset successful.' }),
+    });
+
+    await waitFor(() => expect(screen.getByLabelText('New Password')).not.toBeDisabled());
+  });
+
   test('rejects a reset page without link credentials', async () => {
     const showSnackbar = jest.fn();
     renderWithProviders(<ResetPassword showSnackbar={showSnackbar} />, {

@@ -35,6 +35,35 @@ describe('Login', () => {
     expect(showSnackbar).toHaveBeenCalledWith('success', 'Welcome mapper!');
   });
 
+  test('disables inputs and button during submission', async () => {
+    let resolveLogin;
+    const loginPromise = new Promise((resolve) => {
+      resolveLogin = resolve;
+    });
+    login.mockReturnValue(loginPromise);
+
+    renderWithProviders(<Login showSnackbar={jest.fn()} />, { routeEntries: ['/login'] });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+    await userEvent.click(screen.getByRole('button', { name: 'Login' }));
+
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+    expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Login' })).toBeDisabled();
+
+    resolveLogin({
+      ok: true,
+      json: async () => ({
+        access: 'access-token',
+        refresh: 'refresh-token',
+        username: 'mapper',
+      }),
+    });
+
+    await waitFor(() => expect(screen.getByLabelText('Email')).not.toBeDisabled());
+  });
+
   test('shows a pending session-expired message', () => {
     const showSnackbar = jest.fn();
     sessionStorage.setItem(
