@@ -53,6 +53,7 @@ class RegisterView(APIView):
 
         email = email.strip().lower() if isinstance(email, str) else None
         username = username.strip() if isinstance(username, str) else None
+        password = password.strip() if isinstance(password, str) else None
 
         if not email or not password:
             return Response(
@@ -83,6 +84,14 @@ class RegisterView(APIView):
         else:
             base_username = email.split("@", 1)[0]
             username = _build_unique_username(base_username)
+
+        try:
+            validate_password(password, user=User(username=username, email=email))
+        except ValidationError as exc:
+            return Response(
+                {"error": exc.messages[0] if exc.messages else "Invalid password."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user = User.objects.create_user(
             username=username, email=email, password=password

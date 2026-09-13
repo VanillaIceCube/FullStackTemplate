@@ -55,4 +55,25 @@ describe('Register', () => {
     expect(register).not.toHaveBeenCalled();
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Passwords do not match.');
   });
+
+  test('disables controls while submitting and displays backend error', async () => {
+    const showSnackbar = jest.fn();
+    register.mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'This password is too short.' }),
+    });
+    renderWithProviders(<Register showSnackbar={showSnackbar} />, {
+      routeEntries: ['/register'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), '123');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), '123');
+    await userEvent.click(screen.getByRole('button', { name: 'Register' }));
+
+    await waitFor(() =>
+      expect(showSnackbar).toHaveBeenCalledWith('error', 'This password is too short.'),
+    );
+  });
 });

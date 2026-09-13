@@ -35,6 +35,38 @@ describe('Login', () => {
     expect(showSnackbar).toHaveBeenCalledWith('success', 'Welcome mapper!');
   });
 
+  test('disables inputs and button while submitting', async () => {
+    const showSnackbar = jest.fn();
+    let resolveLogin;
+    login.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveLogin = resolve;
+        }),
+    );
+    renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+    await userEvent.click(screen.getByRole('button', { name: 'Login' }));
+
+    expect(screen.getByRole('button', { name: 'Signing in...' })).toBeDisabled();
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+    expect(screen.getByLabelText('Password')).toBeDisabled();
+
+    resolveLogin({
+      ok: true,
+      json: async () => ({
+        access: 'access-token',
+        refresh: 'refresh-token',
+        username: 'mapper',
+        email: 'mapper@example.com',
+      }),
+    });
+
+    await waitFor(() => expect(sessionStorage.getItem('accessToken')).toBe('access-token'));
+  });
+
   test('shows a pending session-expired message', () => {
     const showSnackbar = jest.fn();
     sessionStorage.setItem(

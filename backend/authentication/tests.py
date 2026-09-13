@@ -91,6 +91,23 @@ class RegistrationTests(APITestCase):
         self.assertEqual(duplicate.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(duplicate.data["error"], "Email already exists.")
 
+    def test_register_rejects_weak_and_whitespace_passwords(self):
+        short_pwd = self.client.post(
+            "/auth/register/",
+            {"email": "short@example.com", "password": "123"},
+            format="json",
+        )
+        space_pwd = self.client.post(
+            "/auth/register/",
+            {"email": "space@example.com", "password": "   "},
+            format="json",
+        )
+
+        self.assertEqual(short_pwd.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("too short", short_pwd.data["error"])
+        self.assertEqual(space_pwd.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(space_pwd.data["error"], "Email and password required.")
+
 
 class LoginAndRefreshTests(APITestCase):
     def setUp(self):
@@ -111,6 +128,16 @@ class LoginAndRefreshTests(APITestCase):
         self.assertTrue(response.data["access"])
         self.assertTrue(response.data["refresh"])
         self.assertEqual(response.data["username"], "mapper")
+        self.assertEqual(response.data["email"], "mapper@example.com")
+
+    def test_login_strips_email_whitespace(self):
+        response = self.client.post(
+            "/auth/login/",
+            {"email": "  MAPPER@example.com  ", "password": "test_password"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["email"], "mapper@example.com")
 
     def test_login_rejects_bad_credentials(self):

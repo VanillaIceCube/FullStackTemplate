@@ -27,4 +27,33 @@ describe('ForgotPassword', () => {
     );
     expect(forgotPassword).toHaveBeenCalledWith({ email: 'mapper@example.com' });
   });
+
+  test('disables inputs and button while submitting', async () => {
+    const showSnackbar = jest.fn();
+    let resolveForgotPassword;
+    forgotPassword.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveForgotPassword = resolve;
+        }),
+    );
+    renderWithProviders(<ForgotPassword showSnackbar={showSnackbar} />, {
+      routeEntries: ['/forgot-password'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Send Reset Link' }));
+
+    expect(screen.getByRole('button', { name: 'Sending...' })).toBeDisabled();
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+
+    resolveForgotPassword({
+      ok: true,
+      json: async () => ({ message: 'Password reset link has been sent!' }),
+    });
+
+    await waitFor(() =>
+      expect(showSnackbar).toHaveBeenCalledWith('success', 'Password reset link has been sent!'),
+    );
+  });
 });
