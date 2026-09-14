@@ -119,3 +119,22 @@ class NotificationApiTests(APITestCase):
         self.assertTrue(
             Notification.objects.filter(pk=self.other_notification.pk).exists()
         )
+
+    def test_mark_all_read_when_no_unread_notifications(self):
+        self.notification.is_read = True
+        self.notification.save()
+        self.client.force_authenticate(user=self.recipient)
+
+        response = self.client.patch("/api/notifications/mark-all-read/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["updated"], 0)
+
+    def test_clear_all_when_no_notifications(self):
+        Notification.objects.filter(recipient=self.recipient).delete()
+        self.client.force_authenticate(user=self.recipient)
+
+        response = self.client.delete("/api/notifications/clear-all/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["deleted"], 0)
