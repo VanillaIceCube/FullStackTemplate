@@ -9,12 +9,15 @@ jest.mock('../../services/authApiClient', () => ({
 }));
 
 describe('ResetPassword', () => {
-  test('submits a valid reset link and matching passwords', async () => {
+  test('submits a valid reset link and matching passwords, disabling inputs during submission', async () => {
     const showSnackbar = jest.fn();
-    resetPassword.mockResolvedValue({
-      ok: true,
-      json: async () => ({ message: 'Password reset successful.' }),
-    });
+    let resolveResetPassword;
+    resetPassword.mockReturnValue(
+      new Promise((resolve) => {
+        resolveResetPassword = resolve;
+      }),
+    );
+
     renderWithProviders(<ResetPassword showSnackbar={showSnackbar} />, {
       routeEntries: ['/reset-password?uid=user-id&token=reset-token'],
     });
@@ -22,6 +25,15 @@ describe('ResetPassword', () => {
     await userEvent.type(screen.getByLabelText('New Password'), 'new-secret');
     await userEvent.type(screen.getByLabelText('Confirm Password'), 'new-secret');
     await userEvent.click(screen.getByRole('button', { name: 'Reset Password' }));
+
+    expect(screen.getByRole('button', { name: 'Resetting Password...' })).toBeDisabled();
+    expect(screen.getByLabelText('New Password')).toBeDisabled();
+    expect(screen.getByLabelText('Confirm Password')).toBeDisabled();
+
+    resolveResetPassword({
+      ok: true,
+      json: async () => ({ message: 'Password reset successful.' }),
+    });
 
     await waitFor(() =>
       expect(resetPassword).toHaveBeenCalledWith({
