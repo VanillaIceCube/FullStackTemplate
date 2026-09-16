@@ -1,4 +1,7 @@
+import { clearAuthSession } from './authSession';
 import { navigate } from './navigationService';
+
+export { clearAuthSession };
 
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL ??
@@ -12,17 +15,6 @@ function shouldRedirectToLogin(path) {
     !path.startsWith('/auth/forgot-password') &&
     !path.startsWith('/auth/reset-password')
   );
-}
-
-export function clearAuthSession() {
-  try {
-    sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('refreshToken');
-    sessionStorage.removeItem('username');
-    sessionStorage.removeItem('email');
-  } catch (_err) {
-    // Ignore non-browser / blocked storage environments.
-  }
 }
 
 export function redirectToLogin() {

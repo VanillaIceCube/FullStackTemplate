@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthPageShell from '../../components/AuthPageShell';
 import { login } from '../../services/authApiClient';
-import { persistAuthSession, readOkJson } from '../../services/authSession';
+import { persistAuthSession } from '../../services/authSession';
+import { readOkJson } from '../../services/httpUtils';
 
 export default function Login({ showSnackbar }) {
   const [email, setEmail] = useState('');

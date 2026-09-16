@@ -1,4 +1,9 @@
-import { getResponseErrorMessage, persistAuthSession, readOkJson } from './authSession';
+import {
+  clearAuthSession,
+  getResponseErrorMessage,
+  persistAuthSession,
+  readOkJson,
+} from './authSession';
 
 function makeResponse({ ok, status = 200, json }) {
   return { ok, status, json };
@@ -105,35 +110,63 @@ describe('authSession', () => {
     });
   });
 
-  describe('persistAuthSession', () => {
-    test('when tokens are missing, it throws', () => {
+  describe('persistAuthSession and clearAuthSession', () => {
+    test('when tokens are missing, persistAuthSession throws', () => {
       expect(() => persistAuthSession({})).toThrow('Auth response missing tokens.');
       expect(() => persistAuthSession({ access: 'A' })).toThrow('Auth response missing tokens.');
       expect(() => persistAuthSession({ refresh: 'R' })).toThrow('Auth response missing tokens.');
     });
 
-    test('when tokens are present, it stores them', () => {
-      persistAuthSession({ access: 'A', refresh: 'R' });
+    test('persistAuthSession stores tokens and profile info', () => {
+      persistAuthSession({ access: 'A', refresh: 'R', username: 'u', email: 'e@example.com' });
 
       expect(sessionStorage.getItem('accessToken')).toBe('A');
       expect(sessionStorage.getItem('refreshToken')).toBe('R');
-    });
-
-    test('when profile fields are present, it stores them', () => {
-      persistAuthSession({ access: 'A', refresh: 'R', username: 'u', email: 'e@example.com' });
-
       expect(sessionStorage.getItem('username')).toBe('u');
       expect(sessionStorage.getItem('email')).toBe('e@example.com');
     });
 
-    test('when username/email are missing, it does not store "undefined"', () => {
+    test('persistAuthSession does not store undefined username/email', () => {
       persistAuthSession({ access: 'A', refresh: 'R', username: undefined, email: undefined });
 
       expect(sessionStorage.getItem('username')).toBeNull();
       expect(sessionStorage.getItem('email')).toBeNull();
     });
 
-    test('when sessionStorage throws, it surfaces a storage error', () => {
+    test('clearAuthSession removes all stored session items', () => {
+      sessionStorage.setItem('accessToken', 'A');
+      sessionStorage.setItem('refreshToken', 'R');
+      sessionStorage.setItem('username', 'u');
+      sessionStorage.setItem('email', 'e@example.com');
+
+      clearAuthSession();
+
+      expect(sessionStorage.getItem('accessToken')).toBeNull();
+      expect(sessionStorage.getItem('refreshToken')).toBeNull();
+      expect(sessionStorage.getItem('username')).toBeNull();
+      expect(sessionStorage.getItem('email')).toBeNull();
+    });
+
+    test('clearAuthSession gracefully handles storage errors', () => {
+      const originalSessionStorage = global.sessionStorage;
+      Object.defineProperty(global, 'sessionStorage', {
+        configurable: true,
+        value: {
+          removeItem: () => {
+            throw new Error('blocked');
+          },
+        },
+      });
+
+      expect(() => clearAuthSession()).not.toThrow();
+
+      Object.defineProperty(global, 'sessionStorage', {
+        configurable: true,
+        value: originalSessionStorage,
+      });
+    });
+
+    test('when sessionStorage setItem throws, persistAuthSession surfaces storage error', () => {
       const originalSessionStorage = global.sessionStorage;
       Object.defineProperty(global, 'sessionStorage', {
         configurable: true,

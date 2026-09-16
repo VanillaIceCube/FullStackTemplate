@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthPageShell from '../../components/AuthPageShell';
 import { forgotPassword } from '../../services/authApiClient';
-import { readOkJson } from '../../services/authSession';
+import { readOkJson } from '../../services/httpUtils';
 
 export default function ForgotPassword({ showSnackbar }) {
   const [email, setEmail] = useState('');
