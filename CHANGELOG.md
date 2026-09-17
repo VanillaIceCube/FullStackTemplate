@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-09-17
+
+### Fixed
+
+- Enforced Django password validation rules on account registration in `RegisterView` to ensure consistent password strength policy during account creation and password reset.
+- Added active submission state management to authentication forms (`Login`, `Register`, `ForgotPassword`, `ResetPassword`) to disable inputs, buttons, and navigation links while asynchronous requests are pending, preventing duplicate submissions.
+- Added access token fallback from `sessionStorage` in `notificationApiClient.js` when the explicit token parameter is omitted or empty.
+
 ## 2026-08-22
 
 ### Fixed

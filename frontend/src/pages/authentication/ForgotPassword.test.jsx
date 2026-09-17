@@ -27,4 +27,31 @@ describe('ForgotPassword', () => {
     );
     expect(forgotPassword).toHaveBeenCalledWith({ email: 'mapper@example.com' });
   });
+
+  test('disables submit during pending request', async () => {
+    const showSnackbar = jest.fn();
+    let resolveForgot;
+    forgotPassword.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveForgot = resolve;
+        }),
+    );
+    renderWithProviders(<ForgotPassword showSnackbar={showSnackbar} />, {
+      routeEntries: ['/forgot-password'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    const submitBtn = screen.getByRole('button', { name: 'Send Reset Link' });
+    await userEvent.click(submitBtn);
+
+    await waitFor(() => expect(submitBtn).toBeDisabled());
+
+    resolveForgot({
+      ok: true,
+      json: async () => ({ message: 'Sent' }),
+    });
+
+    await waitFor(() => expect(showSnackbar).toHaveBeenCalledWith('success', 'Sent'));
+  });
 });

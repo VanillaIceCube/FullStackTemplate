@@ -91,6 +91,16 @@ class RegistrationTests(APITestCase):
         self.assertEqual(duplicate.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(duplicate.data["error"], "Email already exists.")
 
+    def test_register_rejects_weak_password(self):
+        response = self.client.post(
+            "/auth/register/",
+            {"email": "weak@example.com", "password": "123"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+
 
 class LoginAndRefreshTests(APITestCase):
     def setUp(self):

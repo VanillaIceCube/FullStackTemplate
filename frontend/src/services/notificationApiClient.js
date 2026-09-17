@@ -1,6 +1,15 @@
 import { apiFetch } from './requestClient';
 
-const authHeader = (token) => ({ Authorization: `Bearer ${token}` });
+function resolveToken(token) {
+  if (token) return token;
+  try {
+    return sessionStorage.getItem('accessToken') || '';
+  } catch (_err) {
+    return '';
+  }
+}
+
+const authHeader = (token) => ({ Authorization: `Bearer ${resolveToken(token)}` });
 const jsonHeaders = (token) => ({
   ...authHeader(token),
   'Content-Type': 'application/json',

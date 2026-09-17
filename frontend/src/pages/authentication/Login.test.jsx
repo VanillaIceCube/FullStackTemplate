@@ -47,4 +47,35 @@ describe('Login', () => {
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Please sign in again.');
     expect(sessionStorage.getItem('pendingSnackbar')).toBeNull();
   });
+
+  test('disables inputs and button during pending submission and recovers on failure', async () => {
+    const showSnackbar = jest.fn();
+    let resolveLogin;
+    login.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveLogin = resolve;
+        }),
+    );
+    renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+
+    const submitBtn = screen.getByRole('button', { name: 'Login' });
+    await userEvent.click(submitBtn);
+
+    await waitFor(() => expect(submitBtn).toBeDisabled());
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+    expect(screen.getByLabelText('Password')).toBeDisabled();
+
+    resolveLogin({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'Invalid credentials.' }),
+    });
+
+    await waitFor(() => expect(submitBtn).not.toBeDisabled());
+    expect(showSnackbar).toHaveBeenCalledWith('error', 'Invalid credentials.');
+  });
 });

@@ -55,4 +55,37 @@ describe('Register', () => {
     expect(register).not.toHaveBeenCalled();
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Passwords do not match.');
   });
+
+  test('disables inputs during pending registration and recovers on error', async () => {
+    const showSnackbar = jest.fn();
+    let resolveRegister;
+    register.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRegister = resolve;
+        }),
+    );
+    renderWithProviders(<Register showSnackbar={showSnackbar} />, {
+      routeEntries: ['/register'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'secret-pass-123');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'secret-pass-123');
+
+    const submitBtn = screen.getByRole('button', { name: 'Register' });
+    await userEvent.click(submitBtn);
+
+    await waitFor(() => expect(submitBtn).toBeDisabled());
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+
+    resolveRegister({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'Email already exists.' }),
+    });
+
+    await waitFor(() => expect(submitBtn).not.toBeDisabled());
+    expect(showSnackbar).toHaveBeenCalledWith('error', 'Email already exists.');
+  });
 });

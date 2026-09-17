@@ -68,4 +68,14 @@ describe('notificationApiClient', () => {
       },
     });
   });
+
+  test('falls back to sessionStorage accessToken when token argument is missing', () => {
+    sessionStorage.setItem('accessToken', 'STORED_TOKEN');
+
+    fetchNotifications();
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
+      headers: { Authorization: 'Bearer STORED_TOKEN' },
+    });
+  });
 });
