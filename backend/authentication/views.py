@@ -68,6 +68,14 @@ class RegisterView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        try:
+            validate_password(password)
+        except ValidationError as exc:
+            return Response(
+                {"error": exc.messages[0] if exc.messages else "Invalid password."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if User.objects.filter(email__iexact=email).exists():
             return Response(
                 {"error": "Email already exists."},
