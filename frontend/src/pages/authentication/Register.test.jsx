@@ -55,4 +55,40 @@ describe('Register', () => {
     expect(register).not.toHaveBeenCalled();
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Passwords do not match.');
   });
+
+  test('displays API registration error and disables controls during submit', async () => {
+    const showSnackbar = jest.fn();
+    let resolveRegister;
+    register.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRegister = resolve;
+      }),
+    );
+
+    renderWithProviders(<Register showSnackbar={showSnackbar} />, {
+      routeEntries: ['/register'],
+    });
+
+    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'short');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'short');
+
+    const submitBtn = screen.getByRole('button', { name: 'Register' });
+    userEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Registering...' })).toBeDisabled();
+    });
+
+    resolveRegister({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'This password is too short.' }),
+    });
+
+    await waitFor(() => {
+      expect(showSnackbar).toHaveBeenCalledWith('error', 'This password is too short.');
+    });
+    expect(screen.getByRole('button', { name: 'Register' })).not.toBeDisabled();
+  });
 });
