@@ -1,0 +1,5 @@
+# Otto's Journal — Backlog & Project Organization Learnings
+
+## 2026-09-18 - Offline Sandboxed Backlog Reconciliation **Learning:** In sandboxed execution environments where remote GitHub API CLI tools (`gh`) are uninstalled or restricted, backlog audit and reconciliation rely on retrieving issue/PR metadata via GitHub REST API endpoints alongside local git commit and branch logs (`origin/jules/*`, `origin/codex/*`, `origin/dependabot/*`). **Action:** Always cross-reference active agent PRs and local branch states before attempting backlog updates to prevent conflicting scope reorganizations.
+
+## 2026-09-18 - Protecting Active Specialist Implementation PRs **Learning:** Specialist implementation PRs from agents like Marty 🦀 (e.g. auth form states, password validation) and Nora 🐚 (auth session consolidation) actively address open security and structural backlog items. **Action:** Maintain active issue scopes and status alignments without altering underlying acceptance criteria while implementation PRs are actively undergoing review.
