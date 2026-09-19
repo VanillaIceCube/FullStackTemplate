@@ -35,6 +35,26 @@ describe('authSession', () => {
       );
     });
 
+    test('handles non_field_errors and field array errors', async () => {
+      const nonField = makeResponse({
+        ok: false,
+        status: 400,
+        json: async () => ({ non_field_errors: ['Invalid credentials.'] }),
+      });
+      await expect(getResponseErrorMessage(nonField, 'fallback')).resolves.toBe(
+        'Invalid credentials.',
+      );
+
+      const fieldErr = makeResponse({
+        ok: false,
+        status: 400,
+        json: async () => ({ email: ['This field is required.'] }),
+      });
+      await expect(getResponseErrorMessage(fieldErr, 'fallback')).resolves.toBe(
+        'This field is required.',
+      );
+    });
+
     test('when response json cannot be read, it returns fallback', async () => {
       const response = makeResponse({
         ok: false,
