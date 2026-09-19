@@ -6,9 +6,31 @@ async function safeReadJson(response) {
   }
 }
 
+function extractErrorString(value) {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const extracted = extractErrorString(item);
+      if (extracted) return extracted;
+    }
+  } else if (value && typeof value === 'object') {
+    if (value.error) return extractErrorString(value.error);
+    if (value.detail) return extractErrorString(value.detail);
+    if (value.non_field_errors) return extractErrorString(value.non_field_errors);
+    for (const key of Object.keys(value)) {
+      const extracted = extractErrorString(value[key]);
+      if (extracted) return extracted;
+    }
+  }
+  return null;
+}
+
 export async function getResponseErrorMessage(response, fallbackMessage) {
   const data = await safeReadJson(response);
-  return data?.error || data?.detail || fallbackMessage;
+  if (!data) return fallbackMessage;
+
+  const extracted = extractErrorString(data);
+  return extracted || fallbackMessage;
 }
 
 export async function readOkJson(response, fallbackMessage) {

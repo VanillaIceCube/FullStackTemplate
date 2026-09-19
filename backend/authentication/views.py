@@ -84,6 +84,15 @@ class RegisterView(APIView):
             base_username = email.split("@", 1)[0]
             username = _build_unique_username(base_username)
 
+        candidate_user = User(username=username, email=email)
+        try:
+            validate_password(password, user=candidate_user)
+        except ValidationError as exc:
+            return Response(
+                {"error": exc.messages[0] if exc.messages else "Invalid password."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         user = User.objects.create_user(
             username=username, email=email, password=password
         )
@@ -157,7 +166,6 @@ class ResetPasswordView(APIView):
         uid = request.data.get("uid")
         token = request.data.get("token")
         password = request.data.get("password")
-        password = password.strip() if isinstance(password, str) else password
 
         if not uid or not token or not password:
             return Response(
@@ -180,6 +188,7 @@ class ResetPasswordView(APIView):
             UnicodeDecodeError,
             ValueError,
             OverflowError,
+            ValidationError,
             User.DoesNotExist,
         ):
             user = None
