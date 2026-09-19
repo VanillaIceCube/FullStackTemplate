@@ -1,9 +1,11 @@
 import json
+from io import BytesIO
 from unittest.mock import MagicMock, patch
+from urllib.error import HTTPError
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import EmailMessage, get_connection
+from django.core.mail import EmailMessage, EmailMultiAlternatives, get_connection
 from django.test import override_settings
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -247,6 +249,88 @@ class ResendApiEmailBackendTests(APITestCase):
         payload = json.loads(request_arg.data.decode("utf-8"))
         self.assertEqual(payload["from"], "fullstacktemplate@example.com")
         self.assertEqual(payload["to"], ["mapper@example.com"])
+
+    @override_settings(
+        EMAIL_BACKEND="authentication.email_backends.ResendApiEmailBackend",
+        EMAIL_HOST_PASSWORD="resend-api-key",
+        DEFAULT_FROM_EMAIL="fullstacktemplate@example.com",
+    )
+    @patch("authentication.email_backends.request.urlopen")
+    def test_send_messages_includes_reply_to_and_html_body(self, mock_urlopen):
+        response = MagicMock()
+        response.__enter__.return_value = response
+        mock_urlopen.return_value = response
+
+        html_msg = EmailMessage(
+            "HTML Subject",
+            "<p>HTML Content</p>",
+            "from@example.com",
+            ["to@example.com"],
+            reply_to=["reply@example.com"],
+        )
+        html_msg.content_subtype = "html"
+
+        multi_msg = EmailMultiAlternatives(
+            "Multi Subject",
+            "Plain text",
+            "from@example.com",
+            ["to@example.com"],
+            cc=["cc@example.com"],
+            bcc=["bcc@example.com"],
+        )
+        multi_msg.attach_alternative("<p>Rich text</p>", "text/html")
+
+        connection = get_connection()
+        sent_count = connection.send_messages([html_msg, multi_msg])
+
+        self.assertEqual(sent_count, 2)
+        self.assertEqual(mock_urlopen.call_count, 2)
+
+        # First email checks
+        req1 = mock_urlopen.call_args_list[0].args[0]
+        payload1 = json.loads(req1.data.decode("utf-8"))
+        self.assertEqual(payload1["reply_to"], ["reply@example.com"])
+        self.assertEqual(payload1["html"], "<p>HTML Content</p>")
+        self.assertNotIn("text", payload1)
+
+        # Second email checks
+        req2 = mock_urlopen.call_args_list[1].args[0]
+        payload2 = json.loads(req2.data.decode("utf-8"))
+        self.assertEqual(payload2["cc"], ["cc@example.com"])
+        self.assertEqual(payload2["bcc"], ["bcc@example.com"])
+        self.assertEqual(payload2["text"], "Plain text")
+        self.assertEqual(payload2["html"], "<p>Rich text</p>")
+
+    @override_settings(
+        EMAIL_BACKEND="authentication.email_backends.ResendApiEmailBackend",
+        EMAIL_HOST_PASSWORD="resend-api-key",
+    )
+    @patch("authentication.email_backends.request.urlopen")
+    def test_send_messages_handles_http_errors_and_fail_silently(self, mock_urlopen):
+        error_body = json.dumps(
+            {"statusCode": 422, "message": "Invalid sender address"}
+        ).encode("utf-8")
+        http_err = HTTPError(
+            "https://api.resend.com/emails",
+            422,
+            "Unprocessable Entity",
+            {},
+            BytesIO(error_body),
+        )
+        mock_urlopen.side_effect = http_err
+
+        msg = EmailMessage("Subject", "Body", "invalid@example.com", ["to@example.com"])
+
+        # fail_silently = False (default)
+        connection = get_connection(fail_silently=False)
+        with self.assertRaises(HTTPError) as cm:
+            connection.send_messages([msg])
+        self.assertEqual(cm.exception.code, 422)
+
+        # fail_silently = True
+        silent_connection = get_connection(fail_silently=True)
+        sent_count = silent_connection.send_messages([msg])
+        self.assertEqual(sent_count, 0)
 
     @override_settings(
         EMAIL_BACKEND="authentication.email_backends.ResendApiEmailBackend",
