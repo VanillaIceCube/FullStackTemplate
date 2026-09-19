@@ -51,6 +51,8 @@ export default function AppHeader({ title, setDrawerOpen }) {
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationError, setNotificationError] = useState('');
+  const [actionPending, setActionPending] = useState(false);
+  const [pendingIds, setPendingIds] = useState(new Set());
 
   const profileUsername = safeGetSessionItem('username');
   const profileEmail = safeGetSessionItem('email');
@@ -73,7 +75,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setNotificationError('');
     try {
       const response = await fetchNotifications(accessToken);
-      if (!response.ok) throw new Error('Unable to load notifications.');
+      if (!response?.ok) throw new Error('Unable to load notifications.');
       setNotifications(await response.json());
     } catch (_error) {
       setNotificationError('Notifications are unavailable right now.');
@@ -88,30 +90,25 @@ export default function AppHeader({ title, setDrawerOpen }) {
 
   const updateNotification = async (notificationId, operation, errorMessage) => {
     setNotificationError('');
+    setPendingIds((prev) => new Set(prev).add(notificationId));
     try {
       const response = await operation(notificationId, accessToken);
-      if (!response.ok) throw new Error(errorMessage);
+      if (!response?.ok) throw new Error(errorMessage);
       return response;
     } catch (_error) {
       setNotificationError(errorMessage);
       return null;
+    } finally {
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(notificationId);
+        return next;
+      });
     }
   };
 
-  const handleMarkRead = async (notificationId) => {
-    const response = await updateNotification(
-      notificationId,
-      markNotificationRead,
-      'Could not update that notification.',
-    );
-    if (!response) return;
-    const updated = await response.json();
-    setNotifications((current) =>
-      current.map((notification) => (notification.id === updated.id ? updated : notification)),
-    );
-  };
-
   const handleClearNotification = async (notificationId) => {
+    if (pendingIds.has(notificationId) || actionPending) return;
     const response = await updateNotification(
       notificationId,
       clearNotification,
@@ -124,34 +121,66 @@ export default function AppHeader({ title, setDrawerOpen }) {
   };
 
   const handleOpenNotification = async (notification) => {
-    if (!notification.is_read) await handleMarkRead(notification.id);
-    if (notification.target_path) {
+    if (pendingIds.has(notification.id) || actionPending) return;
+    let markReadSuccess = true;
+    if (!notification.is_read) {
+      markReadSuccess = false;
+      const response = await updateNotification(
+        notification.id,
+        markNotificationRead,
+        'Could not update that notification.',
+      );
+      if (response) {
+        try {
+          const updated = await response.json();
+          if (updated && typeof updated === 'object' && updated.id) {
+            setNotifications((current) =>
+              current.map((item) => (item.id === updated.id ? updated : item)),
+            );
+            markReadSuccess = true;
+          } else {
+            setNotificationError('Could not update that notification.');
+          }
+        } catch (_error) {
+          setNotificationError('Could not update that notification.');
+        }
+      }
+    }
+    if (markReadSuccess && notification.target_path) {
       setNotificationAnchorEl(null);
       navigate(notification.target_path);
     }
   };
 
   const handleMarkAllRead = async () => {
+    if (actionPending || pendingIds.size > 0) return;
     setNotificationError('');
+    setActionPending(true);
     try {
       const response = await markAllNotificationsRead(accessToken);
-      if (!response.ok) throw new Error();
+      if (!response?.ok) throw new Error();
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, is_read: true })),
       );
     } catch (_error) {
       setNotificationError('Could not update notifications.');
+    } finally {
+      setActionPending(false);
     }
   };
 
   const handleClearAll = async () => {
+    if (actionPending || pendingIds.size > 0) return;
     setNotificationError('');
+    setActionPending(true);
     try {
       const response = await clearAllNotifications(accessToken);
-      if (!response.ok) throw new Error();
+      if (!response?.ok) throw new Error();
       setNotifications([]);
     } catch (_error) {
       setNotificationError('Could not clear notifications.');
+    } finally {
+      setActionPending(false);
     }
   };
 
@@ -209,6 +238,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
                 {notifications.length > 0 && (
                   <Button
                     size="small"
+                    disabled={actionPending || pendingIds.size > 0}
                     sx={{ color: 'var(--secondary-color)', fontWeight: 'bold' }}
                     onClick={unreadCount > 0 ? handleMarkAllRead : handleClearAll}
                   >
@@ -222,66 +252,85 @@ export default function AppHeader({ title, setDrawerOpen }) {
                   <CircularProgress size={24} />
                 </Box>
               )}
-              {!notificationsLoading && notificationError && (
-                <Typography role="status" variant="body2" sx={{ py: 2 }}>
-                  {notificationError}
-                </Typography>
+              {!notificationsLoading && notificationError && notifications.length === 0 && (
+                <Stack spacing={1} sx={{ py: 2, alignItems: 'flex-start' }}>
+                  <Typography role="status" variant="body2">
+                    {notificationError}
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="inherit"
+                    onClick={loadNotifications}
+                  >
+                    Retry
+                  </Button>
+                </Stack>
               )}
               {!notificationsLoading && !notificationError && notifications.length === 0 && (
                 <Typography variant="body2">No notifications yet.</Typography>
               )}
-              {!notificationsLoading && !notificationError && notifications.length > 0 && (
-                <List dense disablePadding sx={{ maxHeight: 360, overflowY: 'auto' }}>
-                  {notifications.map((notification, index) => (
-                    <ListItem
-                      key={notification.id}
-                      disablePadding
-                      divider={index < notifications.length - 1}
-                    >
-                      <ListItemButton
-                        onClick={() => handleOpenNotification(notification)}
-                        sx={{
-                          alignItems: 'flex-start',
-                          bgcolor: notification.is_read ? 'transparent' : 'rgba(0, 0, 0, 0.06)',
-                        }}
+              {!notificationsLoading && notifications.length > 0 && (
+                <>
+                  {notificationError && (
+                    <Typography role="status" variant="body2" sx={{ pb: 1, color: 'error.main' }}>
+                      {notificationError}
+                    </Typography>
+                  )}
+                  <List dense disablePadding sx={{ maxHeight: 360, overflowY: 'auto' }}>
+                    {notifications.map((notification, index) => (
+                      <ListItem
+                        key={notification.id}
+                        disablePadding
+                        divider={index < notifications.length - 1}
                       >
-                        <ListItemText
-                          primary={notification.title}
-                          secondary={notification.message}
-                          slotProps={{
-                            primary: {
-                              sx: {
-                                color: 'var(--secondary-color)',
-                                fontWeight: notification.is_read ? 500 : 'bold',
-                              },
-                            },
-                            secondary: { sx: { color: 'var(--secondary-color)' } },
+                        <ListItemButton
+                          disabled={actionPending || pendingIds.has(notification.id)}
+                          onClick={() => handleOpenNotification(notification)}
+                          sx={{
+                            alignItems: 'flex-start',
+                            bgcolor: notification.is_read ? 'transparent' : 'rgba(0, 0, 0, 0.06)',
                           }}
-                        />
-                        <Tooltip title="Clear notification">
-                          <IconButton
-                            aria-label="Clear notification"
-                            size="small"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleClearNotification(notification.id);
+                        >
+                          <ListItemText
+                            primary={notification.title}
+                            secondary={notification.message}
+                            slotProps={{
+                              primary: {
+                                sx: {
+                                  color: 'var(--secondary-color)',
+                                  fontWeight: notification.is_read ? 500 : 'bold',
+                                },
+                              },
+                              secondary: { sx: { color: 'var(--secondary-color)' } },
                             }}
-                            sx={{
-                              width: 40,
-                              height: 40,
-                              ml: 1,
-                              alignSelf: 'center',
-                              flexShrink: 0,
-                              color: 'var(--secondary-color)',
-                            }}
-                          >
-                            <ClearIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </List>
+                          />
+                          <Tooltip title="Clear notification">
+                            <IconButton
+                              aria-label="Clear notification"
+                              size="small"
+                              disabled={actionPending || pendingIds.has(notification.id)}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleClearNotification(notification.id);
+                              }}
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                ml: 1,
+                                alignSelf: 'center',
+                                flexShrink: 0,
+                                color: 'var(--secondary-color)',
+                              }}
+                            >
+                              <ClearIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </>
               )}
             </Box>
           </Popover>
