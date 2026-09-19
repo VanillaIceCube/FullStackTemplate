@@ -171,4 +171,42 @@ describe('AppHeader', () => {
     await user.click(screen.getByLabelText('Clear notification'));
     await waitFor(() => expect(screen.queryByText('Notification 1')).not.toBeInTheDocument());
   });
+
+  test('does not navigate to target_path when markNotificationRead fails or returns malformed response', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Notification with path',
+          message: 'Target path test',
+          is_read: false,
+          target_path: '/target-route',
+        },
+      ]),
+    );
+
+    // Case 1: markNotificationRead request fails (ok: false)
+    markNotificationRead.mockResolvedValueOnce(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />, {
+      routeEntries: ['/'],
+    });
+
+    await user.click(screen.getByLabelText('notifications'));
+    expect(await screen.findByText('Notification with path')).toBeInTheDocument();
+
+    await user.click(screen.getByText('Notification with path'));
+    expect(await screen.findByText('Could not update that notification.')).toBeInTheDocument();
+
+    // Case 2: markNotificationRead returns non-OK or malformed JSON
+    markNotificationRead.mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn().mockRejectedValueOnce(new Error('Invalid JSON')),
+    });
+
+    await user.click(screen.getByText('Notification with path'));
+    expect(await screen.findByText('Could not update that notification.')).toBeInTheDocument();
+  });
 });

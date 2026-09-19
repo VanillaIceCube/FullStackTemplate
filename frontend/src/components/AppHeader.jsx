@@ -75,7 +75,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setNotificationError('');
     try {
       const response = await fetchNotifications(accessToken);
-      if (!response.ok) throw new Error('Unable to load notifications.');
+      if (!response?.ok) throw new Error('Unable to load notifications.');
       setNotifications(await response.json());
     } catch (_error) {
       setNotificationError('Notifications are unavailable right now.');
@@ -93,7 +93,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setPendingIds((prev) => new Set(prev).add(notificationId));
     try {
       const response = await operation(notificationId, accessToken);
-      if (!response.ok) throw new Error(errorMessage);
+      if (!response?.ok) throw new Error(errorMessage);
       return response;
     } catch (_error) {
       setNotificationError(errorMessage);
@@ -122,20 +122,31 @@ export default function AppHeader({ title, setDrawerOpen }) {
 
   const handleOpenNotification = async (notification) => {
     if (pendingIds.has(notification.id) || actionPending) return;
+    let markReadSuccess = true;
     if (!notification.is_read) {
+      markReadSuccess = false;
       const response = await updateNotification(
         notification.id,
         markNotificationRead,
         'Could not update that notification.',
       );
       if (response) {
-        const updated = await response.json();
-        setNotifications((current) =>
-          current.map((item) => (item.id === updated.id ? updated : item)),
-        );
+        try {
+          const updated = await response.json();
+          if (updated && typeof updated === 'object' && updated.id) {
+            setNotifications((current) =>
+              current.map((item) => (item.id === updated.id ? updated : item)),
+            );
+            markReadSuccess = true;
+          } else {
+            setNotificationError('Could not update that notification.');
+          }
+        } catch (_error) {
+          setNotificationError('Could not update that notification.');
+        }
       }
     }
-    if (notification.target_path) {
+    if (markReadSuccess && notification.target_path) {
       setNotificationAnchorEl(null);
       navigate(notification.target_path);
     }
@@ -147,7 +158,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setActionPending(true);
     try {
       const response = await markAllNotificationsRead(accessToken);
-      if (!response.ok) throw new Error();
+      if (!response?.ok) throw new Error();
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, is_read: true })),
       );
@@ -164,7 +175,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
     setActionPending(true);
     try {
       const response = await clearAllNotifications(accessToken);
-      if (!response.ok) throw new Error();
+      if (!response?.ok) throw new Error();
       setNotifications([]);
     } catch (_error) {
       setNotificationError('Could not clear notifications.');
