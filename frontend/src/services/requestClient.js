@@ -123,26 +123,41 @@ async function refreshAccessToken() {
 
 export function normalizeHeaders(headers) {
   if (!headers) return {};
+  const result = {};
   if (typeof Headers !== 'undefined' && headers instanceof Headers) {
-    const result = {};
     headers.forEach((value, key) => {
-      result[key] = value;
+      if (value !== undefined && value !== null) {
+        result[key] = value;
+      }
     });
     return result;
   }
   if (Array.isArray(headers)) {
-    return Object.fromEntries(headers);
+    headers.forEach(([key, value]) => {
+      if (key && value !== undefined && value !== null) {
+        result[key] = value;
+      }
+    });
+    return result;
   }
-  return { ...headers };
+  Object.entries(headers).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      result[key] = value;
+    }
+  });
+  return result;
 }
 
 function hasAuthorizationHeader(headers) {
-  return Object.keys(headers).some((key) => key.toLowerCase() === 'authorization');
+  return Object.entries(headers).some(
+    ([key, value]) => key.toLowerCase() === 'authorization' && Boolean(value),
+  );
 }
 
 function getStoredAccessToken() {
   try {
-    return sessionStorage.getItem('accessToken') || null;
+    const token = sessionStorage.getItem('accessToken');
+    return typeof token === 'string' && token.trim() ? token.trim() : null;
   } catch (_err) {
     return null;
   }
