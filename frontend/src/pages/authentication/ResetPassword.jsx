@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AuthPageShell from '../../components/AuthPageShell';
 import { resetPassword } from '../../services/authApiClient';
-import { readOkJson } from '../../services/authSession';
+import { readOkJson } from '../../services/httpUtils';
 
 export default function ResetPassword({ showSnackbar }) {
   const [password, setPassword] = useState('');

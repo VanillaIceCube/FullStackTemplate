@@ -1,27 +1,16 @@
-async function safeReadJson(response) {
+import { getResponseErrorMessage, readOkJson } from './httpUtils';
+
+export { getResponseErrorMessage, readOkJson };
+
+export function clearAuthSession() {
   try {
-    return await response.json();
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('email');
   } catch (_err) {
-    return null;
+    // Ignore non-browser / blocked storage environments.
   }
-}
-
-export async function getResponseErrorMessage(response, fallbackMessage) {
-  const data = await safeReadJson(response);
-  return data?.error || data?.detail || fallbackMessage;
-}
-
-export async function readOkJson(response, fallbackMessage) {
-  if (!response?.ok) {
-    const message = await getResponseErrorMessage(response, `HTTP ${response?.status ?? 'error'}`);
-    throw new Error(message);
-  }
-
-  const data = await safeReadJson(response);
-  if (!data) {
-    throw new Error(fallbackMessage);
-  }
-  return data;
 }
 
 export function persistAuthSession(data) {

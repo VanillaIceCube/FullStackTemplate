@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthPageShell from '../../components/AuthPageShell';
 import { register } from '../../services/authApiClient';
-import { persistAuthSession, readOkJson } from '../../services/authSession';
+import { persistAuthSession } from '../../services/authSession';
+import { readOkJson } from '../../services/httpUtils';
 
 export default function Register({ showSnackbar }) {
   const [email, setEmail] = useState('');
