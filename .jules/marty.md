@@ -1,3 +1,5 @@
-# Marty the Crab - Learnings Journal
+# Marty's Journal
 
 ## 2026-09-08 - Notification State and Transaction Concurrency Guard **Learning:** Bulk notification operations (`mark_all_read` and `clear_all`) require database transaction isolation (`transaction.atomic()`), and frontend notification popovers need per-notification action state tracking (`pendingIds`) to prevent duplicate clicks and race conditions. **Action:** Always wrap DRF bulk update/delete actions in `transaction.atomic()` and disable notification buttons during pending async updates.
+
+## 2026-09-06 - Resend API Email Backend Error Handling & Payload Formatting **Learning:** In Python's `urllib.request.urlopen`, non-2xx status responses raise `urllib.error.HTTPError` directly before entering the context manager block, making status code checks inside `with request.urlopen` unreachable for HTTP errors. Additionally, Django `EmailMessage` instances using `content_subtype = "html"` or `reply_to` require explicit payload mapping for the Resend API. **Action:** Future runs touching `ResendApiEmailBackend` or custom urllib-based API clients should wrap `request.urlopen` in a `try...except error.HTTPError` block to catch and parse error response bodies, and verify `reply_to` and `content_subtype` payload bindings.
