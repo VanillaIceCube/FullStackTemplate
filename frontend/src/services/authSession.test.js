@@ -126,11 +126,18 @@ describe('authSession', () => {
       expect(sessionStorage.getItem('email')).toBe('e@example.com');
     });
 
-    test('when username/email are missing or empty, it removes pre-existing stale session items', () => {
-      sessionStorage.setItem('username', 'stale-user');
+    test('when username/email are missing, it does not store "undefined"', () => {
+      persistAuthSession({ access: 'A', refresh: 'R', username: undefined, email: undefined });
+
+      expect(sessionStorage.getItem('username')).toBeNull();
+      expect(sessionStorage.getItem('email')).toBeNull();
+    });
+
+    test('when profile fields are missing or empty, it removes existing stale profile keys', () => {
+      sessionStorage.setItem('username', 'staleUser');
       sessionStorage.setItem('email', 'stale@example.com');
 
-      persistAuthSession({ access: 'A', refresh: 'R', username: undefined, email: '' });
+      persistAuthSession({ access: 'A', refresh: 'R', username: '', email: '   ' });
 
       expect(sessionStorage.getItem('username')).toBeNull();
       expect(sessionStorage.getItem('email')).toBeNull();

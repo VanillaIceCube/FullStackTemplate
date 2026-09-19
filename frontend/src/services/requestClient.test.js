@@ -223,4 +223,83 @@ describe('requestClient', () => {
 
     window.location = originalLocation;
   });
+
+  test('normalizeHeaders correctly normalizes various header formats', async () => {
+    const { normalizeHeaders } = await import('./requestClient');
+
+    expect(normalizeHeaders(null)).toEqual({});
+    expect(normalizeHeaders({ 'Content-Type': 'application/json' })).toEqual({
+      'Content-Type': 'application/json',
+    });
+    expect(
+      normalizeHeaders([
+        ['Content-Type', 'application/json'],
+        ['X-Custom', 'value'],
+      ]),
+    ).toEqual({
+      'Content-Type': 'application/json',
+      'X-Custom': 'value',
+    });
+
+    const headersInstance = new Headers();
+    headersInstance.append('Content-Type', 'application/json');
+    headersInstance.append('X-Custom', 'value');
+    expect(normalizeHeaders(headersInstance)).toEqual({
+      'content-type': 'application/json',
+      'x-custom': 'value',
+    });
+  });
+
+  test('preserves Headers instance entries when retrying after access token refresh', async () => {
+    delete process.env.REACT_APP_API_BASE_URL;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 401 })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ access: 'NEW_ACCESS' }),
+      })
+      .mockResolvedValueOnce({ ok: true, status: 200 });
+
+    sessionStorage.setItem('accessToken', 'OLD_ACCESS');
+    sessionStorage.setItem('refreshToken', 'REFRESH');
+
+    const { apiFetch } = await import('./requestClient');
+
+    const customHeaders = new Headers();
+    customHeaders.append('Content-Type', 'application/json');
+    customHeaders.append('X-Custom-Header', 'custom-value');
+
+    const response = await apiFetch('/api/custom/', {
+      method: 'POST',
+      headers: customHeaders,
+    });
+
+    expect(response.ok).toBe(true);
+    expect(global.fetch).toHaveBeenLastCalledWith('http://localhost:8000/api/custom/', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-custom-header': 'custom-value',
+        Authorization: 'Bearer NEW_ACCESS',
+      },
+    });
+  });
+
+  test('automatically attaches stored accessToken when not provided in headers', async () => {
+    delete process.env.REACT_APP_API_BASE_URL;
+    sessionStorage.setItem('accessToken', 'STORED_ACCESS');
+
+    const { apiFetch } = await import('./requestClient');
+
+    await apiFetch('/api/protected/', { method: 'GET' });
+
+    expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/protected/', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer STORED_ACCESS',
+      },
+    });
+  });
 });
