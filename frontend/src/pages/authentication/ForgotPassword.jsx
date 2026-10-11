@@ -1,7 +1,7 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthPageShell from '../../components/AuthPageShell';
+import AuthPageShell from '../../components/authentication/AuthPageShell';
 import { forgotPassword } from '../../services/authApiClient';
 import { readOkJson } from '../../services/authSession';
 
