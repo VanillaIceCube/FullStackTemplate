@@ -45,4 +45,37 @@ describe('ResetPassword', () => {
     expect(resetPassword).not.toHaveBeenCalled();
     expect(showSnackbar).toHaveBeenCalledWith('error', 'Invalid or expired reset link.');
   });
+
+  test('disables controls and button during submission', async () => {
+    const showSnackbar = jest.fn();
+    let resolveReset;
+    resetPassword.mockReturnValue(
+      new Promise((resolve) => {
+        resolveReset = resolve;
+      }),
+    );
+
+    renderWithProviders(<ResetPassword showSnackbar={showSnackbar} />, {
+      routeEntries: ['/reset-password?uid=user-id&token=reset-token'],
+    });
+
+    await userEvent.type(screen.getByLabelText('New Password'), 'new-secret');
+    await userEvent.type(screen.getByLabelText('Confirm Password'), 'new-secret');
+
+    const submitBtn = screen.getByRole('button', { name: 'Reset Password' });
+    userEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Resetting...' })).toBeDisabled();
+    });
+
+    resolveReset({
+      ok: true,
+      json: async () => ({ message: 'Password reset successful.' }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Reset Password' })).not.toBeDisabled();
+    });
+  });
 });
