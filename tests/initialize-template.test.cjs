@@ -45,7 +45,9 @@ test('initializes Vite/flat ESLint files, runtime assets, package metadata and D
   assert.match(read('frontend/Dockerfile'), /ARG VITE_API_BASE_URL/);
   assert.match(read('frontend/Dockerfile'), /\/frontend\/dist/);
   assert.match(read('deploy/docker-compose.dev.yml'), /VITE_API_BASE_URL:/);
-  assert.ok(read('AGENTS.md').includes('https://sample-atlas.example.net'));
+  const productionLine = read('AGENTS.md').split(/\r?\n/)
+    .find((line) => line.startsWith('Production is designed for'));
+  assert.equal(new URL(productionLine.split('`')[1]).origin, 'https://sample-atlas.example.net');
   assert.equal(fs.existsSync(path.join(destination, 'frontend/public/sample-atlas-mark.svg')), true);
   assert.equal(fs.existsSync(path.join(destination, 'frontend/src/__tests__/SampleAtlasThemeStyles.test.js')), true);
   assert.equal(JSON.parse(read('frontend/package.json')).dependencies['react-scripts'], undefined);

@@ -198,7 +198,9 @@ repository automation tests. The current reviewed action revision is
 
 ## Vite frontend and template checks
 
-The frontend test gate runs Vitest and the production Vite build as one failure
-gate. Automation coverage includes the PowerShell template initializer, whose
+The frontend test gate runs Vitest, the production Vite build, and an initialized
+sample-app Docker image/SPA smoke test as one failure gate. The container test
+uses random local-only images/containers and loopback ports, then removes only
+its own resources. Automation coverage includes the PowerShell template initializer, whose
 `.mjs`/`.cjs` branding support is required by Vite and flat ESLint. The browser
 API variable is `VITE_API_BASE_URL`; never publish secrets through Vite env.
