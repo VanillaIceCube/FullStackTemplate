@@ -89,3 +89,9 @@ Review `deploy/nginx-proxy.conf`, the deploy workflow, Cloudflare settings, and 
 The copied Notoli automation includes lint, tests, CodeQL, dependency review, npm malware review, Dependabot auto-merge, AI PR reviewers, deployment, and scheduled security-alert aggregation.
 
 Secret-dependent workflows must fail visibly when their credentials are unavailable. Keep GitHub App permissions and the credential separation described in `.github/README-WORKFLOWS.md`.
+
+## Jules recurring agents
+
+Nora and Marty use the [v3 operating rules](.jules/README.md): at most one open
+PR per agent per repository. Repeat runs maintain the existing PR, integrate
+current main, and verify its latest head instead of opening another PR.
