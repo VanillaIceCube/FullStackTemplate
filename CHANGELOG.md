@@ -4,6 +4,24 @@ All notable changes to this project are documented in this file.
 
 ## 2026-10-18
 
+### Added
+
+- Added pinned Infrastructure release tools, parity checks, app-only policy,
+  private immutable bundles, recovery tests, and explicit onboarding guidance.
+- Verify generated apps preserve canonical shared-source metadata and hashes.
+
+### Changed
+
+- Separated local HTTPS/proxy fixtures from production ownership and stopped
+  trusting forwarded Host in favor of the gateway's canonical Host.
+
+### Removed
+
+- Removed production certificate uploads, shared-proxy lifecycle, mutable-image
+  activation, and host-wide Docker pruning from the template deploy workflow.
+
+## 2026-10-18
+
 ### Changed
 
 - Replaced Create React App with the shared Vite/React-plugin build baseline,

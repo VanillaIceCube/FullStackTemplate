@@ -81,9 +81,11 @@ Production is designed for `https://app.example.com` behind Cloudflare and an or
 - Notification and future application APIs: `/api/`
 - GitHub deployment branch: `env-prod`
 - GHCR images: `fullstacktemplate-backend` and `fullstacktemplate-frontend`
-- Suggested deployment path: `/root/apps/fullstacktemplate`
+- Suggested deployment path: `/opt/apps/fullstacktemplate`
 
-Review `deploy/nginx-proxy.conf`, the deploy workflow, Cloudflare settings, and all allowlist/base-URL variables whenever domains or routes change.
+Review Infrastructure gateway/vhosts, app release policy, Cloudflare settings,
+and allowlist/base-URL variables whenever domains or routes change. The local
+proxy/Compose files are not production release inputs.
 
 ## GitHub automation
 The copied Notoli automation includes lint, tests, CodeQL, dependency review, npm malware review, Dependabot auto-merge, AI PR reviewers, deployment, and scheduled security-alert aggregation.
@@ -93,3 +95,10 @@ Secret-dependent workflows must fail visibly when their credentials are unavaila
 Frontend tooling uses Vite 8, Vitest 5/jsdom, and ESLint 10 flat configuration.
 Build output is `frontend/dist/`. Keep Docker, CI, `VITE_API_BASE_URL`, and
 template-initializer coverage aligned; see `docs/FRONTEND-ALIGNMENT.md`.
+
+Production release ownership follows `deploy/production/README.md`. Common
+release code/tests/checker/workflow are pinned to Infrastructure in
+`deploy/shared-source.json`; update the shared source and synchronize consumers,
+never edit only a vendored copy. Keep new-app onboarding/capacity and live
+activation separate from source review. Initializer changes must preserve
+canonical shared-source metadata and hash-verified files.

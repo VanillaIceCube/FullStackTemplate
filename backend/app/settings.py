@@ -36,7 +36,7 @@ if extra_hosts:
     ALLOWED_HOSTS.extend(extra_hosts.split(","))
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_HOST = False
 
 FORCE_SCRIPT_NAME = os.getenv("DJANGO_FORCE_SCRIPT_NAME")
 if FORCE_SCRIPT_NAME:
