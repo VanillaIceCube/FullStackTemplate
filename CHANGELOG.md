@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-10-17
+### Removed
+- Retire the recurring Jules Kris upstream-curation role, delete its external schedule, and preserve the evidence and remaining findings through explicit tickets.
+
 ## 2026-08-22
 
 ### Fixed
