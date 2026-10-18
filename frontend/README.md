@@ -87,3 +87,7 @@ npm run build
 React Router 7 exposes its DOM entry point through the `react-router/dom`
 package subpath. The CRA test setup maps that subpath for Jest and provides
 the text encoder globals required by the router's DOM exports.
+
+Keep the direct `react` and `react-dom` dependency ranges on the same release
+line (currently `^19.3.0`) and resolve both to matching versions in the lockfile.
+After an upgrade, run the frontend tests and production build together.
