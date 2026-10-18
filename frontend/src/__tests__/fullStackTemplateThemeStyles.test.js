@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
+const sourceDirectory = path.resolve('src');
 
 describe('FullStackTemplate theme styles', () => {
-  const appCss = fs.readFileSync(path.join(__dirname, '../App.css'), 'utf8');
+  const appCss = fs.readFileSync(path.join(sourceDirectory, 'App.css'), 'utf8');
   const readSource = (relativePath) =>
-    fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8');
+    fs.readFileSync(path.join(sourceDirectory, relativePath), 'utf8');
 
   test('keeps the exact Notoli yellow and gray theme tokens', () => {
     expect(appCss).toContain('--background-color: #1a1a1a');

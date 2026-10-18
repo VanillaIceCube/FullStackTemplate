@@ -56,7 +56,7 @@ Optional backend variables:
 
 Optional frontend variable:
 
-- `REACT_APP_API_BASE_URL` (development default: `http://localhost:8000`; leave blank in same-origin production)
+- `VITE_API_BASE_URL` (development default: `http://localhost:8000`; leave blank in same-origin production)
 
 ## Checks
 Run checks in proportion to the change:
@@ -89,3 +89,7 @@ Review `deploy/nginx-proxy.conf`, the deploy workflow, Cloudflare settings, and 
 The copied Notoli automation includes lint, tests, CodeQL, dependency review, npm malware review, Dependabot auto-merge, AI PR reviewers, deployment, and scheduled security-alert aggregation.
 
 Secret-dependent workflows must fail visibly when their credentials are unavailable. Keep GitHub App permissions and the credential separation described in `.github/README-WORKFLOWS.md`.
+
+Frontend tooling uses Vite 8, Vitest 5/jsdom, and ESLint 10 flat configuration.
+Build output is `frontend/dist/`. Keep Docker, CI, `VITE_API_BASE_URL`, and
+template-initializer coverage aligned; see `docs/FRONTEND-ALIGNMENT.md`.

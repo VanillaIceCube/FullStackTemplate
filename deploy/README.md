@@ -46,10 +46,10 @@ DJANGO_EMAIL_HOST_USER=resend
 DJANGO_EMAIL_TIMEOUT=10
 DJANGO_DEFAULT_FROM_EMAIL=Example Application <no-reply@updates.example.com>
 
-REACT_APP_API_BASE_URL=
+VITE_API_BASE_URL=
 ```
 
-Keep `REACT_APP_API_BASE_URL` blank for same-origin requests. The email host,
+Keep `VITE_API_BASE_URL` blank for same-origin requests. The email host,
 port, TLS, and username values are only used if you switch to Django’s SMTP
 backend; retaining them makes that change straightforward.
 
@@ -222,3 +222,10 @@ SQLite persists at `deploy/db.sqlite3` locally and in the deployment directory
 on the server. Back up that file before destructive server maintenance. For
 larger applications, replace SQLite with a managed database before scaling to
 multiple backend replicas.
+
+## Vite build interface
+
+The frontend Docker build accepts `VITE_API_BASE_URL` and copies `dist/` into
+Nginx. The development Compose file uses the same variable and explicit Vite
+polling. Blank production API origins retain same-origin routing. See
+[frontend alignment](../docs/FRONTEND-ALIGNMENT.md).

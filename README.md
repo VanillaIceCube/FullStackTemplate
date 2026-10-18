@@ -101,7 +101,7 @@ Review the initializer diff, replace the starter SVG mark, then complete the
 GitHub settings above before opening the first PR.
 
 ## What is included
-- React 19, Create React App, Material UI, and a responsive application shell
+- React 19, Vite, Material UI, and a responsive application shell
 - Django REST Framework, custom user model, and versioned migrations
 - Email-first registration and JWT login/refresh
 - Forgot-password and tokenized reset email delivery through Resend
@@ -168,7 +168,7 @@ Use the production Compose workflow above when testing the HTTPS proxy and
 deployment-shaped containers.
 
 ## Run without Docker
-Requirements: Python 3.12 and Node.js 25. Docker remains the simplest option
+Requirements: Python 3.12 and Node.js 24.15 or newer. Docker remains the simplest option
 when those exact versions are not already installed.
 
 Backend:
@@ -204,7 +204,7 @@ python manage.py makemigrations --check --dry-run
 python manage.py test
 
 Set-Location ..
-node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js `
+node --test tests/*.test.cjs .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js `
   .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js `
   .github/actions/publish-ai-review/publish-ai-review.test.js `
   .github/actions/security-alerts/sync-security-alerts.test.js
@@ -245,3 +245,6 @@ FullStackTemplate uses the
 [Modified MIT License (Non-Commercial Use Only)](LICENSE.md). It permits use,
 copying, modification, and distribution for non-commercial purposes; commercial
 use requires separate permission from the copyright holder.
+
+Frontend builds now use Vite/Vitest with the same baseline as MacroMapper and
+Notoli. See [the cross-app alignment and upgrade guide](docs/FRONTEND-ALIGNMENT.md).

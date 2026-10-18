@@ -139,7 +139,7 @@ Repository variables:
 - `DJANGO_ALLOWED_HOSTS`, `DJANGO_CORS_ALLOWED_ORIGINS`, `DJANGO_CSRF_TRUSTED_ORIGINS`
 - optional `DJANGO_FORCE_SCRIPT_NAME`
 - `DJANGO_FRONTEND_BASE_URL`, `DJANGO_EMAIL_BACKEND`, `DJANGO_EMAIL_TIMEOUT`, `DJANGO_DEFAULT_FROM_EMAIL`
-- optional `REACT_APP_API_BASE_URL`
+- optional `VITE_API_BASE_URL`
 
 Repository secrets:
 
@@ -195,3 +195,10 @@ security-alert workflow assertion in
 `.github/actions/security-alerts/sync-security-alerts.test.js` and rerun the
 repository automation tests. The current reviewed action revision is
 `64ab729a6294000f5aa4a4bc0b73d1f32bc45510` (v3.3.0).
+
+## Vite frontend and template checks
+
+The frontend test gate runs Vitest and the production Vite build as one failure
+gate. Automation coverage includes the PowerShell template initializer, whose
+`.mjs`/`.cjs` branding support is required by Vite and flat ESLint. The browser
+API variable is `VITE_API_BASE_URL`; never publish secrets through Vite env.

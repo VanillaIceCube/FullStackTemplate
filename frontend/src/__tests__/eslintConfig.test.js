@@ -1,8 +1,11 @@
-const path = require('path');
+import { ESLint } from 'eslint';
 
-test('eslint config uses the Create React App presets', () => {
-  const configPath = path.resolve(__dirname, '../../.eslintrc.js');
-  const eslintConfig = require(configPath);
-
-  expect(eslintConfig.extends).toEqual(['react-app', 'react-app/jest']);
+test('flat lint config parses JSX and rejects undefined application variables', async () => {
+  const eslint = new ESLint();
+  const [result] = await eslint.lintText(
+    'export default function Probe() { return <button type="button">{missingName}</button>; }',
+    { filePath: 'src/Probe.jsx' },
+  );
+  expect(result.messages.map(({ ruleId }) => ruleId)).toContain('no-undef');
+  expect(result.messages.every(({ fatal }) => !fatal)).toBe(true);
 });

@@ -58,6 +58,8 @@ jobs:
               - '.github/actions/openai-chat/**'
               - '.github/actions/publish-ai-review/**'
               - '.github/actions/security-alerts/**'
+              - 'scripts/**'
+              - 'tests/**'
               - '.github/workflows/gate-test.yml'
               - '.github/workflows/review-build.yml'
               - '.github/workflows/review-code.yml'
@@ -112,7 +114,7 @@ jobs:
         run: |
           set -o pipefail
           status=0
-          npm test 2>&1 | tee test_output.txt || status=$?
+          { npm test && npm run build; } 2>&1 | tee test_output.txt || status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
 
       - name: Test summary
@@ -237,7 +239,7 @@ jobs:
         run: |
           set -o pipefail
           status=0
-          node --test \
+          node --test tests/*.test.cjs \
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
             .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js \
             .github/actions/publish-ai-review/publish-ai-review.test.js \

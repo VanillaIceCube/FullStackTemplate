@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file.
 
 ## 2026-10-18
 
+### Changed
+
+- Replaced Create React App with the shared Vite/React-plugin build baseline,
+  Vitest/jsdom tests, and supported ESLint 10 plugins; updated Docker, API-base
+  configuration, CI build coverage, and template initialization together.
+- Documented cross-app Vite conventions and the upgrade path for derived apps.
+
+## 2026-10-18
+
 ### Fixed
 
 - Upgraded Material UI and icons together, migrated removed layout system props

@@ -27,6 +27,7 @@ if ([string]::IsNullOrWhiteSpace($compactName)) {
 
 $upperSlug = ($ApplicationSlug -replace '-', '_').ToUpperInvariant()
 $replacementPairs = @(
+    [pscustomobject]@{ Old = 'Full Stack Template'; New = $compactName },
     [pscustomobject]@{ Old = 'FullStackTemplate'; New = $compactName },
     [pscustomobject]@{ Old = 'fullstacktemplate'; New = $ApplicationSlug },
     [pscustomobject]@{ Old = 'FULLSTACKTEMPLATE'; New = $upperSlug },
@@ -36,10 +37,10 @@ $replacementPairs = @(
 
 $excludedDirectories = @('.git', 'node_modules', '.venv', 'venv', 'dist', 'build', 'coverage')
 $textExtensions = @(
-    '.css', '.env', '.html', '.js', '.jsx', '.json', '.md', '.ps1', '.py',
+    '.css', '.env', '.html', '.js', '.jsx', '.mjs', '.cjs', '.json', '.md', '.ps1', '.py',
     '.svg', '.txt', '.yaml', '.yml'
 )
-$explicitTextNames = @('.gitignore', 'Dockerfile')
+$explicitTextNames = @('.gitignore', 'Dockerfile', 'Dockerfile.dev')
 
 $files = Get-ChildItem -LiteralPath $repoRoot -Recurse -File -Force | Where-Object {
     $relativePath = $_.FullName.Substring($repoRoot.Length).TrimStart([char[]]@('\', '/'))
