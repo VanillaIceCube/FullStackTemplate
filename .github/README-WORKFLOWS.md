@@ -189,3 +189,9 @@ creating the ruleset.
 node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js .github/actions/publish-ai-review/publish-ai-review.test.js .github/actions/security-alerts/sync-security-alerts.test.js
 docker run --rm -v "${PWD}:/repo" --workdir /repo rhysd/actionlint:latest -color
 ```
+
+When updating the pinned `actions/create-github-app-token` revision, update the
+security-alert workflow assertion in
+`.github/actions/security-alerts/sync-security-alerts.test.js` and rerun the
+repository automation tests. The current reviewed action revision is
+`64ab729a6294000f5aa4a4bc0b73d1f32bc45510` (v3.3.0).
