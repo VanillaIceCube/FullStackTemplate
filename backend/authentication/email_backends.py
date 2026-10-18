@@ -36,16 +36,21 @@ class ResendApiEmailBackend(BaseEmailBackend):
             "from": message.from_email or settings.DEFAULT_FROM_EMAIL,
             "to": message.to,
             "subject": message.subject,
-            "text": message.body,
         }
         if message.cc:
             payload["cc"] = message.cc
         if message.bcc:
             payload["bcc"] = message.bcc
+        if message.reply_to:
+            payload["reply_to"] = message.reply_to
 
         html_body = self._get_html_body(message)
         if html_body:
             payload["html"] = html_body
+            if getattr(message, "content_subtype", None) != "html" and message.body:
+                payload["text"] = message.body
+        elif message.body:
+            payload["text"] = message.body
 
         http_request = request.Request(
             self.api_url,
@@ -59,26 +64,26 @@ class ResendApiEmailBackend(BaseEmailBackend):
             method="POST",
         )
         timeout = getattr(settings, "EMAIL_TIMEOUT", None)
-        with request.urlopen(http_request, timeout=timeout) as response:
-            status = response.getcode()
-            if 200 <= status < 300:
+        try:
+            with request.urlopen(http_request, timeout=timeout):
                 return
-
-            response_body = response.read().decode("utf-8", errors="replace")
+        except error.HTTPError as exc:
+            response_body = exc.read().decode("utf-8", errors="replace")
             raise error.HTTPError(
                 self.api_url,
-                status,
+                exc.code,
                 response_body,
-                response.headers,
+                exc.headers,
                 None,
-            )
+            ) from exc
 
     def _get_html_body(self, message):
-        if not isinstance(message, EmailMultiAlternatives):
-            return None
+        if getattr(message, "content_subtype", None) == "html":
+            return message.body
 
-        for content, mimetype in message.alternatives:
-            if mimetype == "text/html":
-                return content
+        if isinstance(message, EmailMultiAlternatives):
+            for content, mimetype in message.alternatives:
+                if mimetype == "text/html":
+                    return content
 
         return None
