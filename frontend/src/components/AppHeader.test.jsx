@@ -94,6 +94,23 @@ describe('AppHeader', () => {
     expect(logout).toHaveBeenCalled();
   });
 
+  test('supports profile menu keyboard navigation, dismissal, and logout', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await user.click(screen.getByLabelText('user profile'));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    await user.keyboard('{End}');
+    expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveFocus();
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    expect(logout).not.toHaveBeenCalled();
+
+    await user.click(screen.getByLabelText('user profile'));
+    await user.keyboard('{End}{Enter}');
+    expect(logout).toHaveBeenCalledTimes(1);
+  });
+
   test('renders generic notifications without workspace context', async () => {
     const user = userEvent.setup();
     sessionStorage.setItem('accessToken', 'access');

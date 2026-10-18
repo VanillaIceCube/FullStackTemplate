@@ -4,9 +4,9 @@ export default function AuthPageShell({ children, title }) {
   return (
     <Stack
       spacing={2}
-      alignItems="center"
-      maxWidth="sm"
       sx={{
+        alignItems: 'center',
+        maxWidth: 'sm',
         p: { xs: 3, sm: 5.5 },
         mx: 'auto',
         justifyContent: 'center',

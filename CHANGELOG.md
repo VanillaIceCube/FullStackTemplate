@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-10-18
+
+### Fixed
+
+- Upgraded Material UI and icons together, migrated removed layout system props
+  to `sx`, and exercised real menu context, keyboard focus, dismissal, and logout.
+
 ## 2026-10-17
 ### Removed
 - Retire the recurring Jules Kris upstream-curation role, delete its external schedule, and preserve the evidence and remaining findings through explicit tickets.

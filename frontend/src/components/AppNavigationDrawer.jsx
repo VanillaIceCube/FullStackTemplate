@@ -46,7 +46,7 @@ export default function AppNavigationDrawer({ open, setOpen }) {
         }}
         role="navigation"
       >
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2 }}>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'var(--secondary-color)' }}>
             Full Stack Template
           </Typography>

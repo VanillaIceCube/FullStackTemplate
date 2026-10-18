@@ -87,3 +87,10 @@ npm run build
 React Router 7 exposes its DOM entry point through the `react-router/dom`
 package subpath. The CRA test setup maps that subpath for Jest and provides
 the text encoder globals required by the router's DOM exports.
+
+Material UI and icons use the compatible v9 line and must be upgraded together.
+Use `sx` for layout system properties and `slotProps` for component slot APIs.
+The supported browser baseline follows [MUI v9](https://mui.com/material-ui/migration/upgrade-to-v9/).
+Verify strict lint, the frontend tests (including actual menu keyboard interaction),
+and a production build after changing MUI. Tests retain the real Menu/MenuList
+implementation so the v9 context and focus behavior are exercised.
