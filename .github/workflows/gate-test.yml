@@ -48,6 +48,9 @@ jobs:
             frontend:
               - 'frontend/**'
               - '.github/actions/read-versions/**'
+              - 'scripts/initialize-template.ps1'
+              - 'tests/test_frontend_container.py'
+              - '.github/workflows/gate-test.yml'
             backend:
               - 'backend/**'
               - '.github/actions/read-versions/**'
