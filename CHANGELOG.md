@@ -8,6 +8,10 @@ All notable changes to this project are documented in this file.
 
 - Upgraded Material UI and icons together, migrated removed layout system props
   to `sx`, and exercised real menu context, keyboard focus, dismissal, and logout.
+- Aligned React and React DOM on the 19.3 release line to prevent mismatched
+  runtime versions during frontend tests and rendering.
+- Aligned the security-alert workflow test with the reviewed GitHub App token
+  action v3.3.0 pin so intentional dependency updates pass automation checks.
 
 ## 2026-10-17
 ### Removed

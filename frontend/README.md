@@ -94,3 +94,7 @@ The supported browser baseline follows [MUI v9](https://mui.com/material-ui/migr
 Verify strict lint, the frontend tests (including actual menu keyboard interaction),
 and a production build after changing MUI. Tests retain the real Menu/MenuList
 implementation so the v9 context and focus behavior are exercised.
+
+Keep the direct `react` and `react-dom` dependency ranges on the same release
+line (currently `^19.3.1`) and resolve both to matching versions in the lockfile.
+After an upgrade, run the frontend tests and production build together.
