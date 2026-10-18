@@ -26,6 +26,8 @@ class GeneratedFrontendContainerTests(unittest.TestCase):
     def test_generated_frontend_image_serves_assets_and_history_fallback(self):
         identity = "template-frontend-" + uuid.uuid4().hex[:12]
         image = identity + ":test"
+        network = identity + "-network"
+        backend = identity + "-backend"
         with tempfile.TemporaryDirectory(prefix="template-container-") as directory:
             root = Path(directory)
             self.assertTrue(
@@ -53,12 +55,35 @@ class GeneratedFrontendContainerTests(unittest.TestCase):
             )
             try:
                 run("docker", "build", "-t", image, str(root / "frontend"), timeout=600)
+                run("docker", "network", "create", network)
+                # Supply the backend DNS name required by the real Nginx config.
+                run(
+                    "docker",
+                    "run",
+                    "-d",
+                    "--name",
+                    backend,
+                    "--network",
+                    network,
+                    "--network-alias",
+                    "backend",
+                    "--entrypoint",
+                    "/bin/sh",
+                    image,
+                    "-c",
+                    "printf 'events {} http { server { listen 8000; "
+                    'location / { return 200 "backend fixture"; } } }'
+                    "' > /tmp/backend.conf; "
+                    "exec nginx -c /tmp/backend.conf -g 'daemon off;'",
+                )
                 run(
                     "docker",
                     "run",
                     "-d",
                     "--name",
                     identity,
+                    "--network",
+                    network,
                     "-p",
                     "127.0.0.1::80",
                     image,
@@ -69,6 +94,7 @@ class GeneratedFrontendContainerTests(unittest.TestCase):
                     ]["Ports"]["80/tcp"][0]["HostPort"]
                 )
                 deadline = time.monotonic() + 30
+                last_response = "No HTTP response received"
                 while True:
                     try:
                         connection = http.client.HTTPConnection(
@@ -77,13 +103,17 @@ class GeneratedFrontendContainerTests(unittest.TestCase):
                         connection.request("GET", "/")
                         response = connection.getresponse()
                         body = response.read().decode()
+                        last_response = f"HTTP {response.status}: {body[:500]}"
                         connection.close()
                         if response.status == 200:
                             break
-                    except OSError:
-                        pass
+                    except (OSError, http.client.HTTPException) as error:
+                        # Startup can briefly refuse/reset connections; retain evidence.
+                        last_response = repr(error)
                     if time.monotonic() >= deadline:
-                        self.fail("Disposable frontend did not become ready")
+                        self.fail(
+                            "Disposable frontend did not become ready: " + last_response
+                        )
                     time.sleep(0.2)
                 self.assertIn("SampleAtlas", body)
                 self.assertNotIn("@vite/client", body)
@@ -104,9 +134,32 @@ class GeneratedFrontendContainerTests(unittest.TestCase):
                         self.assertIn(b"<svg", content)
                     else:
                         self.assertIn(b"SampleAtlas", content)
+                connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+                connection.request("GET", "/api/fixture")
+                response = connection.getresponse()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(response.read(), b"backend fixture")
+                connection.close()
+            except Exception:
+                for container in (identity, backend):
+                    for command in ("inspect", "logs"):
+                        result = subprocess.run(
+                            ["docker", command, container],
+                            capture_output=True,
+                            text=True,
+                        )
+                        print(
+                            f"{container} {command}:\n{result.stdout}\n{result.stderr}"
+                        )
+                raise
             finally:
                 # Only resources named with this test's random identity are removed.
-                subprocess.run(["docker", "rm", "-f", identity], capture_output=True)
+                subprocess.run(
+                    ["docker", "rm", "-f", identity, backend], capture_output=True
+                )
+                subprocess.run(
+                    ["docker", "network", "rm", network], capture_output=True
+                )
                 subprocess.run(["docker", "image", "rm", image], capture_output=True)
 
 
