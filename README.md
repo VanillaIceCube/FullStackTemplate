@@ -215,6 +215,11 @@ malware, AI review gates, and a stable `Auto Merge` status check. The latter
 reports every pull request while a separate Dependabot-only job enables
 auto-merge for eligible dependency updates.
 
+The Linux frontend gate also runs `python tests/test_frontend_container.py`
+from the repository root. It needs a disposable Docker daemon and PowerShell,
+initializes a sample app, builds its frontend image, and verifies assets and SPA
+history fallback on loopback before removing its own test resources.
+
 RoboCop treats a path-scoped CodeQL language skip as expected only when the
 scope detector and aggregate gate succeed and the omitted language has a
 default-branch baseline. Neutral GitHub summaries for those expected omissions
