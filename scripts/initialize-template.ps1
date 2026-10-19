@@ -27,13 +27,20 @@ if ([string]::IsNullOrWhiteSpace($compactName)) {
 
 $upperSlug = ($ApplicationSlug -replace '-', '_').ToUpperInvariant()
 $replacementPairs = @(
+    # Match the complete host before a slug that may also occur inside it.
+    [pscustomobject]@{ Old = 'app.example.com'; New = $ProductionHost },
     [pscustomobject]@{ Old = 'Full Stack Template'; New = $compactName },
     [pscustomobject]@{ Old = 'FullStackTemplate'; New = $compactName },
+    [pscustomobject]@{ Old = 'fullStackTemplate'; New = $compactName },
     [pscustomobject]@{ Old = 'fullstacktemplate'; New = $ApplicationSlug },
     [pscustomobject]@{ Old = 'FULLSTACKTEMPLATE'; New = $upperSlug },
-    [pscustomobject]@{ Old = 'app.example.com'; New = $ProductionHost },
     [pscustomobject]@{ Old = 'vanillaicecube'; New = $GitHubOwner.ToLowerInvariant() }
 )
+$replacementValues = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+foreach ($pair in $replacementPairs) {
+    $replacementValues[$pair.Old] = $pair.New
+}
+$replacementPattern = ($replacementPairs | ForEach-Object { [regex]::Escape($_.Old) }) -join '|'
 
 $excludedDirectories = @('.git', 'node_modules', '.venv', 'venv', 'dist', 'build', 'coverage')
 $textExtensions = @(
@@ -55,10 +62,11 @@ $files = Get-ChildItem -LiteralPath $repoRoot -Recurse -File -Force | Where-Obje
 
 foreach ($file in $files) {
     $content = [System.IO.File]::ReadAllText($file.FullName)
-    $updated = $content
-    foreach ($pair in $replacementPairs) {
-        $updated = $updated.Replace($pair.Old, $pair.New)
-    }
+    # One pass prevents inserted names/hosts from being replaced a second time.
+    $updated = [regex]::Replace($content, $replacementPattern, [System.Text.RegularExpressions.MatchEvaluator] {
+        param($match)
+        $replacementValues[$match.Value]
+    })
 
     if ($updated -ne $content -and $PSCmdlet.ShouldProcess($file.FullName, 'Apply template branding')) {
         [System.IO.File]::WriteAllText(

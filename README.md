@@ -91,6 +91,11 @@ the production host, and every local host to:
 https://[application-slug].localhost
 ```
 
+Initializer checks are retained in generated repositories. They verify branding
+again in a disposable copy, including slug-prefixed production hosts and renamed
+theme tests. Host replacement takes precedence over slug replacement, and new
+values are inserted once so overlapping names cannot rewrite the chosen host.
+
 That subdomain convention is an invariant of the template. Browsers resolve
 `.localhost` names to loopback, so no hosts-file entry is normally needed.
 Production uses the same shape: `https://[application-slug].[base-domain]`.

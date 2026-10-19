@@ -25,11 +25,13 @@ function sample(t) {
   return destination;
 }
 
-function initialize(destination, extra = []) {
+function initialize(destination, extra = [], branding = {
+  name: 'SampleAtlas', slug: 'sample-atlas', host: 'sample-atlas.example.net', owner: 'ExampleOwner',
+}) {
   return execFileSync('pwsh', [
     '-NoProfile', '-File', path.join(destination, 'scripts/initialize-template.ps1'),
-    '-ApplicationName', 'SampleAtlas', '-ApplicationSlug', 'sample-atlas',
-    '-ProductionHost', 'sample-atlas.example.net', '-GitHubOwner', 'ExampleOwner',
+    '-ApplicationName', branding.name, '-ApplicationSlug', branding.slug,
+    '-ProductionHost', branding.host, '-GitHubOwner', branding.owner,
     ...extra,
   ], { encoding: 'utf8' });
 }
@@ -60,4 +62,37 @@ test('WhatIf leaves the template and Vite configuration unchanged', (t) => {
   initialize(destination, ['-WhatIf']);
   assert.deepEqual(fs.readFileSync(filename), before);
   assert.equal(fs.existsSync(path.join(destination, 'frontend/public/fullstacktemplate-mark.svg')), true);
+});
+
+test('retained initializer checks pass after branding a repository with a slug-prefixed host', (t) => {
+  const destination = sample(t);
+  initialize(destination, [], {
+    name: 'ExampleApplication', slug: 'example-application',
+    host: 'example-application.example.com', owner: 'ExampleOwner',
+  });
+  execFileSync('git', ['init', '-q'], { cwd: destination });
+  execFileSync('git', ['add', '-A'], { cwd: destination, stdio: 'pipe' });
+  // Run the retained smoke/WhatIf checks without recursively invoking this test.
+  const childEnv = { ...process.env };
+  delete childEnv.NODE_TEST_CONTEXT;
+  const output = execFileSync(process.execPath, [
+    '--test', '--test-name-pattern', '^(initializes Vite|WhatIf)',
+    path.join(destination, 'tests/initialize-template.test.cjs'),
+  ], { cwd: destination, env: childEnv, encoding: 'utf8', stdio: 'pipe' });
+  assert.match(output, /pass 2\b/);
+});
+
+test('inserts overlapping application names and production hosts only once', (t) => {
+  const destination = sample(t);
+  const branding = {
+    name: 'FullStackTemplatePlus', slug: 'fullstacktemplate-plus',
+    host: 'fullstacktemplate.example.com', owner: 'ExampleOwner',
+  };
+  initialize(destination, [], branding);
+  const read = (name) => fs.readFileSync(path.join(destination, name), 'utf8');
+  const productionLine = read('AGENTS.md').split(/\r?\n/)
+    .find((line) => line.startsWith('Production is designed for'));
+  assert.equal(new URL(productionLine.split('`')[1]).origin, `https://${branding.host}`);
+  assert.equal(JSON.parse(read('frontend/package.json')).name, `${branding.slug}-frontend`);
+  assert.ok(read('frontend/index.html').includes(`<title>${branding.name}</title>`));
 });
