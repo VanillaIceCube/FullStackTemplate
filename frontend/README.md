@@ -1,100 +1,46 @@
 # FullStackTemplate frontend
 
-The frontend is a Create React App-powered React 19 single-page application
-built with Material UI and React Router. Its intentionally small authenticated
-shell is ready for an application-specific feature set and retains Notoli's
-yellow-and-gray visual theme.
+React 19 and Material UI 9 use Vite 8 with the React plugin. Tests run in Vitest
+and jsdom with Testing Library; standalone ESLint 10 uses `eslint.config.mjs`.
+Create React App, its Jest runtime, and the React Router export workaround have
+been removed. The app shell, authentication routes, notifications, theme, and
+real menu keyboard coverage are preserved.
 
-## Routes
+## Development and checks
 
-- `/login`: email and password login
-- `/register`: account creation with an optional username
-- `/forgot-password`: password-reset email request
-- `/reset-password?uid=...&token=...`: choose a new password
-- `/`: protected application shell with one placeholder Paper
-- Any unknown route resolves to the protected home page
-
-Signed-out users who request a protected route are redirected to `/login`.
-
-## Authentication and shell behavior
-
-- Access and refresh tokens are stored in `sessionStorage`.
-- The profile name and email are stored for the app header.
-- API requests that receive a `401` attempt one refresh-token exchange.
-- An invalid refresh token clears the session and redirects to login.
-- Login and registration navigate directly to the protected home page.
-- The app header title is `Full Stack Template`.
-- The header retains the generic navigation drawer, recipient-scoped
-  notifications, profile display, and logout action.
-- The drawer contains one Home destination and placeholder copy for future
-  application navigation.
-
-Authentication endpoint functions live in `src/services/authApiClient.js`.
-Notification functions live in `src/services/notificationApiClient.js`. Token
-refresh and unauthorized-response behavior live in
-`src/services/requestClient.js`.
-
-## Local setup
-
-The checked-in frontend dependencies require Node.js 25, matching
-`package.json`, CI, and the production Docker image.
+Use Node.js 24.15 or newer (the same minimum as MacroMapper):
 
 ```powershell
 npm ci
 npm start
-```
-
-Open the development frontend at
-`http://fullstacktemplate.localhost:3000`. The development API default is
-`http://localhost:8000`. Override it with:
-
-```env
-REACT_APP_API_BASE_URL=http://localhost:8000
-```
-
-Production builds should normally leave `REACT_APP_API_BASE_URL` blank so
-`/auth/...` and `/api/...` requests use the current origin.
-
-The production frontend image uses `nginx.conf` to serve the CRA `build`
-directory and forward `/auth/`, `/api/`, and `/admin/` to the Compose backend
-service.
-
-## Docker hot reload
-
-From the repository root, run:
-
-```powershell
-docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml up --build -d
-```
-
-The development image uses `Dockerfile.dev`, mounts `frontend/`, and keeps
-`node_modules` in a Docker volume. React watches the mounted source and reloads
-without rebuilding the production image. Open
-`http://fullstacktemplate.localhost:3000`; the development API runs at
-`http://fullstacktemplate.localhost:8000`. Both ports are localhost-only by
-default and can be changed with the `FULLSTACKTEMPLATE_DEV_*_PORT` variables
-in `deploy/.env`.
-
-## Checks
-
-```powershell
-npm test -- --runInBand
+npm test
+npm run test:watch
 npm run lint:strict
 npm run format:check
 npm run build
 ```
 
-React Router 7 exposes its DOM entry point through the `react-router/dom`
-package subpath. The CRA test setup maps that subpath for Jest and provides
-the text encoder globals required by the router's DOM exports.
+Vite listens on localhost:3000 and accepts `fullstacktemplate.localhost`.
+Docker sets `HOST=0.0.0.0`; published development ports stay on loopback.
+`CHOKIDAR_USEPOLLING=true` enables Docker source watching. The build is written
+to `dist/`, which the frontend image copies into Nginx's static directory.
 
-Material UI and icons use the compatible v9 line and must be upgraded together.
-Use `sx` for layout system properties and `slotProps` for component slot APIs.
-The supported browser baseline follows [MUI v9](https://mui.com/material-ui/migration/upgrade-to-v9/).
-Verify strict lint, the frontend tests (including actual menu keyboard interaction),
-and a production build after changing MUI. Tests retain the real Menu/MenuList
-implementation so the v9 context and focus behavior are exercised.
+## Routes and API settings
 
-Keep the direct `react` and `react-dom` dependency ranges on the same release
-line (currently `^19.3.1`) and resolve both to matching versions in the lockfile.
-After an upgrade, run the frontend tests and production build together.
+Public routes are `/login`, `/register`, `/forgot-password`, and
+`/reset-password?uid=...&token=...`. `/` is the protected starter page. Unknown
+routes resolve to that protected page. Tokens live in sessionStorage; a failed
+JWT refresh clears the session and redirects to login. Notifications remain
+recipient-scoped.
+
+Set `VITE_API_BASE_URL=http://localhost:8000` in the shell or an untracked
+frontend `.env.local` for an explicit API origin. An unset development value
+defaults to localhost:8000. Leave it unset or blank for production same-origin
+requests. Vite exposes this value to the browser: never put secrets in `VITE_*`.
+`import.meta.env.BASE_URL` provides the router/asset base; subdomain-root `/`
+remains the default. `REACT_APP_*` and `PUBLIC_URL` are legacy CRA settings and
+are not read by this template. See [the alignment and upgrade guide](../docs/FRONTEND-ALIGNMENT.md).
+
+Keep React/React DOM on matching versions and Material UI/icons on compatible
+v9 versions. Use `sx` for layout and `slotProps` for component slots. Supported
+build targets are Chrome 117, Edge 121, Firefox 121, and Safari 17 or newer.

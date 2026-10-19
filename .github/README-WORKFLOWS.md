@@ -139,7 +139,7 @@ Repository variables:
 - `DJANGO_ALLOWED_HOSTS`, `DJANGO_CORS_ALLOWED_ORIGINS`, `DJANGO_CSRF_TRUSTED_ORIGINS`
 - optional `DJANGO_FORCE_SCRIPT_NAME`
 - `DJANGO_FRONTEND_BASE_URL`, `DJANGO_EMAIL_BACKEND`, `DJANGO_EMAIL_TIMEOUT`, `DJANGO_DEFAULT_FROM_EMAIL`
-- optional `REACT_APP_API_BASE_URL`
+- optional `VITE_API_BASE_URL`
 
 Repository secrets:
 
@@ -163,11 +163,25 @@ requests remain pending while GitHub reports an unstable merge state and are
 never merged directly. Third-party Actions are pinned to
 immutable commit SHAs, with release-version comments retained for maintenance.
 Credential-handling GitHub Actions are pinned the same way. When a complete
-pull-request diff exceeds an AI reviewer's configured budget, that reviewer's
+  pull-request source diff exceeds an AI reviewer's configured budget, that reviewer's
 GitHub App posts an explicit incomplete-review comment under its own identity
 and then fails the check without publishing a verdict.
-All three reviewers inherit the same 512 KiB diff budget from
+All three reviewers inherit the same 512 KiB source-diff budget from
 `.github/actions/get-pr-diff/action.yml`; reviewer workflows do not override it.
+Only the regular generated `frontend/package-lock.json` payload is excluded
+from the source diff and Obi-Wan's changed-file contents. This exact path is
+covered by the independent Dependency Review and npm malware gates; other
+lockfiles and symlinks/executable files at that path remain in source review.
+Each AI prompt and job summary discloses excluded files and the full diff size.
+Manifests and source retain their review budget and added/context/deleted-line
+legend with correct RIGHT-side line numbers. Oversized source diffs still
+publish an incomplete review and fail. Lockfile-only PRs explicitly have no
+source diff: an empty source review is not dependency-safety evidence, and all
+independent security gates remain required. Behavioral tests execute the real
+action against temporary Git histories, including oversized diffs and failures.
+MacroMapper already filters generated lockfiles; this template's narrower policy
+is scoped to its actual scanner coverage. Other repositories need their own
+scanner-coverage review before adopting it.
 OpenAI review requests also cap combined reasoning and visible output at 16,000
 tokens so they do not reserve the model's full output allowance against project
 rate limits.
@@ -195,3 +209,12 @@ security-alert workflow assertion in
 `.github/actions/security-alerts/sync-security-alerts.test.js` and rerun the
 repository automation tests. The current reviewed action revision is
 `64ab729a6294000f5aa4a4bc0b73d1f32bc45510` (v3.3.0).
+
+## Vite frontend and template checks
+
+The frontend test gate runs Vitest, the production Vite build, and an initialized
+sample-app Docker image/SPA smoke test as one failure gate. The container test
+uses random local-only images/containers and loopback ports, then removes only
+its own resources. Automation coverage includes the PowerShell template initializer, whose
+`.mjs`/`.cjs` branding support is required by Vite and flat ESLint. The browser
+API variable is `VITE_API_BASE_URL`; never publish secrets through Vite env.

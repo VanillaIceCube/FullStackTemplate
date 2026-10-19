@@ -1,21 +1,43 @@
-const originalEnv = process.env;
-
 describe('requestClient', () => {
   beforeEach(() => {
-    jest.resetModules();
-    process.env = { ...originalEnv };
-    global.fetch = jest.fn(() => Promise.resolve({ ok: true, status: 200 }));
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    vi.stubEnv('PROD', false);
+    vi.stubEnv('DEV', true);
+    vi.stubEnv('BASE_URL', '/');
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, status: 200 }));
     sessionStorage.clear();
     window.history.replaceState({}, '', '/');
   });
 
   afterEach(() => {
-    process.env = originalEnv;
-    jest.restoreAllMocks();
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
-  test('when REACT_APP_API_BASE_URL is set, it prefixes the base URL', async () => {
-    process.env.REACT_APP_API_BASE_URL = 'https://api.example.com';
+  test('an unset production API base uses same-origin URLs', async () => {
+    vi.stubEnv('PROD', true);
+    vi.stubEnv('DEV', false);
+    const { apiFetch } = await import('./requestClient');
+    await apiFetch('/api/example/');
+    expect(global.fetch).toHaveBeenCalledWith('/api/example/', {});
+  });
+
+  test('the fallback login redirect preserves the Vite deployment base', async () => {
+    vi.stubEnv('BASE_URL', '/sample/');
+    const replace = vi.fn();
+    vi.stubGlobal('window', { location: { origin: 'https://app.example.com', replace } });
+    const { clearNavigate } = await import('./navigationService');
+    clearNavigate();
+    const { redirectToLogin } = await import('./requestClient');
+    redirectToLogin();
+    expect(replace).toHaveBeenCalledWith('https://app.example.com/sample/login');
+  });
+
+  test('when VITE_API_BASE_URL is set, it prefixes the base URL', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.com');
     const { apiFetch } = await import('./requestClient');
 
     await apiFetch('/path', { method: 'GET' });
@@ -23,8 +45,8 @@ describe('requestClient', () => {
     expect(global.fetch).toHaveBeenCalledWith('https://api.example.com/path', { method: 'GET' });
   });
 
-  test('when REACT_APP_API_BASE_URL is blank, it uses same-origin relative URLs', async () => {
-    process.env.REACT_APP_API_BASE_URL = '';
+  test('when VITE_API_BASE_URL is blank, it uses same-origin relative URLs', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', '');
     const { apiFetch } = await import('./requestClient');
 
     await apiFetch('/api/example/', { method: 'GET' });
@@ -32,8 +54,8 @@ describe('requestClient', () => {
     expect(global.fetch).toHaveBeenCalledWith('/api/example/', { method: 'GET' });
   });
 
-  test('when REACT_APP_API_BASE_URL is not set, it uses the default base URL', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
+  test('when VITE_API_BASE_URL is not set, it uses the default base URL', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
     const { apiFetch } = await import('./requestClient');
 
     await apiFetch('/path', { method: 'GET' });
@@ -47,7 +69,7 @@ describe('requestClient', () => {
       headers: { 'X-Test': 'ok' },
       body: JSON.stringify({ ok: true }),
     };
-    delete process.env.REACT_APP_API_BASE_URL;
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
     const { apiFetch } = await import('./requestClient');
 
     await apiFetch('/path', options);
@@ -56,15 +78,15 @@ describe('requestClient', () => {
   });
 
   test('when a non-auth endpoint and refresh token are invalid, it clears tokens and redirects to /login', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
-    global.fetch = jest.fn(() => Promise.resolve({ ok: false, status: 401 }));
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    global.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 401 }));
 
     sessionStorage.setItem('accessToken', 'ACCESS');
     sessionStorage.setItem('refreshToken', 'REFRESH');
     window.history.replaceState({}, '', '/dashboard');
 
     const { setNavigate } = await import('./navigationService');
-    const mockNavigate = jest.fn();
+    const mockNavigate = vi.fn();
     setNavigate(mockNavigate);
 
     const { apiFetch } = await import('./requestClient');
@@ -81,8 +103,8 @@ describe('requestClient', () => {
   });
 
   test('when an access token expires, it refreshes once and retries without logging out', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
-    global.fetch = jest
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    global.fetch = vi
       .fn()
       .mockResolvedValueOnce({ ok: false, status: 401 })
       .mockResolvedValueOnce({
@@ -95,7 +117,7 @@ describe('requestClient', () => {
     sessionStorage.setItem('refreshToken', 'REFRESH');
 
     const { setNavigate } = await import('./navigationService');
-    const mockNavigate = jest.fn();
+    const mockNavigate = vi.fn();
     setNavigate(mockNavigate);
     const { apiFetch } = await import('./requestClient');
 
@@ -113,15 +135,15 @@ describe('requestClient', () => {
   });
 
   test('when refresh has a transient failure, it preserves the session and returns the original response', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
-    global.fetch = jest
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    global.fetch = vi
       .fn()
       .mockResolvedValueOnce({ ok: false, status: 401 })
       .mockResolvedValueOnce({ ok: false, status: 503 });
     sessionStorage.setItem('accessToken', 'ACCESS');
     sessionStorage.setItem('refreshToken', 'REFRESH');
     const { setNavigate } = await import('./navigationService');
-    const mockNavigate = jest.fn();
+    const mockNavigate = vi.fn();
     setNavigate(mockNavigate);
     const { apiFetch } = await import('./requestClient');
 
@@ -134,15 +156,15 @@ describe('requestClient', () => {
   });
 
   test('when /auth/login/ returns 401, it does not redirect or clear tokens', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
-    global.fetch = jest.fn(() => Promise.resolve({ ok: false, status: 401 }));
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    global.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 401 }));
 
     sessionStorage.setItem('accessToken', 'ACCESS');
     sessionStorage.setItem('refreshToken', 'REFRESH');
     window.history.replaceState({}, '', '/login');
 
     const { setNavigate } = await import('./navigationService');
-    const mockNavigate = jest.fn();
+    const mockNavigate = vi.fn();
     setNavigate(mockNavigate);
 
     const { apiFetch } = await import('./requestClient');
@@ -155,14 +177,14 @@ describe('requestClient', () => {
   });
 
   test('when /auth/forgot-password/ returns 401, it does not redirect or clear tokens', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
-    global.fetch = jest.fn(() => Promise.resolve({ ok: false, status: 401 }));
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    global.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 401 }));
 
     sessionStorage.setItem('accessToken', 'ACCESS');
     sessionStorage.setItem('refreshToken', 'REFRESH');
 
     const { setNavigate } = await import('./navigationService');
-    const mockNavigate = jest.fn();
+    const mockNavigate = vi.fn();
     setNavigate(mockNavigate);
 
     const { apiFetch } = await import('./requestClient');
@@ -175,7 +197,7 @@ describe('requestClient', () => {
   });
 
   test('when logout() is called, it clears tokens/profile and redirects to /login', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
 
     sessionStorage.setItem('accessToken', 'ACCESS');
     sessionStorage.setItem('refreshToken', 'REFRESH');
@@ -184,7 +206,7 @@ describe('requestClient', () => {
     window.history.replaceState({}, '', '/dashboard');
 
     const { setNavigate } = await import('./navigationService');
-    const mockNavigate = jest.fn();
+    const mockNavigate = vi.fn();
     setNavigate(mockNavigate);
 
     const { logout } = await import('./requestClient');
@@ -203,14 +225,12 @@ describe('requestClient', () => {
   });
 
   test('when logout() is called before navigate is registered, it still redirects', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
     sessionStorage.setItem('accessToken', 'ACCESS');
     sessionStorage.setItem('refreshToken', 'REFRESH');
 
-    const originalLocation = window.location;
-    const replaceSpy = jest.fn();
-    delete window.location;
-    window.location = { ...originalLocation, replace: replaceSpy };
+    const replaceSpy = vi.fn();
+    vi.stubGlobal('window', { location: { origin: 'http://localhost', replace: replaceSpy } });
 
     const { clearNavigate } = await import('./navigationService');
     clearNavigate();
@@ -220,7 +240,5 @@ describe('requestClient', () => {
     expect(sessionStorage.getItem('accessToken')).toBeNull();
     expect(sessionStorage.getItem('refreshToken')).toBeNull();
     expect(replaceSpy).toHaveBeenCalled();
-
-    window.location = originalLocation;
   });
 });

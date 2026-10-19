@@ -27,7 +27,7 @@ export default function App() {
   return (
     <>
       <Router
-        basename={process.env.PUBLIC_URL || '/'}
+        basename={import.meta.env.BASE_URL}
         future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
       >
         <NavigationBridge />

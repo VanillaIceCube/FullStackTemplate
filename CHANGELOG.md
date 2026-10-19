@@ -6,6 +6,23 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Preserve complete production hosts and theme-test renames when retained
+  initializer checks run after application branding; apply replacements once.
+- Keep generated frontend npm lockfile payloads out of AI source prompts while
+  disclosing exclusions and preserving independent dependency/security gates,
+  source byte limits, inline line numbers, and visible incomplete-review failures.
+
+### Changed
+
+- Replaced Create React App with the shared Vite/React-plugin build baseline,
+  Vitest/jsdom tests, and supported ESLint 10 plugins; updated Docker, API-base
+  configuration, CI build coverage, and template initialization together.
+- Documented cross-app Vite conventions and the upgrade path for derived apps.
+
+## 2026-10-18
+
+### Fixed
+
 - Upgraded Material UI and icons together, migrated removed layout system props
   to `sx`, and exercised real menu context, keyboard focus, dismissal, and logout.
 - Aligned React and React DOM on the 19.3 release line to prevent mismatched

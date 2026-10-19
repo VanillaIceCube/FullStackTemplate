@@ -91,6 +91,11 @@ the production host, and every local host to:
 https://[application-slug].localhost
 ```
 
+Initializer checks are retained in generated repositories. They verify branding
+again in a disposable copy, including slug-prefixed production hosts and renamed
+theme tests. Host replacement takes precedence over slug replacement, and new
+values are inserted once so overlapping names cannot rewrite the chosen host.
+
 That subdomain convention is an invariant of the template. Browsers resolve
 `.localhost` names to loopback, so no hosts-file entry is normally needed.
 Production uses the same shape: `https://[application-slug].[base-domain]`.
@@ -101,7 +106,7 @@ Review the initializer diff, replace the starter SVG mark, then complete the
 GitHub settings above before opening the first PR.
 
 ## What is included
-- React 19, Create React App, Material UI, and a responsive application shell
+- React 19, Vite, Material UI, and a responsive application shell
 - Django REST Framework, custom user model, and versioned migrations
 - Email-first registration and JWT login/refresh
 - Forgot-password and tokenized reset email delivery through Resend
@@ -168,7 +173,7 @@ Use the production Compose workflow above when testing the HTTPS proxy and
 deployment-shaped containers.
 
 ## Run without Docker
-Requirements: Python 3.12 and Node.js 25. Docker remains the simplest option
+Requirements: Python 3.12 and Node.js 24.15 or newer. Docker remains the simplest option
 when those exact versions are not already installed.
 
 Backend:
@@ -204,7 +209,7 @@ python manage.py makemigrations --check --dry-run
 python manage.py test
 
 Set-Location ..
-node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js `
+node --test tests/*.test.cjs .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js `
   .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js `
   .github/actions/publish-ai-review/publish-ai-review.test.js `
   .github/actions/security-alerts/sync-security-alerts.test.js
@@ -214,6 +219,11 @@ CI runs the same application and automation checks, plus CodeQL, dependency,
 malware, AI review gates, and a stable `Auto Merge` status check. The latter
 reports every pull request while a separate Dependabot-only job enables
 auto-merge for eligible dependency updates.
+
+The Linux frontend gate also runs `python tests/test_frontend_container.py`
+from the repository root. It needs a disposable Docker daemon and PowerShell,
+initializes a sample app, builds its frontend image, and verifies assets and SPA
+history fallback on loopback before removing its own test resources.
 
 RoboCop treats a path-scoped CodeQL language skip as expected only when the
 scope detector and aggregate gate succeed and the omitted language has a
@@ -245,3 +255,6 @@ FullStackTemplate uses the
 [Modified MIT License (Non-Commercial Use Only)](LICENSE.md). It permits use,
 copying, modification, and distribution for non-commercial purposes; commercial
 use requires separate permission from the copyright holder.
+
+Frontend builds now use Vite/Vitest with the same baseline as MacroMapper and
+Notoli. See [the cross-app alignment and upgrade guide](docs/FRONTEND-ALIGNMENT.md).
