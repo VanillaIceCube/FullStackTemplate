@@ -218,3 +218,14 @@ uses random local-only images/containers and loopback ports, then removes only
 its own resources. Automation coverage includes the PowerShell template initializer, whose
 `.mjs`/`.cjs` branding support is required by Vite and flat ESLint. The browser
 API variable is `VITE_API_BASE_URL`; never publish secrets through Vite env.
+
+## Shared app-only deployment
+
+The deploy workflow is rendered from the immutable Infrastructure source pin.
+It runs only for `env-prod`, serializes attempts, checks parity before deployment
+credentials/images, records image digests, stages private app-only bundles, and
+uses the shared lock/SQLite/readiness/recovery transaction. It never uploads TLS
+keys, owns shared ingress, or prunes the host. Automation tests include parity,
+all common release suites on disposable Linux/Docker, and generated-app
+provenance checks. Destination credentials include `DEPLOY_HOST_FINGERPRINT`;
+missing settings fail visibly. See `deploy/production/README.md`.

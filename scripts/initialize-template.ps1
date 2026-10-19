@@ -48,9 +48,17 @@ $textExtensions = @(
     '.svg', '.txt', '.yaml', '.yml'
 )
 $explicitTextNames = @('.gitignore', 'Dockerfile', 'Dockerfile.dev')
+# These exact bytes are owned by the pinned Infrastructure standard, not branding.
+$sharedFiles = @(
+    'deploy/shared-source.json', 'deploy/check_parity.py',
+    'deploy/production/release.py', 'deploy/production/build_bundle.py'
+)
+
 
 $files = Get-ChildItem -LiteralPath $repoRoot -Recurse -File -Force | Where-Object {
     $relativePath = $_.FullName.Substring($repoRoot.Length).TrimStart([char[]]@('\', '/'))
+    $normalizedPath = $relativePath.Replace('\', '/')
+    if ($sharedFiles -contains $normalizedPath -or $normalizedPath.StartsWith('deploy/tests/')) { return $false }
     $segments = $relativePath -split '[\\/]'
     $isExcluded = $segments | Where-Object { $excludedDirectories -contains $_ }
     (-not $isExcluded) -and (

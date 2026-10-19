@@ -105,3 +105,12 @@ python backend/manage.py test
 ruff check backend
 ruff format backend --check
 ```
+
+## Shared-gateway production boundary
+
+The app-only Compose publishes no backend port and uses an existing database
+bind with `create_host_path: false`. Infrastructure supplies canonical Host and
+overwrites forwarded scheme/client headers. Django ignores forwarded host;
+forwarded HTTPS trust relies on the reviewed, restricted backend networks.
+Bootstrap, migration, backup, and explicit recovery follow
+[the production guide](../deploy/production/README.md).

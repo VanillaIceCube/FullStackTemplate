@@ -53,3 +53,4 @@ certs/*.der
 .pytest_cache/
 .ruff_cache/
 coverage/
+release_bundle/

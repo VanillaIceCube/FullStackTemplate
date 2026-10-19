@@ -229,3 +229,12 @@ The complete deployment variables and secrets are in
 [the deployment guide](../deploy/README.md). The deploy workflow only runs on
 `env-prod` pushes or manual dispatch, so application CI can be proven before
 production credentials are ready.
+
+## Production model for generated apps
+
+Use the [app-only production guide](../deploy/production/README.md) for current
+settings and onboarding. Infrastructure owns TLS and shared routing; the new
+workflow does not consume `CLOUDFLARE_ORIGIN_CERT_PEM` or
+`CLOUDFLARE_ORIGIN_KEY_PEM`. Configure the SSH host fingerprint and per-app
+credentials, preserve the canonical shared source pin when initializing, and
+protect `env-prod`. Main merges and source review do not authorize activation.

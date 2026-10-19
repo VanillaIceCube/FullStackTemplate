@@ -62,6 +62,7 @@ jobs:
               - '.github/actions/openai-chat/**'
               - '.github/actions/publish-ai-review/**'
               - '.github/actions/security-alerts/**'
+              - 'deploy/**'
               - 'scripts/**'
               - 'tests/**'
               - '.github/workflows/gate-test.yml'
@@ -244,7 +245,9 @@ jobs:
           set -o pipefail
           status=0
           (
+            python3 deploy/check_parity.py || exit 1
             group_status=0
+            python3 -m unittest discover -s deploy/tests -v || group_status=$?
             node --test tests/*.test.cjs \
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
             .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js \

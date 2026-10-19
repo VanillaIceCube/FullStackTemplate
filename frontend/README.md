@@ -44,3 +44,7 @@ are not read by this template. See [the alignment and upgrade guide](../docs/FRO
 Keep React/React DOM on matching versions and Material UI/icons on compatible
 v9 versions. Use `sx` for layout and `slotProps` for component slots. Supported
 build targets are Chrome 117, Edge 121, Firefox 121, and Safari 17 or newer.
+
+Production frontend releases publish no host port. The Infrastructure gateway
+serves the same-origin app domain; Vite still builds `dist/` with a blank API
+base. Follow [the production guide](../deploy/production/README.md).

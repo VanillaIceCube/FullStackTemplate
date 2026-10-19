@@ -116,8 +116,8 @@ GitHub settings above before opening the first PR.
 - Recipient-scoped notification APIs with read and clear actions
 - One intentionally minimal protected Material UI Paper ready to replace with
   application-specific content
-- Docker images, Docker Compose, same-origin Nginx proxy, local HTTPS, GHCR,
-  SSH deployment, and migrations
+- Docker images, local Compose/HTTPS, GHCR, and app-only production releases
+  behind the shared Infrastructure gateway
 - Ruff, ESLint, Prettier, React/Django tests, CodeQL, dependency review, malware
   review, Dependabot, and auto-merge gates
 - Three AI reviewer identities and scheduled security-alert-to-Project
@@ -128,8 +128,8 @@ GitHub settings above before opening the first PR.
 Requirements: Docker Desktop and either `mkcert` or OpenSSL.
 
 ```powershell
-Copy-Item deploy/backend.env deploy/.env
-New-Item -ItemType File -Path deploy/db.sqlite3 -Force
+if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
+if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
 ./deploy/create-local-certificate.ps1
 
 docker build -t ghcr.io/vanillaicecube/fullstacktemplate-backend:latest ./backend
@@ -153,8 +153,8 @@ frontend and backend directories into development containers, so React and
 Django reload changes without rebuilding production images:
 
 ```powershell
-Copy-Item deploy/backend.env deploy/.env
-New-Item -ItemType File -Path deploy/db.sqlite3 -Force
+if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
+if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
 docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml up --build -d
 docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
 ```
@@ -169,7 +169,7 @@ docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml down
 ```
 
 This development workflow does not need a local certificate or Nginx proxy.
-Use the production Compose workflow above when testing the HTTPS proxy and
+Use the standalone local HTTPS Compose workflow above when testing the HTTPS proxy and
 deployment-shaped containers.
 
 ## Run without Docker
@@ -258,3 +258,12 @@ use requires separate permission from the copyright holder.
 
 Frontend builds now use Vite/Vitest with the same baseline as MacroMapper and
 Notoli. See [the cross-app alignment and upgrade guide](docs/FRONTEND-ALIGNMENT.md).
+
+## Production release architecture
+
+Production follows [the app-only release/recovery guide](deploy/production/README.md).
+Infrastructure owns ingress, TLS, route networks, and host capacity; this app
+owns only its services, database, immutable images, and private recovery records.
+The default app/domain/subnet are onboarding examples, not an approved third
+deployment. Main does not deploy. Promotion, shared-host onboarding, bootstrap,
+and production actions each require the designated operator's approved plan.
