@@ -24,6 +24,8 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Preserve complete production hosts and theme-test renames when retained
+  initializer checks run after application branding; apply replacements once.
 - Keep generated frontend npm lockfile payloads out of AI source prompts while
   disclosing exclusions and preserving independent dependency/security gates,
   source byte limits, inline line numbers, and visible incomplete-review failures.
