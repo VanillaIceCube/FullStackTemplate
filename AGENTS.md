@@ -93,3 +93,9 @@ Secret-dependent workflows must fail visibly when their credentials are unavaila
 Frontend tooling uses Vite 8, Vitest 5/jsdom, and ESLint 10 flat configuration.
 Build output is `frontend/dist/`. Keep Docker, CI, `VITE_API_BASE_URL`, and
 template-initializer coverage aligned; see `docs/FRONTEND-ALIGNMENT.md`.
+
+## Jules recurring agents
+
+Nora and Marty use the [v3 operating rules](.jules/README.md): at most one open
+PR per agent per repository. Repeat runs maintain the existing PR, integrate
+current main, and verify its latest head instead of opening another PR.
