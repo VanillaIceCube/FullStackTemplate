@@ -139,11 +139,13 @@ ROBOCOP_PRIVATE_KEY
 ## 3. Configure secrets for Dependabot-triggered reviews
 Dependabot-triggered workflows receive only **Dependabot** secrets, not the
 normal **Actions** secrets. To run the same required AI reviewers for trusted
-Dependabot pull requests, add these four values again under **Settings →
+Dependabot pull requests, add these six values again under **Settings →
 Secrets and variables → Dependabot → Secrets**:
 
 ```text
-OPENAI_API_KEY
+OBI_WAN_OPENAI_API_KEY
+LINT_EASTWOOD_OPENAI_API_KEY
+ROBOCOP_OPENAI_API_KEY
 OBI_WAN_CODE_NOBI_PRIVATE_KEY
 LINT_EASTWOOD_PRIVATE_KEY
 ROBOCOP_PRIVATE_KEY
@@ -158,8 +160,10 @@ IDs, remain configured under **Actions → Variables**.
 Set:
 
 ```text
-Variable: OPENAI_PROJECT_ID
-Secret:   OPENAI_API_KEY
+Variable: OPENAI_REVIEWERS_PROJECT_ID
+Secret:   OBI_WAN_OPENAI_API_KEY
+Secret:   LINT_EASTWOOD_OPENAI_API_KEY
+Secret:   ROBOCOP_OPENAI_API_KEY
 Variable: SECURITY_ALERTS_PROJECT_ID
 Secret:   SECURITY_ALERTS_TOKEN
 ```
@@ -238,3 +242,7 @@ workflow does not consume `CLOUDFLARE_ORIGIN_CERT_PEM` or
 `CLOUDFLARE_ORIGIN_KEY_PEM`. Configure the SSH host fingerprint and per-app
 credentials, preserve the canonical shared source pin when initializing, and
 protect `env-prod`. Main merges and source review do not authorize activation.
+
+## 🔑 Separate reviewer keys
+
+Use the [exact key names and deferred migration steps](../.github/README-WORKFLOWS.md#-separate-openai-reviewer-credentials). Each generated repository needs its own reviewer project and credentials; never copy this template's secrets.
