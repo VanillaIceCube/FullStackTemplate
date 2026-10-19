@@ -10,8 +10,8 @@ them over shared host ingress or use them as production rollback scripts.
 The template itself uses `fullstacktemplate.localhost`. A generated repository
 uses the slug passed to `initialize-template.ps1`.
 
-For fast source iteration, use the development Compose file instead of the
-standalone local HTTPS stack:
+For fast source iteration, start the development Compose workflow over HTTP
+(no certificate required):
 
 ```powershell
 if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
