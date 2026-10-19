@@ -163,11 +163,25 @@ requests remain pending while GitHub reports an unstable merge state and are
 never merged directly. Third-party Actions are pinned to
 immutable commit SHAs, with release-version comments retained for maintenance.
 Credential-handling GitHub Actions are pinned the same way. When a complete
-pull-request diff exceeds an AI reviewer's configured budget, that reviewer's
+  pull-request source diff exceeds an AI reviewer's configured budget, that reviewer's
 GitHub App posts an explicit incomplete-review comment under its own identity
 and then fails the check without publishing a verdict.
-All three reviewers inherit the same 512 KiB diff budget from
+All three reviewers inherit the same 512 KiB source-diff budget from
 `.github/actions/get-pr-diff/action.yml`; reviewer workflows do not override it.
+Only the regular generated `frontend/package-lock.json` payload is excluded
+from the source diff and Obi-Wan's changed-file contents. This exact path is
+covered by the independent Dependency Review and npm malware gates; other
+lockfiles and symlinks/executable files at that path remain in source review.
+Each AI prompt and job summary discloses excluded files and the full diff size.
+Manifests and source retain their review budget and added/context/deleted-line
+legend with correct RIGHT-side line numbers. Oversized source diffs still
+publish an incomplete review and fail. Lockfile-only PRs explicitly have no
+source diff: an empty source review is not dependency-safety evidence, and all
+independent security gates remain required. Behavioral tests execute the real
+action against temporary Git histories, including oversized diffs and failures.
+MacroMapper already filters generated lockfiles; this template's narrower policy
+is scoped to its actual scanner coverage. Other repositories need their own
+scanner-coverage review before adopting it.
 OpenAI review requests also cap combined reasoning and visible output at 16,000
 tokens so they do not reserve the model's full output allowance against project
 rate limits.

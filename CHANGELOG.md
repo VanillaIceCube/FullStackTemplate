@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## 2026-10-18
 
+### Fixed
+
+- Keep generated frontend npm lockfile payloads out of AI source prompts while
+  disclosing exclusions and preserving independent dependency/security gates,
+  source byte limits, inline line numbers, and visible incomplete-review failures.
+
 ### Changed
 
 - Replaced Create React App with the shared Vite/React-plugin build baseline,

@@ -1,5 +1,5 @@
 name: Get PR Diff
-description: Generate a unified PR diff and report when it exceeds the review budget.
+description: Generate a source PR diff with explicit generated-lockfile exclusions and budget reporting.
 inputs:
   base_sha:
     description: Base commit SHA for the PR.
@@ -19,7 +19,7 @@ outputs:
     description: Path to the line-numbered diff file.
     value: ${{ steps.diff.outputs.linediff_path }}
   diff_bytes:
-    description: Size of the original diff in bytes.
+    description: Source diff size before truncation, excluding the documented generated lockfile.
     value: ${{ steps.diff.outputs.diff_bytes }}
   max_bytes:
     description: Configured maximum diff size in bytes.
@@ -27,6 +27,12 @@ outputs:
   truncated:
     description: Whether the diff was truncated.
     value: ${{ steps.diff.outputs.truncated }}
+  full_diff_bytes:
+    description: Full diff size before generated-lockfile filtering.
+    value: ${{ steps.diff.outputs.full_diff_bytes }}
+  excluded_files:
+    description: Generated lockfile omitted from AI source review, or empty.
+    value: ${{ steps.diff.outputs.excluded_files }}
 runs:
   using: composite
   steps:
@@ -42,8 +48,26 @@ runs:
         echo "Base: $BASE_SHA"
         echo "Head: $HEAD_SHA"
 
-        # Get unified diff between base and head
-        git diff --unified=3 "$BASE_SHA" "$HEAD_SHA" > pr.diff
+        # Only this exact generated file is covered by our npm malware gate.
+        # Other lockfiles, and non-regular files at this path, remain reviewable.
+        git diff --no-ext-diff --no-textconv --unified=3 "$BASE_SHA" "$HEAD_SHA" > pr_full.diff
+        EXCLUDED_FILES=""
+        REGULAR_LOCKFILE=true
+        for REF in "$BASE_SHA" "$HEAD_SHA"; do
+          MODE=$(git ls-tree "$REF" -- frontend/package-lock.json | cut -d ' ' -f 1)
+          if [ -n "$MODE" ] && [ "$MODE" != '100644' ]; then
+            REGULAR_LOCKFILE=false
+          fi
+        done
+        if [ "$REGULAR_LOCKFILE" = true ]; then
+          git diff --no-ext-diff --no-textconv --unified=3 "$BASE_SHA" "$HEAD_SHA" -- . \
+            ':(exclude,top)frontend/package-lock.json' > pr.diff
+          EXCLUDED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- frontend/package-lock.json)
+        else
+          cp pr_full.diff pr.diff
+        fi
+        FULL_BYTES=$(wc -c < pr_full.diff)
+        export EXCLUDED_FILES
 
         # Truncate if it's huge so we don't blow up token limits
         ACTUAL_BYTES=$(wc -c < pr.diff || echo 0)
@@ -60,6 +84,9 @@ runs:
 
         # Build a line-numbered diff for inline review comments
         python3 - <<'PY'
+        import json
+        import os
+        from pathlib import Path
         import re
 
         diff_path = "pr.diff"
@@ -68,9 +95,34 @@ runs:
         hunk_re = re.compile(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
         new_line = None
 
+        excluded = [os.environ["EXCLUDED_FILES"]] if os.environ["EXCLUDED_FILES"] else []
+        scope = (
+            "AI REVIEW SCOPE\n"
+            f"Full diff bytes: {Path('pr_full.diff').stat().st_size}\n"
+            f"Generated lockfile payloads excluded: {json.dumps(excluded)}\n"
+            "Excluded payloads have NOT been inspected by this AI source review. "
+            "Dependency Review and npm malware review remain independent required gates.\n"
+        )
+        if not Path(diff_path).stat().st_size:
+            scope += (
+                "No source diff remains (lockfile-only or empty change). "
+                "Do not infer dependency safety from an empty source diff; "
+                "use the independent scanner evidence for dependency conclusions.\n"
+            )
+        scope += (
+            "DIFF LEGEND: A<number> is ADDED current RIGHT-side source; "
+            "R<number> is unchanged current context; "
+            "D is DELETED old source, not active code.\n\n"
+        )
+        summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary:
+            with open(summary, "a", encoding="utf-8") as report:
+                report.write(scope)
+
         with open(diff_path, "r", encoding="utf-8", errors="replace") as f, open(
             out_path, "w", encoding="utf-8"
         ) as out:
+            out.write(scope)
             for raw in f:
                 line = raw.rstrip("\n")
                 if line.startswith("@@ "):
@@ -108,6 +160,8 @@ runs:
           echo "diff_path=pr.diff"
           echo "linediff_path=pr_lines.diff"
           echo "diff_bytes=$ACTUAL_BYTES"
+          echo "full_diff_bytes=$FULL_BYTES"
+          echo "excluded_files=$EXCLUDED_FILES"
           echo "max_bytes=$MAX_BYTES"
           echo "truncated=$TRUNCATED"
         } >> "$GITHUB_OUTPUT"
