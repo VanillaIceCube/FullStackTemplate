@@ -94,7 +94,6 @@ class GeneratedFrontendContainerTests(unittest.TestCase):
                     ]["Ports"]["80/tcp"][0]["HostPort"]
                 )
                 deadline = time.monotonic() + 30
-                last_response = "No HTTP response received"
                 while True:
                     try:
                         connection = http.client.HTTPConnection(

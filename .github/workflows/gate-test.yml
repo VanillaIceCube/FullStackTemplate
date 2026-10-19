@@ -55,6 +55,7 @@ jobs:
               - 'backend/**'
               - '.github/actions/read-versions/**'
             automation:
+              - '.github/actions/get-pr-diff/**'
               - '.github/actions/collect-codeql-evidence/**'
               - '.github/actions/collect-prior-ai-reviews/**'
               - '.github/actions/collect-upstream-major-upgrade-evidence/**'
@@ -243,17 +244,18 @@ jobs:
         run: |
           set -o pipefail
           status=0
-          {
+          (
             python3 deploy/check_parity.py || exit 1
-            suite_status=0
-            python3 -m unittest discover -s deploy/tests -v || suite_status=1
+            group_status=0
+            python3 -m unittest discover -s deploy/tests -v || group_status=$?
             node --test tests/*.test.cjs \
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
             .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js \
             .github/actions/publish-ai-review/publish-ai-review.test.js \
-            .github/actions/security-alerts/sync-security-alerts.test.js || suite_status=1
-            exit "$suite_status"
-          } 2>&1 | tee automation_test_output.txt || status=$?
+            .github/actions/security-alerts/sync-security-alerts.test.js || group_status=$?
+            python3 -m unittest discover -s .github/actions/get-pr-diff -p 'test_*.py' -v || group_status=$?
+            exit "$group_status"
+          ) 2>&1 | tee automation_test_output.txt || status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
 
       - name: Test summary

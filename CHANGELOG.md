@@ -22,6 +22,12 @@ All notable changes to this project are documented in this file.
 
 ## 2026-10-18
 
+### Fixed
+
+- Keep generated frontend npm lockfile payloads out of AI source prompts while
+  disclosing exclusions and preserving independent dependency/security gates,
+  source byte limits, inline line numbers, and visible incomplete-review failures.
+
 ### Changed
 
 - Replaced Create React App with the shared Vite/React-plugin build baseline,
@@ -39,6 +45,10 @@ All notable changes to this project are documented in this file.
   runtime versions during frontend tests and rendering.
 - Aligned the security-alert workflow test with the reviewed GitHub App token
   action v3.3.0 pin so intentional dependency updates pass automation checks.
+
+### Changed
+
+- Updated Nora and Marty to v3: one open PR per agent, with repeat runs maintaining the existing PR and integrating current main.
 
 ## 2026-10-17
 ### Removed

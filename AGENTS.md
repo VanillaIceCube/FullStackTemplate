@@ -102,3 +102,9 @@ release code/tests/checker/workflow are pinned to Infrastructure in
 never edit only a vendored copy. Keep new-app onboarding/capacity and live
 activation separate from source review. Initializer changes must preserve
 canonical shared-source metadata and hash-verified files.
+
+## Jules recurring agents
+
+Nora and Marty use the [v3 operating rules](.jules/README.md): at most one open
+PR per agent per repository. Repeat runs maintain the existing PR, integrate
+current main, and verify its latest head instead of opening another PR.

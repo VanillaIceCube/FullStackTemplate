@@ -204,7 +204,7 @@ jobs:
               "summary": "**Review incomplete; check failed.** This change is bigger than the byte budget in this town. I will not stamp a clean build on evidence I could not inspect from end to end.",
               "unchanged": false,
               "findings": [],
-              "evidence": ["The complete diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is ${{ steps.pr-diff.outputs.max_bytes }} bytes."],
+              "evidence": ["The AI source diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is ${{ steps.pr-diff.outputs.max_bytes }} bytes."],
               "actions": ["Break the change into smaller pull requests or intentionally raise my reviewed diff budget, then send it back through."],
               "comments": []
             }
