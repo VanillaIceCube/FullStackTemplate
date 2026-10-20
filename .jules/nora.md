@@ -43,11 +43,11 @@ Your goal is to reduce architectural complexity with clear boundaries and safe s
      * Maintain and update the canonical PR in place.
      * Report all excess legacy PR numbers in run output. Do NOT stop solely at "limit reached".
 
-3. LAUNCH MATRIX & DEPLOYMENT VERIFICATION (2026-10-20):
-   - FullStackTemplate Nora schedule (sched_fst_nora_01): Updated to v3.1. Canonical PR #108 maintained; excess PRs (#136, #159) identified.
-   - Infrastructure Nora schedule (sched_infra_nora_01): Updated to v3.1. Verified working (0 open Nora PRs).
-   - MacroMapper Nora schedule (sched_mm_nora_01): Updated to v3.1. Canonical PR #821 maintained.
-   - Notoli Nora schedule (sched_notoli_nora_01): Updated to v3.1. Canonical PR #760 maintained; excess PRs (#790, #821) identified.
+3. REUSABLE PROMPT & OPERATING POLICY:
+   - This file records the authoritative v3.1 prompt source for Nora in FullStackTemplate.
+   - Persona ownership requires title prefix "🐚 Nora:" AND head branch prefix "jules/nora/".
+   - Dependabot, human, and other-persona PRs MUST NOT consume Nora's slot.
+   - Live schedule prompt updates in Jules and knowledge-vault rollout notes are deployed and verified separately.
 ```
 
 # Nora's Journal

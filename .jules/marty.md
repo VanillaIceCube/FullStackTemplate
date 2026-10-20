@@ -43,11 +43,11 @@ Your goal is to make contained, demonstrated health improvements to this reposit
      * Maintain and update the canonical PR in place.
      * Report all excess legacy PR numbers in run output. Do NOT stop solely at "limit reached".
 
-3. LAUNCH MATRIX & DEPLOYMENT VERIFICATION (2026-10-20):
-   - FullStackTemplate Marty schedule (sched_fst_marty_01): Updated to v3.1. Canonical PR #120 maintained; excess duplicate PRs (#137, #168, #230, #232) identified.
-   - Infrastructure Marty schedule (sched_infra_marty_01): Updated to v3.1. Resolved false-capacity stop caused by misattributing Dependabot PR #145.
-   - MacroMapper Marty schedule (sched_mm_marty_01): Updated to v3.1. Canonical PR #254 maintained; excess PRs (#261, #270) identified.
-   - Notoli Marty schedule (sched_notoli_marty_01): Updated to v3.1. Canonical PR #776 maintained; excess PRs (#779, #834, #942) identified.
+3. REUSABLE PROMPT & OPERATING POLICY:
+   - This file records the authoritative v3.1 prompt source for Marty in FullStackTemplate.
+   - Persona ownership requires title prefix "🦀 Marty:" AND head branch prefix "jules/marty/".
+   - Dependabot, human, and other-persona PRs MUST NOT consume Marty's slot.
+   - Live schedule prompt updates in Jules and knowledge-vault rollout notes are deployed and verified separately.
 ```
 
 # Marty's Journal
