@@ -105,9 +105,11 @@ canonical shared-source metadata and hash-verified files.
 
 ## Jules recurring agents
 
-Nora and Marty use the [v3 operating rules](.jules/README.md): at most one open
+Nora and Marty use the [v3.1 operating rules](.jules/README.md): at most one open
 PR per agent per repository. Repeat runs maintain the existing PR, integrate
-current main, and verify its latest head instead of opening another PR.
+current main, and verify its latest head. Persona ownership requires strict title
+and branch prefixes (`🦀 Marty:` / `jules/marty/` and `🐚 Nora:` / `jules/nora/`);
+shared bot author alone or non-persona PRs (Dependabot/human) do not consume a slot.
 
 ## 🔑 OpenAI reviewer isolation
 

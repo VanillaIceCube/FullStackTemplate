@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-20
+
+### Fixed
+
+- Corrected Jules agent PR ownership rules and continuation logic (v3.1): require strict title (`🦀 Marty:` / `🐚 Nora:`) and branch (`jules/marty/` / `jules/nora/`) prefixes so Dependabot, human, or other-persona PRs no longer cause false capacity stops or duplicate branch creation.
+- Updated live schedule prompts for Nora and Marty across all 8 schedules and verified canonical PR maintenance.
+
 ## 2026-10-19
 
 ### Changed
