@@ -1,4 +1,4 @@
-import { apiFetch } from './requestClient';
+import { describe, beforeEach, test, expect, vi } from 'vitest';
 import {
   clearAllNotifications,
   clearNotification,
@@ -11,16 +11,26 @@ vi.mock('./requestClient', () => ({
   apiFetch: vi.fn(),
 }));
 
+import { apiFetch } from './requestClient';
+
 describe('notificationApiClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  test('lists notifications with authentication', () => {
+  test('fetches notifications with bearer token when provided', () => {
     fetchNotifications('TOKEN');
 
     expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
       headers: { Authorization: 'Bearer TOKEN' },
+    });
+  });
+
+  test('handles missing token without injecting malformed header', () => {
+    fetchNotifications();
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
+      headers: {},
     });
   });
 
