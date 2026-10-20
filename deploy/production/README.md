@@ -93,3 +93,8 @@ The full common suite needs Linux and a disposable Docker daemon. It creates
 unique temporary resources and fake credentials, never the production host.
 For local source development only, `--source-root <infrastructure-checkout>`
 checks the same common hashes offline. CI always verifies the immutable pin.
+
+
+## 🔌 Shared MCP framework
+
+Follow the [MCP framework contract](../../docs/MCP-FRAMEWORK.md) before activating an optional app. Notoli keeps its current MCP profile; MacroMapper ships the framework with MCP disabled. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.

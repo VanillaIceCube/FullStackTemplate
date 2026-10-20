@@ -68,6 +68,10 @@ test('WhatIf leaves the template and Vite configuration unchanged', (t) => {
 test('initialization changes app policy while preserving canonical shared source bytes', (t) => {
   const destination = sample(t);
   const files = [
+    'mcp-framework-source.json', 'backend/mcp-framework-manifest.json',
+    'scripts/check_mcp_framework.py', 'docs/MCP-FRAMEWORK.md',
+    ...fs.readdirSync(path.join(destination, 'backend/mcp_framework'), { recursive: true })
+      .filter((name) => name.endsWith('.py')).map((name) => 'backend/mcp_framework/' + name),
     'deploy/shared-source.json', 'deploy/check_parity.py',
     'deploy/production/release.py', 'deploy/production/build_bundle.py',
     ...fs.readdirSync(path.join(destination, 'deploy/tests'))

@@ -69,3 +69,8 @@ The frontend Docker build accepts `VITE_API_BASE_URL` and copies `dist/` into
 Nginx. The development Compose file uses the same variable and explicit Vite
 polling. Blank production API origins retain same-origin routing. See
 [frontend alignment](../docs/FRONTEND-ALIGNMENT.md).
+
+
+## 🔌 Shared MCP framework
+
+The [MCP framework guide](../docs/MCP-FRAMEWORK.md) defines opt-in ASGI/proxy/readiness requirements. Local development can call the backend directly; do not treat a local/legacy proxy as production MCP onboarding.
