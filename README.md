@@ -21,21 +21,23 @@ Add these under both **Settings → Secrets and variables → Actions → Secret
 and **Settings → Secrets and variables → Dependabot → Secrets**:
 
 ```text
-OPENAI_API_KEY
+OBI_WAN_OPENAI_API_KEY
+LINT_EASTWOOD_OPENAI_API_KEY
+ROBOCOP_OPENAI_API_KEY
 OBI_WAN_CODE_NOBI_PRIVATE_KEY
 LINT_EASTWOOD_PRIVATE_KEY
 ROBOCOP_PRIVATE_KEY
 ```
 
 GitHub isolates workflows triggered by Dependabot from the Actions secret
-store. Keeping the same four values in the Dependabot store lets its pull
+store. Keeping the same six values in the Dependabot store lets its pull
 requests run the required AI reviews; GitHub does not provide a way to copy
 secret values between the two stores.
 
 Add under **Actions → Variables**:
 
 ```text
-OPENAI_PROJECT_ID
+OPENAI_REVIEWERS_PROJECT_ID
 OBI_WAN_CODE_NOBI_APP_ID
 LINT_EASTWOOD_APP_ID
 ROBOCOP_APP_ID
@@ -267,3 +269,9 @@ owns only its services, database, immutable images, and private recovery records
 The default app/domain/subnet are onboarding examples, not an approved third
 deployment. Main does not deploy. Promotion, shared-host onboarding, bootstrap,
 and production actions each require the designated operator's approved plan.
+
+## 🔑 AI reviewer credentials
+
+Obi-Wan, Lint Eastwood, and RoboCop use separate OpenAI keys scoped to this
+repository. See the [workflow setup and deferred migration](.github/README-WORKFLOWS.md#-separate-openai-reviewer-credentials)
+for exact secret names, project configuration, verification, and rollback.
