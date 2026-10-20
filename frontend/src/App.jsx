@@ -1,4 +1,5 @@
 import './App.css';
+import ConnectedApps, { OAuthConsent } from './pages/connections/Connections';
 import { useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import AppHeader from './components/AppHeader';
@@ -34,6 +35,26 @@ export default function App() {
         <AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />
         <AppNavigationDrawer open={drawerOpen} setOpen={setDrawerOpen} />
         <Routes>
+          {import.meta.env.VITE_MCP_ENABLED === '1' && (
+            <>
+              <Route
+                path="/connections/authorize"
+                element={
+                  <Protected>
+                    <OAuthConsent />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/connections"
+                element={
+                  <Protected>
+                    <ConnectedApps />
+                  </Protected>
+                }
+              />
+            </>
+          )}
           <Route path="/login" element={<Login showSnackbar={showSnackbar} />} />
           <Route path="/register" element={<Register showSnackbar={showSnackbar} />} />
           <Route path="/forgot-password" element={<ForgotPassword showSnackbar={showSnackbar} />} />

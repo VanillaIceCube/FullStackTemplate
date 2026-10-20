@@ -206,3 +206,17 @@ EMAIL_TIMEOUT = int(os.getenv("DJANGO_EMAIL_TIMEOUT") or "10")
 DEFAULT_FROM_EMAIL = (
     os.getenv("DJANGO_DEFAULT_FROM_EMAIL") or "fullstacktemplate@example.com"
 )
+
+
+# Optional MCP has no routes, OAuth tables or application tools unless explicitly enabled.
+from mcp_framework.config import optional_settings  # noqa: E402
+
+MCP_SETTINGS = optional_settings("FullStackTemplate", "fullstacktemplate", sample=True)
+globals().update(MCP_SETTINGS)
+INSTALLED_APPS += ["mcp_framework"]
+if MCP_SETTINGS["MCP_ENABLED"]:
+    INSTALLED_APPS += ["oauth2_provider"]
+    SECURE_PROXY_SSL_HEADER = None
+    SESSION_COOKIE_SECURE = not DEBUG
+    CSRF_COOKIE_SECURE = not DEBUG
+ASGI_APPLICATION = "app.asgi.application"

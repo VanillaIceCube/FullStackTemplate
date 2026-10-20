@@ -53,6 +53,9 @@ jobs:
               - '.github/workflows/gate-test.yml'
             backend:
               - 'backend/**'
+              - 'scripts/check_mcp_framework.py'
+              - 'mcp-framework-source.json'
+              - '.github/workflows/gate-test.yml'
               - '.github/actions/read-versions/**'
             automation:
               - '.github/actions/get-pr-diff/**'
@@ -105,8 +108,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ steps.versions.outputs.node_version }}
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
 
       - name: Install frontend dependencies
         run: npm ci
@@ -173,7 +176,7 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ steps.versions.outputs.python_version }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: backend/requirements.txt
 
       - name: Install backend dependencies
@@ -185,7 +188,11 @@ jobs:
         run: |
           set -o pipefail
           status=0
-          python manage.py test --verbosity=2 2>&1 | tee test_output.txt || status=$?
+          {
+            python ../scripts/check_mcp_framework.py &&
+            python manage.py test --verbosity=2 &&
+            DJANGO_MCP_ENABLED=1 DJANGO_MCP_BASE_URL=http://localhost:8000 DJANGO_MCP_SERVER_FACTORY=mcp_framework.server.sample_server python manage.py test mcp_framework --verbosity=2
+          } 2>&1 | tee test_output.txt || status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
 
       - name: Test summary

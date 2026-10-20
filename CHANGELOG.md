@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-20
+
+### Added
+
+- Add the reusable, hash-pinned MCP/OAuth framework and isolated consent, token lifecycle and transport tests.
+
+### Changed
+
+- Provide opt-in ASGI startup and optional consent/Connected Apps pages; retain ordinary REST/Gunicorn behavior with MCP disabled by default.
+
+
 ## 2026-10-19
 
 ### Changed

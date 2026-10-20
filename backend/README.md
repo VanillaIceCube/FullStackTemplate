@@ -114,3 +114,8 @@ overwrites forwarded scheme/client headers. Django ignores forwarded host;
 forwarded HTTPS trust relies on the reviewed, restricted backend networks.
 Bootstrap, migration, backup, and explicit recovery follow
 [the production guide](../deploy/production/README.md).
+
+
+## 🔌 Shared MCP framework
+
+See [the MCP framework guide](../docs/MCP-FRAMEWORK.md) for opt-in settings, ASGI startup, OAuth migrations/client registration, consent, scope/ownership requirements and disabled-profile tests.
