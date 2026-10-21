@@ -219,10 +219,10 @@ rerun on the current head. GitHub accepts skipped jobs for required checks, so a
 skipped reviewer is not proof of a review. The read-only audit below rejects
 missing, skipped, cancelled, neutral and all other non-success reviewer results.
 It publishes no aggregator and changes no rules. [The dated ruleset
-snapshot](review-gating-evidence.json) records the existing requirements and
-Notoli's live verdict/failure/recovery parity reference; FullStackTemplate's
-fixed publisher still needs its own live native blocking-to-approval transition
-for that end-to-end acceptance criterion.
+snapshot](review-gating-evidence.json) records the existing requirements,
+Notoli's live verdict/failure/recovery parity reference, and PR #236's own native
+requested-changes reviews, failed required checks and blocked merge state.
+The PR's final validation tracks approval/check recovery after the completed fix.
 
 ```powershell
 gh api repos/VanillaIceCube/FullStackTemplate/rulesets/19855608 > ruleset.json

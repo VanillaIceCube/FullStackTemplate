@@ -132,6 +132,15 @@
     "later_approval": "https://github.com/VanillaIceCube/Notoli/pull/942#pullrequestreview-5583539374",
     "later_passing_check": "https://github.com/VanillaIceCube/Notoli/actions/runs/39404568951/job/118567260315"
   },
-  "verification_limit": "Notoli provides existing live verdict/failure/recovery evidence. FullStackTemplate publisher behavior is covered by local and PR automation tests; a live native REQUEST_CHANGES-to-APPROVE transition on the fixed publisher is separate acceptance evidence.",
-  "credential_check": "Required reviewer secret names exist in both Actions and Dependabot; app ID/project variable names exist. Values were not retrieved."
+  "credential_check": "Required reviewer secret names exist in both Actions and Dependabot; app ID/project variable names exist. Values were not retrieved.",
+  "live_fixed_publisher_verification": {
+    "pr": "https://github.com/VanillaIceCube/FullStackTemplate/pull/236",
+    "head_sha": "c6140fdeb1191f2a678356e018062a4fb16d23f8",
+    "merge_state": "BLOCKED",
+    "blocking_review": "https://github.com/VanillaIceCube/FullStackTemplate/pull/236#pullrequestreview-5593382984",
+    "failed_required_check": "https://github.com/VanillaIceCube/FullStackTemplate/actions/runs/39519771086/job/118961010050",
+    "second_blocking_review": "https://github.com/VanillaIceCube/FullStackTemplate/pull/236#pullrequestreview-5593380637",
+    "second_failed_required_check": "https://github.com/VanillaIceCube/FullStackTemplate/actions/runs/39519771086/job/118960885537",
+    "scope": "Regression-first head implements REQUEST_CHANGES failure, while invalid-event tests expose the remaining bug. Final head fixes invalid events and the CodeQL regex finding. Recovery evidence is tracked in PR validation."
+  }
 }

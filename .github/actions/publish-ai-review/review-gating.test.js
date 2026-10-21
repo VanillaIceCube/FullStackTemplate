@@ -63,11 +63,14 @@ test("gate audit rejects missing, skipped, cancelled and failed reviewer results
     ]).length,
     1,
   );
+  const failed = { ...clean[0], id: 10, conclusion: "failure" };
+  const rerun = { ...failed, id: 11, conclusion: "success" };
+  assert.equal(
+    reviewerGateProblems(ruleset, [failed, ...clean.slice(1)]).length,
+    1,
+  );
   assert.deepEqual(
-    reviewerGateProblems(ruleset, [
-      ...clean,
-      { ...clean[0], id: 0, conclusion: "failure" },
-    ]),
+    reviewerGateProblems(ruleset, [failed, rerun, ...clean.slice(1)]),
     [],
     "A successful rerun supersedes the earlier failure",
   );
@@ -275,7 +278,8 @@ test("required reviewer contexts and trusted PR eligibility stay stable", () => 
         `uses: \\.\\/\\.github\\/workflows\\/${file.replaceAll(".", "\\.")}`,
       ),
     );
-    assert.doesNotMatch(child, /^    if:|continue-on-error:/m);
+    assert.doesNotMatch(child, /^    if:/m);
+    assert.doesNotMatch(child, /continue-on-error:/);
     const condition = parent.match(/    if: >-\n((?:      .*\n)+)/)[1].trim();
     for (const author of ["human", "dependabot[bot]"]) {
       for (const upstream of ["success", "failure", "skipped", "cancelled"]) {
