@@ -2,6 +2,14 @@
 
 ## 2026-10-20
 
+### Fixed
+
+- Fail closed on incomplete dependency reviews and retain sanitized structured evidence with a bounded RoboCop report.
+- Preserve alert history and Project metadata before auto-close; verify concurrent closure without suppressing unrelated API errors and use the current Work type field.
+
+
+## 2026-10-20
+
 ### Added
 
 - Add a read-only reviewer-gate audit and matching Notoli regressions for exact check names, trusted human/Dependabot eligibility, missing/skipped/cancelled results and verdict recovery.
