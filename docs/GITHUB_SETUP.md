@@ -198,8 +198,7 @@ Do not require a standalone `CodeQL` context. FullStackTemplate's reusable
 CodeQL workflow emits `CodeQL / Detect CodeQL Scope` and the three analyzer
 contexts. Scope-empty pull requests skip the analyzers and do not emit a
 standalone parent check, so requiring that context would leave a permanent
-pending check. This is an intentional compatibility difference from Notoli's
-current ruleset. Validate the actual check names from the first CI run before
+pending check. Notoli follows the same scope-aware policy. Validate the actual check names from the first CI run before
 saving the ruleset; GitHub status checks are matched by exact name.
 
 The required AI reviewer contexts are:
@@ -210,6 +209,17 @@ AI Build Sheriff Review / Lint Eastwood build sheriff review
 AI Security Review / RoboCop security review
 Auto Merge
 ```
+
+For all three personas, the shared publisher fails the required job after
+publishing `REQUEST_CHANGES`, including unchanged/repeated blocking verdicts.
+Valid `APPROVE` and `COMMENT` succeed; missing/invalid output and incomplete
+reviews fail visibly. Verify a later successful review on the current head
+before considering a prior failure resolved. Check both a human and a trusted
+Dependabot PR before activating requirements. A missing check stays pending,
+and a skipped reviewer must be rerun: GitHub itself accepts skipped required
+jobs. Use the read-only audit in
+[`README-WORKFLOWS.md`](../.github/README-WORKFLOWS.md#main-branch-protection)
+to verify actual successful reviewer results.
 
 The reviewers run for trusted same-repository pull requests, including
 Dependabot pull requests once [the Dependabot secrets](#3-configure-secrets-for-dependabot-triggered-reviews)

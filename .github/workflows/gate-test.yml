@@ -259,6 +259,7 @@ jobs:
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
             .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js \
             .github/actions/publish-ai-review/publish-ai-review.test.js \
+            .github/actions/publish-ai-review/review-gating.test.js \
             .github/actions/security-alerts/sync-security-alerts.test.js || group_status=$?
             python3 -m unittest discover -s .github/actions/get-pr-diff -p 'test_*.py' -v || group_status=$?
             exit "$group_status"

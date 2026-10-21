@@ -361,7 +361,17 @@ async function publishAiReview({
   }
 
   const events = new Set(["APPROVE", "REQUEST_CHANGES", "COMMENT"]);
-  const event = events.has(parsed.event) ? parsed.event : "COMMENT";
+  if (!events.has(parsed.event)) {
+    await publishUnavailableReview({
+      github,
+      context,
+      core,
+      personaName,
+      reason: `${personaName} returned a review with an invalid event.`,
+    });
+    return;
+  }
+  const event = parsed.event;
   const summary = compactText(parsed.summary);
   if (!summary) {
     await publishUnavailableReview({
@@ -566,6 +576,10 @@ async function publishAiReview({
     body,
     comments: comments.length ? comments : undefined,
   });
+
+  if (event === "REQUEST_CHANGES") {
+    core.setFailed(`${personaName} requested changes.`);
+  }
 }
 
 module.exports = {

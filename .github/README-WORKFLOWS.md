@@ -194,13 +194,45 @@ for trusted same-repository pull requests, including Dependabot once its six
 review secrets are configured. The ruleset blocks force pushes and branch
 deletion and has no bypass actors. The standalone `CodeQL` context is
 intentionally not required because the scope-aware workflow does not emit that
-parent check for scope-empty pull requests. This is an intentional compatibility
-difference from Notoli; validate exact check names after the first CI run when
-creating the ruleset.
+parent check for scope-empty pull requests. Notoli now requires the same three
+reviewer contexts and excludes that standalone CodeQL context. Validate exact
+check names after the first CI run when creating a generated app's ruleset.
+
+The required reviewer contexts are:
+
+- `AI Code Review / Obi-Wan Code-nobi code review`
+- `AI Build Sheriff Review / Lint Eastwood build sheriff review`
+- `AI Security Review / RoboCop security review`
+
+The shared publisher submits the native review first, then fails the job for
+`REQUEST_CHANGES`, including repeated/unchanged verdicts. Valid `APPROVE` and
+`COMMENT` succeed; an approval on a later head can restore a passing check.
+Missing credentials, missing/invalid verdicts, malformed output, incomplete major
+briefs and over-budget diffs continue to fail visibly. Build/security reviews
+use `always()` so upstream failures or skipped gates cannot suppress them.
+All eligible same-repository PRs, including Dependabot and documentation changes,
+run the reviewers. Forks receive no private reviewer secrets; bring the change
+to a trusted same-repository branch for review.
+
+Missing required checks remain pending; failed/cancelled checks require a clean
+rerun on the current head. GitHub accepts skipped jobs for required checks, so a
+skipped reviewer is not proof of a review. The read-only audit below rejects
+missing, skipped, cancelled, neutral and all other non-success reviewer results.
+It publishes no aggregator and changes no rules. [The dated ruleset
+snapshot](review-gating-evidence.json) records the existing requirements,
+Notoli's live verdict/failure/recovery parity reference, and PR #236's own native
+requested-changes reviews, failed required checks and blocked merge state.
+The PR's final validation tracks approval/check recovery after the completed fix.
+
+```powershell
+gh api repos/VanillaIceCube/FullStackTemplate/rulesets/19855608 > ruleset.json
+gh api "repos/VanillaIceCube/FullStackTemplate/commits/<HEAD_SHA>/check-runs?per_page=100" > head-check-runs.json
+node .github/actions/publish-ai-review/verify-gates.js ruleset.json head-check-runs.json
+```
 
 ## Local automation checks
 ```powershell
-node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js .github/actions/publish-ai-review/publish-ai-review.test.js .github/actions/security-alerts/sync-security-alerts.test.js
+node --test .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js .github/actions/publish-ai-review/*.test.js .github/actions/security-alerts/sync-security-alerts.test.js
 docker run --rm -v "${PWD}:/repo" --workdir /repo rhysd/actionlint:latest -color
 ```
 
