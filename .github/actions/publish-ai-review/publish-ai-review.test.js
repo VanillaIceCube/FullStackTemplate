@@ -354,7 +354,7 @@ test("renders varied model-authored unchanged summaries without preset copy", ()
   );
 });
 
-test("keeps exact-line findings inline without duplicating them in the body", async () => {
+test("publishes new request changes and fails the required check", async () => {
   const { createdReviews, github } = createGitHubMock();
   const { core, failures, warnings } = createCore();
   const inlineBody =
@@ -375,7 +375,7 @@ test("keeps exact-line findings inline without duplicating them in the body", as
     ),
   });
 
-  assert.deepEqual(failures, []);
+  assert.deepEqual(failures, ["Lint Eastwood requested changes."]);
   assert.deepEqual(warnings, []);
   assert.equal(createdReviews.length, 1);
   assert.doesNotMatch(createdReviews[0].body, /no-new-func/);
@@ -384,7 +384,7 @@ test("keeps exact-line findings inline without duplicating them in the body", as
   ]);
 });
 
-test("preserves every unplaceable finding when a duplicate is suppressed", async () => {
+test("keeps a repeated blocking verdict failed while preserving findings", async () => {
   const priorBody = renderReviewBody({
     personaName: "Obi-Wan Code-nobi",
     event: "REQUEST_CHANGES",
@@ -431,7 +431,7 @@ test("preserves every unplaceable finding when a duplicate is suppressed", async
     ),
   });
 
-  assert.deepEqual(failures, []);
+  assert.deepEqual(failures, ["Obi-Wan Code-nobi requested changes."]);
   assert.deepEqual(warnings, []);
   assert.equal(createdReviews.length, 1);
   assert.equal(createdReviews[0].comments, undefined);

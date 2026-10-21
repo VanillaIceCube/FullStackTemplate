@@ -4,6 +4,17 @@
 
 ### Added
 
+- Add a read-only reviewer-gate audit and matching Notoli regressions for exact check names, trusted human/Dependabot eligibility, missing/skipped/cancelled results and verdict recovery.
+
+### Fixed
+
+- Fail each AI reviewer job after publishing a native `REQUEST_CHANGES`, including unchanged/repeated verdicts, while preserving successful approval/comment reviews and all existing failure gates.
+- Reject missing or invalid verdict events as unavailable instead of passing a fallback comment.
+
+## 2026-10-20
+
+### Added
+
 - Add the reusable, hash-pinned MCP/OAuth framework and isolated consent, token lifecycle and transport tests.
 
 ### Changed

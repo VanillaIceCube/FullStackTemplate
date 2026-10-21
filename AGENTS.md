@@ -88,6 +88,8 @@ and allowlist/base-URL variables whenever domains or routes change. The local
 proxy/Compose files are not production release inputs.
 
 ## GitHub automation
+
+Main requires `AI Code Review / Obi-Wan Code-nobi code review`, `AI Build Sheriff Review / Lint Eastwood build sheriff review`, and `AI Security Review / RoboCop security review`. The shared publisher must fail after publishing any `REQUEST_CHANGES`, including unchanged verdicts; valid `APPROVE`/`COMMENT` pass and unavailable/invalid output fails. Preserve all existing required checks, same-repository human/Dependabot eligibility and fork credential isolation. Run both publisher test files and Actionlint when changing this contract; use the read-only `verify-gates.js` audit for actual successful reviewer results. See `.github/README-WORKFLOWS.md`.
 The copied Notoli automation includes lint, tests, CodeQL, dependency review, npm malware review, Dependabot auto-merge, AI PR reviewers, deployment, and scheduled security-alert aggregation.
 
 Secret-dependent workflows must fail visibly when their credentials are unavailable. Keep GitHub App permissions and the credential separation described in `.github/README-WORKFLOWS.md`.
