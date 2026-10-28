@@ -164,8 +164,17 @@ function getStoredAccessToken() {
   }
 }
 
+function removeAuthorizationHeaders(headers) {
+  Object.keys(headers).forEach((key) => {
+    if (key.toLowerCase() === 'authorization') {
+      delete headers[key];
+    }
+  });
+}
+
 function withAccessToken(options, accessToken) {
   const headers = normalizeHeaders(options.headers);
+  removeAuthorizationHeaders(headers);
   headers.Authorization = `Bearer ${accessToken}`;
   return {
     ...options,
@@ -180,6 +189,7 @@ export async function apiFetch(path, options = {}) {
 
   const storedToken = getStoredAccessToken();
   if (storedToken && !hasAuthorizationHeader(headers) && shouldRedirectToLogin(path)) {
+    removeAuthorizationHeaders(headers);
     headers.Authorization = `Bearer ${storedToken}`;
   }
 

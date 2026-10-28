@@ -320,4 +320,36 @@ describe('requestClient', () => {
       },
     });
   });
+
+  test('replaces case-variant authorization headers when retrying with new access token', async () => {
+    delete process.env.REACT_APP_API_BASE_URL;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 401 })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ access: 'NEW_ACCESS' }),
+      })
+      .mockResolvedValueOnce({ ok: true, status: 200 });
+
+    sessionStorage.setItem('accessToken', 'OLD_ACCESS');
+    sessionStorage.setItem('refreshToken', 'REFRESH');
+
+    const { apiFetch } = await import('./requestClient');
+
+    const response = await apiFetch('/api/custom/', {
+      method: 'GET',
+      headers: { authorization: 'Bearer OLD_ACCESS', 'x-custom': 'test' },
+    });
+
+    expect(response.ok).toBe(true);
+    expect(global.fetch).toHaveBeenLastCalledWith('http://localhost:8000/api/custom/', {
+      method: 'GET',
+      headers: {
+        'x-custom': 'test',
+        Authorization: 'Bearer NEW_ACCESS',
+      },
+    });
+  });
 });
