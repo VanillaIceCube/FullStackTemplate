@@ -164,6 +164,11 @@ function getStoredAccessToken() {
 
 function withAccessToken(options, accessToken) {
   const headers = normalizeHeaders(options.headers);
+  Object.keys(headers).forEach((key) => {
+    if (key.toLowerCase() === 'authorization') {
+      delete headers[key];
+    }
+  });
   headers.Authorization = `Bearer ${accessToken}`;
   return {
     ...options,
