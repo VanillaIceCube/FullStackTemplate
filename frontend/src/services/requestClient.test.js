@@ -320,4 +320,35 @@ describe('requestClient', () => {
       },
     });
   });
+
+  test('replaces lowercased authorization header during access token refresh retry', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    global.fetch = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 401 })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ access: 'NEW_ACCESS' }),
+      })
+      .mockResolvedValueOnce({ ok: true, status: 200 });
+
+    sessionStorage.setItem('accessToken', 'OLD_ACCESS');
+    sessionStorage.setItem('refreshToken', 'REFRESH');
+
+    const { apiFetch } = await import('./requestClient');
+
+    const response = await apiFetch('/api/test/', {
+      method: 'GET',
+      headers: { authorization: 'Bearer OLD_ACCESS' },
+    });
+
+    expect(response.ok).toBe(true);
+    expect(global.fetch).toHaveBeenLastCalledWith('http://localhost:8000/api/test/', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer NEW_ACCESS',
+      },
+    });
+  });
 });
