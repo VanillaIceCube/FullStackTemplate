@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Record the previously undocumented Resend fix from [PR #122](https://github.com/VanillaIceCube/FullStackTemplate/pull/122): catch HTTP errors with decoded API response bodies and map reply-to, HTML-only and multipart plain-text/HTML messages correctly (merged 2026-09-19).
+
 - Preserve custom request headers through token-refresh retries, attach session tokens when omitted, and trim or remove stale profile values.
 
 - Enforce registration password validators against the prospective user, preserve reset-password whitespace, normalize login email, and reject malformed reset user IDs.

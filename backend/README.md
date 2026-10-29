@@ -100,6 +100,20 @@ DJANGO_EMAIL_TIMEOUT=10
 DJANGO_DEFAULT_FROM_EMAIL=fullstacktemplate.no-reply@example.com
 ```
 
+`ResendApiEmailBackend` maps sender, recipients, subject, `cc`, `bcc`, and
+`reply_to` into the API payload. Plain messages send `text`; an `EmailMessage`
+with `content_subtype = "html"` sends `html` without duplicating markup into
+`text`. `EmailMultiAlternatives` sends its HTML alternative and, when present,
+its plain-text body.
+
+HTTP failures from `urlopen` are caught as `urllib.error.HTTPError`; the backend
+re-raises that error with the original status and decoded API response body.
+The default `fail_silently=False` propagates delivery errors. With
+`fail_silently=True`, failed messages are skipped and the returned count includes
+only successful sends. A missing API key raises `ValueError`, or returns zero
+in silent mode. See [PR #122](https://github.com/VanillaIceCube/FullStackTemplate/pull/122)
+and `authentication/tests.py` for the payload and error regression coverage.
+
 SMTP-compatible backends can instead use the documented `DJANGO_EMAIL_HOST`,
 `DJANGO_EMAIL_PORT`, `DJANGO_EMAIL_USE_TLS`, and
 `DJANGO_EMAIL_HOST_USER` settings.
