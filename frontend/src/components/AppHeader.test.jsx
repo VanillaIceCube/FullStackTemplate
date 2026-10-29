@@ -135,4 +135,116 @@ describe('AppHeader', () => {
     await user.click(screen.getByText('Mark all read'));
     expect(markAllNotificationsRead).toHaveBeenCalledWith('access');
   });
+
+  test('handles notification loading error and retry', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValueOnce(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await user.click(screen.getByLabelText('notifications'));
+    expect(await screen.findByText('Notifications are unavailable right now.')).toBeInTheDocument();
+
+    fetchNotifications.mockResolvedValueOnce(
+      response([
+        {
+          id: 1,
+          title: 'Template ready',
+          message: 'Your shell is ready.',
+          is_read: false,
+        },
+      ]),
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText('Template ready')).toBeInTheDocument();
+  });
+
+  test('handles individual notification clear and action errors', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Notification 1',
+          message: 'Message 1',
+          is_read: false,
+        },
+      ]),
+    );
+    clearNotification.mockResolvedValueOnce(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+
+    await user.click(screen.getByLabelText('notifications'));
+    expect(await screen.findByText('Notification 1')).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText('Clear notification'));
+    expect(await screen.findByText('Could not clear that notification.')).toBeInTheDocument();
+
+    clearNotification.mockResolvedValueOnce(response({ deleted: 1 }, true));
+    await user.click(screen.getByLabelText('Clear notification'));
+    await waitFor(() => expect(screen.queryByText('Notification 1')).not.toBeInTheDocument());
+  });
+
+  test('does not navigate to target_path when markNotificationRead fails or returns malformed response', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    fetchNotifications.mockResolvedValue(
+      response([
+        {
+          id: 1,
+          title: 'Notification with path',
+          message: 'Target path test',
+          is_read: false,
+          target_path: '/target-route',
+        },
+      ]),
+    );
+
+    // Case 1: markNotificationRead request fails (ok: false)
+    markNotificationRead.mockResolvedValueOnce(response(null, false));
+
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />, {
+      routeEntries: ['/'],
+    });
+
+    await user.click(screen.getByLabelText('notifications'));
+    expect(await screen.findByText('Notification with path')).toBeInTheDocument();
+
+    await user.click(screen.getByText('Notification with path'));
+    expect(await screen.findByText('Could not update that notification.')).toBeInTheDocument();
+
+    // Case 2: markNotificationRead returns non-OK or malformed JSON
+    markNotificationRead.mockResolvedValueOnce({
+      ok: true,
+      json: vi.fn().mockRejectedValueOnce(new Error('Invalid JSON')),
+    });
+
+    await user.click(screen.getByText('Notification with path'));
+    expect(await screen.findByText('Could not update that notification.')).toBeInTheDocument();
+  });
+  test('keeps item and bulk actions disabled until mark-read JSON finishes', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    const notification = { id: 1, title: 'Slow notification', message: 'Wait', is_read: false };
+    fetchNotifications.mockResolvedValue(response([notification]));
+    let resolveJson;
+    markNotificationRead.mockResolvedValue({
+      ok: true,
+      json: () =>
+        new Promise((resolve) => {
+          resolveJson = resolve;
+        }),
+    });
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(await screen.findByText('Slow notification'));
+    expect(screen.getByLabelText('Clear notification')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Mark all read' })).toBeDisabled();
+    resolveJson({ ...notification, is_read: true });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Clear all' })).toBeEnabled());
+  });
 });
