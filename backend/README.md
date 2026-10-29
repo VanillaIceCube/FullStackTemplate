@@ -19,6 +19,7 @@ template. Add new Django apps beside `authentication` and `notifications`.
 ## Authentication API
 - `POST /auth/register/`
   - Body: `email`, `password`, and optional `username`
+  - Enforces configured Django password validators, including similarity to the prospective username/email; invalid passwords return HTTP 400 before account creation.
   - Returns: `access`, `refresh`, `username`, `email`, and a success message
 - `POST /auth/login/`
   - Body: `email`, `password`
@@ -31,6 +32,7 @@ template. Add new Django apps beside `authentication` and `notifications`.
   - Always returns a generic success response for valid email-shaped input
 - `POST /auth/reset-password/`
   - Body: `uid`, `token`, `password`
+  - Validates passwords against the existing user and preserves password whitespace exactly.
 
 ## Notification API
 All `/api/` endpoints require a JWT access token. Notification querysets are

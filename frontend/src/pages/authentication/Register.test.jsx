@@ -57,7 +57,7 @@ describe('Register', () => {
   });
 
   test('displays API registration error and disables controls during submit', async () => {
-    const showSnackbar = jest.fn();
+    const showSnackbar = vi.fn();
     let resolveRegister;
     register.mockReturnValue(
       new Promise((resolve) => {
@@ -74,7 +74,7 @@ describe('Register', () => {
     await userEvent.type(screen.getByLabelText('Confirm Password'), 'short');
 
     const submitBtn = screen.getByRole('button', { name: 'Register' });
-    userEvent.click(submitBtn);
+    await userEvent.click(submitBtn);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Registering...' })).toBeDisabled();

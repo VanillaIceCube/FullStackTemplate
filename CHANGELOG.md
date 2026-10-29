@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-28
+
+### Fixed
+
+- Enforce registration password validators against the prospective user, preserve reset-password whitespace, normalize login email, and reject malformed reset user IDs.
+- Disable authentication controls while submitting and display nested or field-level API validation errors.
+
 ## 2026-10-20
 
 ### Fixed

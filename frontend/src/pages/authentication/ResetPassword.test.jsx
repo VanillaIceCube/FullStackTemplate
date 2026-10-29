@@ -47,7 +47,7 @@ describe('ResetPassword', () => {
   });
 
   test('disables controls and button during submission', async () => {
-    const showSnackbar = jest.fn();
+    const showSnackbar = vi.fn();
     let resolveReset;
     resetPassword.mockReturnValue(
       new Promise((resolve) => {
@@ -63,7 +63,7 @@ describe('ResetPassword', () => {
     await userEvent.type(screen.getByLabelText('Confirm Password'), 'new-secret');
 
     const submitBtn = screen.getByRole('button', { name: 'Reset Password' });
-    userEvent.click(submitBtn);
+    await userEvent.click(submitBtn);
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Resetting...' })).toBeDisabled();
