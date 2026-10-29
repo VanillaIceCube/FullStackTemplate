@@ -93,6 +93,45 @@ class RegistrationTests(APITestCase):
         self.assertEqual(duplicate.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(duplicate.data["error"], "Email already exists.")
 
+    def test_register_rejects_weak_password(self):
+        response = self.client.post(
+            "/auth/register/",
+            {"email": "mapper@example.com", "password": "short"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertIn("too short", response.data["error"].lower())
+        self.assertFalse(User.objects.filter(email="mapper@example.com").exists())
+
+    def test_register_rejects_common_numeric_and_user_similar_passwords(self):
+        for password in ("password", "123456789012", "mapper", "macro_mapper"):
+            with self.subTest(password=password):
+                response = self.client.post(
+                    "/auth/register/",
+                    {
+                        "email": "mapper@example.com",
+                        "username": "macro_mapper",
+                        "password": password,
+                    },
+                    format="json",
+                )
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertFalse(
+                    User.objects.filter(email="mapper@example.com").exists()
+                )
+
+    def test_register_checks_similarity_to_derived_username(self):
+        response = self.client.post(
+            "/auth/register/",
+            {"email": "longusername@example.com", "password": "longusername"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("too similar", response.data["error"].lower())
+        self.assertFalse(User.objects.filter(email="longusername@example.com").exists())
+
 
 class LoginAndRefreshTests(APITestCase):
     def setUp(self):
@@ -188,6 +227,20 @@ class PasswordResetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("new_password_123!"))
+
+    def test_reset_password_preserves_whitespace(self):
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
+        password = "  new_password_123!  "
+        response = self.client.post(
+            "/auth/reset-password/",
+            {"uid": uid, "token": token, "password": password},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(password))
+        self.assertFalse(self.user.check_password(password.strip()))
 
     def test_reset_password_rejects_invalid_link(self):
         response = self.client.post(
