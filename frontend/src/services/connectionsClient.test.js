@@ -47,3 +47,25 @@ test('backend errors are shown without treating them as successful responses', a
   });
   await expect(loadConsent('?invalid')).rejects.toThrow('Invalid callback.');
 });
+
+test('handles non-JSON HTTP errors gracefully without SyntaxError', async () => {
+  apiFetch.mockResolvedValue({
+    ok: false,
+    status: 502,
+    json: async () => {
+      throw new SyntaxError('Unexpected token < in JSON');
+    },
+  });
+  await expect(loadConsent('?invalid')).rejects.toThrow('HTTP 502');
+});
+
+test('handles ok response with invalid JSON payload', async () => {
+  apiFetch.mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: async () => {
+      throw new SyntaxError('Unexpected token < in JSON');
+    },
+  });
+  await expect(loadConsent('?invalid')).rejects.toThrow('Request failed.');
+});
