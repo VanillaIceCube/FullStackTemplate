@@ -53,3 +53,12 @@ base. Follow [the production guide](../deploy/production/README.md).
 ## 🔌 Shared MCP framework
 
 See [the MCP framework guide](../docs/MCP-FRAMEWORK.md). Optional consent and Connected Apps routes require `VITE_MCP_ENABLED=1` in the template/MacroMapper; Notoli keeps its existing enabled UI. Preserve JWT-only consent and validated connection return paths.
+
+## Shared request and session handling
+
+`apiFetch` preserves plain-object, tuple-array, and native `Headers` entries
+through token refresh. Protected requests use the stored access token when the
+caller omits authorization; explicit authorization is preserved until a refresh
+requires replacement. Authentication-form requests do not receive an injected
+access token. Session profile values are trimmed, and missing or blank username
+and email fields clear stale values.
