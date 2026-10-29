@@ -52,7 +52,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationError, setNotificationError] = useState('');
   const [actionPending, setActionPending] = useState(false);
-  const [pendingIds, setPendingIds] = useState(new Set());
+  const [pendingIds, setPendingIds] = useState(() => new Set());
 
   const profileUsername = safeGetSessionItem('username');
   const profileEmail = safeGetSessionItem('email');
