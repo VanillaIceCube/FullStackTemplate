@@ -269,8 +269,7 @@ describe('requestClient', () => {
   });
 
   test('preserves Headers instance entries when retrying after access token refresh', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
-    global.fetch = jest
+    global.fetch = vi
       .fn()
       .mockResolvedValueOnce({ ok: false, status: 401 })
       .mockResolvedValueOnce({
@@ -306,7 +305,6 @@ describe('requestClient', () => {
   });
 
   test('automatically attaches stored accessToken when not provided in headers', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
     sessionStorage.setItem('accessToken', 'STORED_ACCESS');
 
     const { apiFetch } = await import('./requestClient');
@@ -322,8 +320,7 @@ describe('requestClient', () => {
   });
 
   test('replaces case-variant authorization headers when retrying with new access token', async () => {
-    delete process.env.REACT_APP_API_BASE_URL;
-    global.fetch = jest
+    global.fetch = vi
       .fn()
       .mockResolvedValueOnce({ ok: false, status: 401 })
       .mockResolvedValueOnce({
