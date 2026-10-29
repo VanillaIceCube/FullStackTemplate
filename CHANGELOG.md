@@ -6,6 +6,8 @@
 
 - Enforce registration password validators against the prospective user, preserve reset-password whitespace, normalize login email, and reject malformed reset user IDs.
 - Disable authentication controls while submitting and display nested or field-level API validation errors.
+- Add notification load retries and keep item/bulk actions disabled through response parsing, with inline action errors and guarded navigation.
+- Execute recipient-scoped bulk notification mutations inside database transactions.
 
 ## 2026-10-20
 

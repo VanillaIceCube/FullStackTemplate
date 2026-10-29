@@ -45,6 +45,9 @@ always scoped to the authenticated recipient.
 - `PATCH /api/notifications/mark-all-read/`
 - `DELETE /api/notifications/clear-all/`
 
+Bulk mark-read and clear operations run in atomic transactions and accept empty
+recipient lists. Authentication and recipient scoping apply to both actions.
+
 Notifications retain a generic event type, title, message, optional actor, and
 optional frontend `target_path`. Future application apps can create them
 without depending on a template-owned domain model.

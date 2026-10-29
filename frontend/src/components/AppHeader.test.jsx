@@ -220,10 +220,31 @@ describe('AppHeader', () => {
     // Case 2: markNotificationRead returns non-OK or malformed JSON
     markNotificationRead.mockResolvedValueOnce({
       ok: true,
-      json: jest.fn().mockRejectedValueOnce(new Error('Invalid JSON')),
+      json: vi.fn().mockRejectedValueOnce(new Error('Invalid JSON')),
     });
 
     await user.click(screen.getByText('Notification with path'));
     expect(await screen.findByText('Could not update that notification.')).toBeInTheDocument();
+  });
+  test('keeps item and bulk actions disabled until mark-read JSON finishes', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('accessToken', 'access');
+    const notification = { id: 1, title: 'Slow notification', message: 'Wait', is_read: false };
+    fetchNotifications.mockResolvedValue(response([notification]));
+    let resolveJson;
+    markNotificationRead.mockResolvedValue({
+      ok: true,
+      json: () =>
+        new Promise((resolve) => {
+          resolveJson = resolve;
+        }),
+    });
+    renderWithProviders(<AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />);
+    await user.click(screen.getByLabelText('notifications'));
+    await user.click(await screen.findByText('Slow notification'));
+    expect(screen.getByLabelText('Clear notification')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Mark all read' })).toBeDisabled();
+    resolveJson({ ...notification, is_read: true });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Clear all' })).toBeEnabled());
   });
 });

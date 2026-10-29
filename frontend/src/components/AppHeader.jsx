@@ -88,12 +88,24 @@ export default function AppHeader({ title, setDrawerOpen }) {
     loadNotifications();
   }, [loadNotifications]);
 
-  const updateNotification = async (notificationId, operation, errorMessage) => {
+  const updateNotification = async (
+    notificationId,
+    operation,
+    errorMessage,
+    readUpdated = false,
+  ) => {
     setNotificationError('');
     setPendingIds((prev) => new Set(prev).add(notificationId));
     try {
       const response = await operation(notificationId, accessToken);
       if (!response?.ok) throw new Error(errorMessage);
+      if (readUpdated) {
+        const updated = await response.json();
+        if (!updated || updated.id !== notificationId || updated.is_read !== true) {
+          throw new Error(errorMessage);
+        }
+        return updated;
+      }
       return response;
     } catch (_error) {
       setNotificationError(errorMessage);
@@ -122,31 +134,19 @@ export default function AppHeader({ title, setDrawerOpen }) {
 
   const handleOpenNotification = async (notification) => {
     if (pendingIds.has(notification.id) || actionPending) return;
-    let markReadSuccess = true;
     if (!notification.is_read) {
-      markReadSuccess = false;
-      const response = await updateNotification(
+      const updated = await updateNotification(
         notification.id,
         markNotificationRead,
         'Could not update that notification.',
+        true,
       );
-      if (response) {
-        try {
-          const updated = await response.json();
-          if (updated && typeof updated === 'object' && updated.id) {
-            setNotifications((current) =>
-              current.map((item) => (item.id === updated.id ? updated : item)),
-            );
-            markReadSuccess = true;
-          } else {
-            setNotificationError('Could not update that notification.');
-          }
-        } catch (_error) {
-          setNotificationError('Could not update that notification.');
-        }
-      }
+      if (!updated) return;
+      setNotifications((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      );
     }
-    if (markReadSuccess && notification.target_path) {
+    if (notification.target_path) {
       setNotificationAnchorEl(null);
       navigate(notification.target_path);
     }
