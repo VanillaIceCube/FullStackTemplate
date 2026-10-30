@@ -8,6 +8,12 @@ Change the shared source, regenerate its manifest, and synchronize every consume
 
 ## Ownership and onboarding gate
 
+Follow the [main-first release policy](../../docs/SHARED-ROLLOUT-POLICY.md#main-first-releases).
+Ordinary changes merge through reviewed main before promotion; exceptional
+owner-authorized deployment experiments return to main promptly through review.
+Intentional release lag is allowed until features are ready. This template has
+no active `env-prod` branch; branch parity does not authorize provisioning one.
+
 Infrastructure owns shared Nginx, TLS certificates, ports 80/443, route-network
 lifecycle, and host capacity. This repository owns only its backend, frontend,
 database, immutable images, and private release/recovery records. The template
