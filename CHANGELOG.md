@@ -7,6 +7,13 @@
 - Allow an application-owned MCP verifier to select a separate authorization
   issuer without changing resource identity or transport Host/Origin trust.
 
+### Fixed
+
+- Adopt the same reviewed Infrastructure release fixture pin `ee9c0d40421a8b3f4886340b188a21e86c6429cf` across all consumers, including exact app-mode topology and metadata content-type checks.
+
+- Synchronize the shared release fixtures for required backend settings and
+  reviewed MCP gateway/readiness profiles from Infrastructure PR #77.
+
 ## 2026-10-28
 
 ### Fixed
