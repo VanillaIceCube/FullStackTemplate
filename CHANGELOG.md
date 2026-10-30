@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Synchronize canonical release-contract regressions for app-owned MacroMapper MCP, preserving this application’s existing runtime, framework and OAuth policy.
+
 - Document main-first release lineage across the four repositories, prompt
   reconciliation of exceptional deployment fixes, and intentional release holds.
   Treat the template's absent production branch as not applicable to deployment.
