@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Synchronize canonical release-contract regressions for app-owned MacroMapper MCP, preserving this application’s existing runtime, framework and OAuth policy.
 - Use GPT-6 Luna for all OpenAI PR reviewers and security-alert grouping while preserving existing review gates, isolated credentials and token budgets.
 
 - Document main-first release lineage across the four repositories, prompt
