@@ -8,6 +8,12 @@
   reconciliation of exceptional deployment fixes, and intentional release holds.
   Treat the template's absent production branch as not applicable to deployment.
 
+### Removed
+
+- Withdraw the separate MCP issuer extension and restore the canonical app-owned
+  OAuth framework pin. Each app manages MCP and authorization behind shared nginx;
+  the optional template scaffold and ordinary app login remain unchanged.
+
 ## 2026-10-29
 
 ### Added
