@@ -97,6 +97,12 @@ class ExternalIssuerTests(SimpleTestCase):
 
         with self.assertRaisesMessage(ValueError, "explicit token verifier"):
             create_server(instructions="test", issuer_url="https://issuer.example")
+        with self.assertRaisesMessage(ValueError, "require HTTPS"):
+            create_server(
+                instructions="test",
+                verifier=OwnedVerifier(),
+                issuer_url="http://issuer.example",
+            )
         legacy = create_server(instructions="test")
         self.assertEqual(str(legacy.settings.auth.issuer_url), settings.MCP_BASE_URL)
         server = create_server(

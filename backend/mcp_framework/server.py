@@ -38,6 +38,8 @@ def create_server(*, instructions, verifier=None, issuer_url=None):
     issuer = settings.MCP_BASE_URL if issuer_url is None else issuer_url
     if issuer != settings.MCP_BASE_URL and verifier is None:
         raise ValueError("An external issuer requires an explicit token verifier")
+    if not settings.DEBUG and not str(issuer).startswith("https://"):
+        raise ValueError("Production MCP issuers require HTTPS")
     return MCPServer(
         settings.MCP_NAME,
         token_verifier=verifier if verifier is not None else DjangoTokenVerifier(),
