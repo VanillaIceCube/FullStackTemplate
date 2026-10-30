@@ -9,6 +9,8 @@
 
 ### Fixed
 
+- Adopt the same reviewed Infrastructure release fixture pin `ee9c0d40421a8b3f4886340b188a21e86c6429cf` across all consumers, including exact app-mode topology and metadata content-type checks.
+
 - Synchronize the shared release fixtures for required backend settings and
   reviewed MCP gateway/readiness profiles from Infrastructure PR #77.
 
