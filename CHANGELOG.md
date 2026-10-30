@@ -7,6 +7,11 @@
 - Allow an application-owned MCP verifier to select a separate authorization
   issuer without changing resource identity or transport Host/Origin trust.
 
+### Fixed
+
+- Synchronize the shared release fixtures for required backend settings and
+  reviewed MCP gateway/readiness profiles from Infrastructure PR #77.
+
 ## 2026-10-28
 
 ### Fixed

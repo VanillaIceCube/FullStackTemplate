@@ -91,6 +91,10 @@ node --test tests/*.test.cjs .github/actions/*/*.test.js
 
 The full common suite needs Linux and a disposable Docker daemon. It creates
 unique temporary resources and fake credentials, never the production host.
+Fixtures derive synthetic values for additional required backend settings from
+`app.json`; production bundling still requires explicit operator credentials.
+Contract checks cover the reviewed optional MCP gateway peers and both disabled
+and centrally authorized MacroMapper readiness profiles.
 For local source development only, `--source-root <infrastructure-checkout>`
 checks the same common hashes offline. CI always verifies the immutable pin.
 
