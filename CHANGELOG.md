@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Use GPT-6 Luna for all OpenAI PR reviewers and security-alert grouping while preserving existing review gates, isolated credentials and token budgets.
+
 - Document main-first release lineage across the four repositories, prompt
   reconciliation of exceptional deployment fixes, and intentional release holds.
   Treat the template's absent production branch as not applicable to deployment.
