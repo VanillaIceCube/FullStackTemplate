@@ -11,6 +11,20 @@ the package/manifest/checker and pin the same commit in every consumer. Never
 brand or independently patch the shared package. CI checks the remote pin;
 `--source-root ../FullStackTemplate` is a local development override only.
 
+An application using a separate authorization service may call
+`create_server(instructions=..., verifier=..., issuer_url="https://issuer.example")`.
+The application must supply its own token verifier for an external issuer; the
+local Django token verifier is never silently reused across that boundary.
+`MCP_BASE_URL` and `MCP_RESOURCE_URL` still identify the application's MCP endpoint
+and transport Host/Origin restrictions. Omitting `issuer_url` preserves the
+existing app-owned issuer. This hook does not provision an issuer or change
+discovery/consent views; the application owns that integration and rollout.
+Production external issuers require HTTPS. Infrastructure owns the separately
+deployed shared MCP authorization service; an adopting app must register its own
+resource/client/scopes and explicitly map issuer subjects to local accounts.
+Template scaffolding remains disabled until that app-owned policy is ready.
+This concerns MCP authorization only; ordinary website login/REST JWTs stay local.
+
 ## ⚙️ Enabling a derived application
 
 MCP is off by default in the template and MacroMapper. Disabled applications keep

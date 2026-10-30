@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29
+
+### Added
+
+- Allow an application-owned MCP verifier to select a separate authorization
+  issuer without changing resource identity or transport Host/Origin trust.
+
 ## 2026-10-28
 
 ### Fixed

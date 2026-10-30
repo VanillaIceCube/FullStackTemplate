@@ -1,4 +1,8 @@
 # AGENTS.md
+
+Shared MCP changes follow [docs/MCP-FRAMEWORK.md](docs/MCP-FRAMEWORK.md).
+An external issuer requires an application-owned verifier; keep the MCP resource
+origin and transport trust independent, and synchronize canonical hashes/pins.
 FullStackTemplate uses manual setup steps; do not assume Django or Node dependencies are installed.
 
 When setup, routing, environment variables, deployment, or CI/CD changes, update the relevant documentation:
