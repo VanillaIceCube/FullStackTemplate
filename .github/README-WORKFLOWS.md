@@ -353,3 +353,7 @@ Auto-close issue enabled (read-only verification 2026-10-20). This establishes
 the competing-close ordering; GitHub's internal validation cause is not exposed.
 Mocks reproduce that interleaving and reject unrelated errors. Empty scheduled
 feeds do not establish that a live close race occurred.
+
+## 🤖 Reviewer model
+
+Code, build and security reviewers and security-alert grouping use `gpt-6-luna` through the existing Responses API action. Per-reviewer credentials, project isolation, output budgets, triggers and failure gates are preserved. See [the model documentation](https://developers.openai.com/api/docs/models/gpt-6-luna) and [shared tracking #241](https://github.com/VanillaIceCube/FullStackTemplate/issues/241). Application AI models and Jules schedules are independent of this setting.
