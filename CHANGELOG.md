@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-30
+
+### Changed
+
+- Document main-first release lineage across the four repositories, prompt
+  reconciliation of exceptional deployment fixes, and intentional release holds.
+  Treat the template's absent production branch as not applicable to deployment.
+
 ## 2026-10-29
 
 ### Added

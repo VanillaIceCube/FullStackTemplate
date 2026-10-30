@@ -77,6 +77,13 @@ npm run build
 ```
 
 ## Production
+
+Follow [main-first releases](docs/SHARED-ROLLOUT-POLICY.md#main-first-releases):
+review and merge ordinary changes into `main` before promoting an exact reviewed
+source tree to `env-prod`. Return explicitly authorized deployment experiments
+to `main` promptly through review. Preserve history and intentional release holds;
+do not deploy unready features or create an absent production branch for parity.
+
 Production is designed for `https://app.example.com` behind Cloudflare and an origin Nginx proxy.
 
 - Frontend: `/`
