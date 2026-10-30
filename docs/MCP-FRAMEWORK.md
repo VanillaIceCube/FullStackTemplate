@@ -19,6 +19,11 @@ local Django token verifier is never silently reused across that boundary.
 and transport Host/Origin restrictions. Omitting `issuer_url` preserves the
 existing app-owned issuer. This hook does not provision an issuer or change
 discovery/consent views; the application owns that integration and rollout.
+Production external issuers require HTTPS. Infrastructure owns the separately
+deployed shared MCP authorization service; an adopting app must register its own
+resource/client/scopes and explicitly map issuer subjects to local accounts.
+Template scaffolding remains disabled until that app-owned policy is ready.
+This concerns MCP authorization only; ordinary website login/REST JWTs stay local.
 
 ## ⚙️ Enabling a derived application
 
