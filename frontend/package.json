@@ -41,5 +41,8 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "test:watch": "vitest"
+  },
+  "overrides": {
+    "minimatch@>=9 <11.0.1": "^11.0.1"
   }
 }
