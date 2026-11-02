@@ -256,3 +256,16 @@ protect `env-prod`. Main merges and source review do not authorize activation.
 ## 🔑 Separate reviewer keys
 
 Use the [exact key names and deferred migration steps](../.github/README-WORKFLOWS.md#-separate-openai-reviewer-credentials). Each generated repository needs its own reviewer project and credentials; never copy this template's secrets.
+
+## 🔒 Per-head Dependabot policy activation
+
+After the protected auto-merge source is on main, add `Dependabot Policy` from
+GitHub Actions (integration 15368) to the active main ruleset. Preserve all other
+requirements and bypass restrictions. This check holds native auto-merge until
+the successful CI head's dependency policy and approvals are validated, and must
+be emitted afresh on later heads. Existing open PRs may need a fresh CI run.
+
+When using newly created reviewer Apps, set `OBI_WAN_REVIEWER_LOGIN`,
+`LINT_EASTWOOD_REVIEWER_LOGIN`, and `ROBOCOP_REVIEWER_LOGIN` to their actual bot
+logins including `[bot]`; defaults use this template's existing persona Apps.
+See the workflow guide for signed metadata, alert scope and activation evidence.
