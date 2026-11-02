@@ -98,7 +98,7 @@ async function resolveRun({ github, context }) {
   return pr;
 }
 
-async function enableAutoMerge({ github, context, core, metadata }) {
+async function enableAutoMerge({ github, context, core, metadata, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
   const eventPr = context.payload.pull_request;
   const { owner, repo } = context.repo;
   const repository = `${owner}/${repo}`;
@@ -112,11 +112,19 @@ async function enableAutoMerge({ github, context, core, metadata }) {
     return "ineligible";
   }
   const request = { owner, repo, pull_number: eventPr.number };
-  const { data: pr } = await github.rest.pulls.get(request);
-  if (!trusted(pr, repository) || pr.head.sha !== eventPr.head.sha || pr.node_id !== eventPr.node_id) {
-    throw new Error("PR identity or head changed; run CI for the current head");
+  let pr;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    ({ data: pr } = await github.rest.pulls.get(request));
+    if (!trusted(pr, repository) || pr.head.sha !== eventPr.head.sha || pr.node_id !== eventPr.node_id) {
+      throw new Error("PR identity or head changed; run CI for the current head");
+    }
+    if (pr.state !== "open" || pr.merged || pr.draft) return "inactive";
+    if (pr.mergeable !== null && pr.mergeable_state !== "unknown") break;
+    if (attempt < 5) {
+      core.info("GitHub is calculating mergeability; retrying in two seconds.");
+      await sleep(2000);
+    }
   }
-  if (pr.state !== "open" || pr.merged || pr.draft) return "inactive";
   if (pr.mergeable !== true || !["clean", "blocked"].includes(pr.mergeable_state)) {
     throw new Error(`PR merge state is not stable: ${pr.mergeable_state}`);
   }

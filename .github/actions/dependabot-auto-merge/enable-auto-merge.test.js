@@ -45,6 +45,7 @@ function harness() {
     },
   };
   h.core = { info() {} };
+  h.sleep = async () => {};
   h.enable = () => enableAutoMerge(h);
   h.resolve = () => resolveRun({ ...h, context: { ...h.context, eventName: "workflow_run", payload: { workflow_run: { id: 8, head_sha: "a".repeat(40) } } } });
   return h;
@@ -170,6 +171,27 @@ test("mutation races are idempotent only when the same head is already enabled",
   const moved = harness();
   moved.github.graphql = async () => { moved.pr.head.sha = "new"; moved.pr.auto_merge = {}; throw new Error("head moved"); };
   await assert.rejects(moved.enable(), /head moved/);
+});
+
+test("transient unknown mergeability settles with bounded polling and head revalidation", async () => {
+  const h = harness();
+  h.pr.mergeable = null; h.pr.mergeable_state = "unknown";
+  let retries = 0;
+  h.sleep = async (ms) => {
+    assert.equal(ms, 2000);
+    retries += 1;
+    h.pr.mergeable = true; h.pr.mergeable_state = "clean";
+  };
+  assert.equal(await h.enable(), "enabled");
+  assert.equal(retries, 1);
+  const stuck = harness(); stuck.pr.mergeable = null; stuck.pr.mergeable_state = "unknown";
+  let waits = 0; stuck.sleep = async () => { waits += 1; };
+  await assert.rejects(stuck.enable(), /not stable/);
+  assert.equal(waits, 5);
+  assert.equal(stuck.calls.length, 0);
+  const moved = harness(); moved.pr.mergeable = null;
+  moved.sleep = async () => { moved.pr.head.sha = "new"; };
+  await assert.rejects(moved.enable(), /head changed/);
 });
 
 test("follow-up validates authoritative CI identity, result and head, independent of rerun actor", async () => {

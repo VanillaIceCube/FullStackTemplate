@@ -390,7 +390,9 @@ Verified Dependabot commit metadata supplies patch/minor eligibility; open
 security alerts retain the CVSS ceiling of 6.9. Major updates and unsupported
 metadata stay manual. All three persona checks must succeed and each persona
 must approve the current head. Missing/failed/cancelled checks, requested changes,
-forks and unstable/unknown/conflicting heads cannot enable auto-merge. Required
+forks and unstable/conflicting heads cannot enable auto-merge. Unknown
+mergeability is polled at most six times with two-second waits, revalidating
+the same PR/head on every read; an unresolved state still fails closed. Required
 branch rules and all required contexts are read live; expected path-scoped skips
 remain valid only for application/analyzer child jobs.
 
