@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-02
+
+### Fixed
+
+- Pin CodeQL init/analyze to the same immutable v4.39.1 revision as all three downstream repositories.
+
+### Changed
+
+- Group all CodeQL action entry points in coordinated Dependabot version and security updates while preserving existing schedules and review gates ([FullStackTemplate #271](https://github.com/VanillaIceCube/FullStackTemplate/issues/271)).
+
 ## 2026-10-30
 
 ### Changed
