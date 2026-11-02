@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Resolve the transitive minimatch advisory with a scoped modern-version override and regenerated frontend lockfile; document parent API compatibility and removal checks ([FullStackTemplate #267](https://github.com/VanillaIceCube/FullStackTemplate/issues/267)).
 - Pin CodeQL init/analyze to the same immutable v4.39.1 revision as all three downstream repositories.
 
 ### Changed
