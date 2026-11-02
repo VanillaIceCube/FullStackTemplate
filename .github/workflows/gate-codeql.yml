@@ -53,6 +53,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Verify atomic immutable CodeQL revisions
+        run: node .github/actions/check-codeql-pins/check-codeql-pins.js
+
+      - name: Test CodeQL drift prevention
+        run: node --test .github/actions/check-codeql-pins/check-codeql-pins.test.js
+
       - name: Detect relevant changes
         id: filter
         if: github.event_name == 'pull_request'
