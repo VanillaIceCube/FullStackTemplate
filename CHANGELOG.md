@@ -10,7 +10,7 @@
 
 ### Changed
 
-- Synchronize canonical release-contract regressions for app-owned MacroMapper MCP, preserving this applicationâ€™s existing runtime, framework and OAuth policy.
+- Synchronize canonical release-contract regressions for app-owned MacroMapper MCP, preserving this application’s existing runtime, framework and OAuth policy.
 - Use GPT-6 Luna for all OpenAI PR reviewers and security-alert grouping while preserving existing review gates, isolated credentials and token budgets.
 
 - Document main-first release lineage across the four repositories, prompt
@@ -270,7 +270,7 @@ All notable changes to this project are documented in this file.
 - Added frontend, backend, and repository-automation test coverage.
 - Added Docker, Nginx, GHCR, SSH deployment, Dependabot, CodeQL, lint, test, vulnerability, malware, AI review, and security-alert workflows based on Notoli.
 - Added the Modified MIT License (Non-Commercial Use Only).
-- Added a working generic Workspace â†’ Collection â†’ Item example with CRUD,
+- Added a working generic Workspace → Collection → Item example with CRUD,
   inline editing, drag-and-drop ordering, mobile gestures, collaborator
   sharing, authorization boundaries, and persisted activity notifications.
 - Added scripts to initialize generated repositories and create a linked GitHub
