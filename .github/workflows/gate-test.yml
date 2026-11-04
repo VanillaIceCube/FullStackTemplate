@@ -265,7 +265,7 @@ jobs:
             python3 -m unittest discover -s deploy/tests -v || group_status=$?
             node --test .github/actions/dependabot-auto-merge/*.test.js .github/actions/check-codeql-pins/*.test.js .github/actions/prepare-vulnerability-report/prepare-vulnerability-report.test.js tests/*.test.cjs \
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
-            .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js \
+            .github/actions/collect-upstream-major-upgrade-evidence/*.test.js \
             .github/actions/publish-ai-review/publish-ai-review.test.js \
             .github/actions/publish-ai-review/review-gating.test.js \
             .github/actions/security-alerts/sync-security-alerts.test.js || group_status=$?

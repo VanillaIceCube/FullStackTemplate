@@ -3,6 +3,17 @@ FullStackTemplate carries forward the proven CI/CD and security automation from
 Notoli and MacroMapper, adapted to the template's repository, images, and
 generic GitHub Project.
 
+## Major-upgrade review evidence
+
+Obi-Wan uses Dependabot's per-dependency metadata for grouped upgrades.
+Release lookups use each major update's own ecosystem and target version.
+Repository usage searches cover every listed dependency and retain the
+tracked-file exclusions and 30,000-byte limit. Numeric Actions references
+such as 7 and v7 can match a full release tag such as v7.0.0. Opaque refs
+leave a visible evidence gap. Required briefs need at least one valid HTTP(S)
+source URL. The publisher keeps independent body findings when it suppresses
+duplicate inline comments or sees an unchanged verdict.
+
 ## Repository settings baseline
 The live FullStackTemplate repository uses the Notoli baseline with intentional
 least-privilege differences: auto-merge is enabled; merge commits, squash
