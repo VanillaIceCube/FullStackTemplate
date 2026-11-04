@@ -6,6 +6,8 @@
 
 - Collect usage evidence for every Dependabot dependency and use each major update's own versions and ecosystem for upstream release evidence.
 - Preserve independent AI review findings during duplicate suppression and require valid HTTP(S) sources in major-upgrade briefs.
+- Validate each deployment against its accepted frontend port policy and block unexpected candidate port bindings before release acceptance.
+- Exclude credential-bearing URLs from published major-upgrade briefs.
 
 ## 2026-11-02
 

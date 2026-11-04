@@ -35,6 +35,11 @@ Review its diff before adopting a generated app. The database must already be a
 nonempty, valid SQLite file created through a separately approved bootstrap;
 the release engine never silently creates or truncates an existing database.
 
+
+The release controller verifies running frontend bindings against the accepted
+app policy and checks rendered Compose and Docker against the candidate policy.
+Change both Compose and app.json when changing a publication.
+
 ## Production settings
 
 Actions secrets: `DEPLOY_SSH_KEY`, `DJANGO_SECRET_KEY`, `DJANGO_EMAIL_HOST_KEY`.
