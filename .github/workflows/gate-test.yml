@@ -26,6 +26,10 @@ concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   changes:
     name: Detect Changes
@@ -35,14 +39,14 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       automation: ${{ steps.filter.outputs.automation }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
       - name: Detect relevant changes
         id: filter
         continue-on-error: true
-        uses: dorny/paths-filter@f3360c560367c9daf72b88c0e6164162034c5721
+        uses: dorny/paths-filter@f3360c560367c9daf72b88c0e6164162034c5721 # v4
         with:
           filters: |
             frontend:
@@ -58,6 +62,7 @@ jobs:
               - '.github/workflows/gate-test.yml'
               - '.github/actions/read-versions/**'
             automation:
+              - '.github/**'
               - '.github/actions/dependabot-auto-merge/**'
               - '.github/actions/check-codeql-pins/**'
               - '.github/workflows/ci-auto-merge.yml'
@@ -102,7 +107,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Read versions
         id: versions
@@ -110,7 +115,7 @@ jobs:
         with:
           read_python: "false"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ steps.versions.outputs.node_version }}
           cache: "npm"
@@ -170,7 +175,7 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Read versions
         id: versions
@@ -178,7 +183,7 @@ jobs:
         with:
           read_node: "false"
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: ${{ steps.versions.outputs.python_version }}
           cache: "pip"
@@ -237,7 +242,7 @@ jobs:
     if: needs.changes.outputs.automation == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Read versions
         id: versions
@@ -245,7 +250,7 @@ jobs:
         with:
           read_python: "false"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ steps.versions.outputs.node_version }}
 
@@ -263,7 +268,7 @@ jobs:
             python3 deploy/check_parity.py || exit 1
             group_status=0
             python3 -m unittest discover -s deploy/tests -v || group_status=$?
-            node --test .github/actions/dependabot-auto-merge/*.test.js .github/actions/check-codeql-pins/*.test.js .github/actions/prepare-vulnerability-report/prepare-vulnerability-report.test.js tests/*.test.cjs \
+            node --test .github/actions/check-workflow-security/*.test.js .github/actions/review-npm-malware/*.test.js .github/actions/dependabot-auto-merge/*.test.js .github/actions/check-codeql-pins/*.test.js .github/actions/prepare-vulnerability-report/prepare-vulnerability-report.test.js tests/*.test.cjs \
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
             .github/actions/collect-upstream-major-upgrade-evidence/*.test.js \
             .github/actions/publish-ai-review/publish-ai-review.test.js \
