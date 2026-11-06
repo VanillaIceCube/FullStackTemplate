@@ -12,6 +12,7 @@ export default defineConfig({
   },
   build: { target: ['chrome117', 'edge121', 'firefox121', 'safari17'] },
   test: {
+    include: ['src/**/*.test.{js,jsx}'],
     clearMocks: true,
     environment: 'jsdom',
     globals: true,

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { resetPassword } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
@@ -38,8 +38,10 @@ describe('ResetPassword', () => {
       routeEntries: ['/reset-password'],
     });
 
-    await userEvent.type(screen.getByLabelText('New Password'), 'new-secret');
-    await userEvent.type(screen.getByLabelText('Confirm Password'), 'new-secret');
+    fireEvent.change(screen.getByLabelText('New Password'), { target: { value: 'new-secret' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password'), {
+      target: { value: 'new-secret' },
+    });
     await userEvent.click(screen.getByRole('button', { name: 'Reset Password' }));
 
     expect(resetPassword).not.toHaveBeenCalled();
@@ -59,8 +61,10 @@ describe('ResetPassword', () => {
       routeEntries: ['/reset-password?uid=user-id&token=reset-token'],
     });
 
-    await userEvent.type(screen.getByLabelText('New Password'), 'new-secret');
-    await userEvent.type(screen.getByLabelText('Confirm Password'), 'new-secret');
+    fireEvent.change(screen.getByLabelText('New Password'), { target: { value: 'new-secret' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password'), {
+      target: { value: 'new-secret' },
+    });
 
     const submitBtn = screen.getByRole('button', { name: 'Reset Password' });
     await userEvent.click(submitBtn);
