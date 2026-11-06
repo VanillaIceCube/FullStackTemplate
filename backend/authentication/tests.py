@@ -301,6 +301,7 @@ class ResendApiEmailBackendTests(APITestCase):
     def test_send_messages_includes_reply_to_and_html_body(self, mock_urlopen):
         response = MagicMock()
         response.__enter__.return_value = response
+        response.getcode.return_value = 200
         mock_urlopen.return_value = response
 
         html_msg = EmailMessage(
