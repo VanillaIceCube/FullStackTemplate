@@ -29,7 +29,8 @@
     "jsdom": "^30.1.2",
     "prettier": "^3.9.10",
     "vite": "^8.3.5",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "@playwright/test": "^1.65.0"
   },
   "scripts": {
     "start": "vite",
@@ -40,7 +41,8 @@
     "lint:strict": "eslint \"src/**/*.{js,jsx}\" --max-warnings=0",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "node ../scripts/run_e2e.cjs"
   },
   "overrides": {
     "minimatch@>=9 <11.0.1": "^11.0.1"

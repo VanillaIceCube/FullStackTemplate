@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { forgotPassword } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
@@ -41,7 +41,7 @@ describe('ForgotPassword', () => {
       routeEntries: ['/forgot-password'],
     });
 
-    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'mapper@example.com' } });
     const submitBtn = screen.getByRole('button', { name: 'Send Reset Link' });
     await userEvent.click(submitBtn);
 

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { login } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
@@ -59,8 +59,8 @@ describe('Login', () => {
 
     renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
 
-    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
-    await userEvent.type(screen.getByLabelText('Password'), 'secret');
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'mapper@example.com' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret' } });
 
     const submitBtn = screen.getByRole('button', { name: 'Login' });
     await userEvent.click(submitBtn);
