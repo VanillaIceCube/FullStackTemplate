@@ -18,6 +18,7 @@ function createGitHubMock({
 } = {}) {
   const createdReviews = [];
   const pulls = {
+    async get() { return { data: { head: { sha: "abc123" } } }; },
     listFiles() {},
     listReviews() {},
     listReviewComments() {},
@@ -421,6 +422,7 @@ test("keeps a repeated blocking verdict failed while preserving findings", async
     raw: JSON.stringify(
       review({
         event: "REQUEST_CHANGES",
+        unchanged: true,
         summary: "One publishing edge case remains.",
         comments: [
           { path: "src/example.js", line: 1, body: "Duplicate inline finding" },
@@ -449,6 +451,26 @@ test("keeps a repeated blocking verdict failed while preserving findings", async
     "2 Obi-Wan Code-nobi finding(s) were moved into the review body.",
   ]);
 });
+
+test("keeps approval and comment verdict checks successful", async () => {
+  for (const event of ["APPROVE", "COMMENT"]) {
+    const { createdReviews, github } = createGitHubMock();
+    const { core, failures } = createCore();
+
+    await publishAiReview({
+      github,
+      context: context(),
+      core,
+      personaName: "RoboCop",
+      raw: JSON.stringify(review({ event })),
+    });
+
+    assert.deepEqual(failures, []);
+    assert.equal(createdReviews.length, 1);
+    assert.equal(createdReviews[0].event, event);
+  }
+});
+
 
 test("keeps the model-authored summary when it declares no new material", async () => {
   const { createdReviews, github } = createGitHubMock({
@@ -616,6 +638,7 @@ test("reviewer identities explain truncated reviews before their checks fail", (
   const actionPath = path.resolve(__dirname, "../get-pr-diff/action.yml");
   const action = fs.readFileSync(actionPath, "utf8");
   assert.match(action, /default: "524288"/);
+  assert.match(action, /:\(exclude,top\)frontend\/package-lock\.json/);
   assert.match(action, /echo "max_bytes=\$MAX_BYTES"/);
   assert.match(action, /echo "truncated=\$TRUNCATED"/);
   assert.doesNotMatch(action, /exit 1/);
@@ -661,15 +684,17 @@ test("OpenAI review requests reserve a bounded output budget", () => {
     action,
     /MAX_OUTPUT_TOKENS: \$\{\{ inputs\.max_output_tokens \}\}/,
   );
-  assert.match(action, /max_output_tokens: \$max_output_tokens/);
+  assert.match(action, /policy.cjs" payload/);
+  const policy = fs.readFileSync(path.resolve(__dirname, "../openai-chat/policy.cjs"), "utf8");
+  assert.match(policy, /max_output_tokens: budget/);
   assert.match(action, /enable_web_search:[\s\S]*?default: "false"/);
   assert.match(
     action,
     /ENABLE_WEB_SEARCH: \$\{\{ inputs\.enable_web_search \}\}/,
   );
-  assert.match(action, /type: "web_search"/);
-  assert.match(action, /search_context_size: "medium"/);
-  assert.match(action, /tool_choice: "required"/);
+  assert.match(policy, /type: "web_search"/);
+  assert.match(policy, /search_context_size: "medium"/);
+  assert.match(policy, /tool_choice: "required"/);
 });
 
 test("Obi-Wan collects bounded external evidence for Dependabot major updates", () => {
@@ -846,4 +871,22 @@ test("requires valid HTTP(S) source strings for an otherwise complete major-upgr
       assert.match(createdReviews[0].body, /Review unavailable/);
     }
   }
+});
+
+test("a changed PR head cannot receive an obsolete model verdict", async () => {
+  const { github, createdReviews } = createGitHubMock();
+  const { core, failures } = createCore();
+  await publishAiReview({ github, context: context({ sha: "obsolete-head" }), core,
+    raw: JSON.stringify(review()), personaName: "Obi-Wan Code-nobi" });
+  assert.equal(createdReviews.length, 0);
+  assert.match(failures[0], /PR head changed/);
+});
+test("unavailable notices identify the reviewed event commit without claiming approval", async () => {
+  const { github, createdReviews } = createGitHubMock();
+  const { core, failures } = createCore();
+  await publishAiReview({ github, context: context({ sha: "reviewed-head" }), core,
+    raw: "OpenAI response unavailable", personaName: "Obi-Wan Code-nobi" });
+  assert.equal(createdReviews[0].commit_id, "reviewed-head");
+  assert.equal(createdReviews[0].event, "COMMENT");
+  assert.equal(failures.length, 1);
 });
