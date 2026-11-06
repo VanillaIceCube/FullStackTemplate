@@ -80,3 +80,21 @@ parent or override changes. Review upstream API changes before widening the
 selector. Remove overrides once all parent ranges natively accept patched
 versions, regenerate the lockfile and repeat those checks. Canonical rollout:
 [FullStackTemplate #267](https://github.com/VanillaIceCube/FullStackTemplate/issues/267).
+
+## Development dependency reproducibility
+
+Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
+registry digests. Production Dockerfiles and the independent release engine are
+unchanged by this development-image policy. Refresh tags/digests together after
+registry verification and a disposable build/configuration check.
+
+The frontend development entrypoint hashes both `package.json` and
+`package-lock.json` inside its persistent `node_modules` volume. Fresh volumes
+install with `npm ci`; unchanged restarts reuse dependencies; changing either
+manifest reinstalls. Missing manifests or a failed installation stop startup and
+retry on the next invocation. Use one volume per checkout and restart after edits.
+Run `node --test tests/dev-dependencies.test.cjs` from the repository root for the
+credential-free mocked lifecycle/exit-status regression. Compose configuration
+checks do not deploy or touch application data.
+
+Supported test/build runtimes are Node24.15+ within24.x or Node26.x. jsdom30 explicitly excludes the end-of-life Node25 line; do not treat >=24 as universal support. Use the same supported runtime for before/after timings.
