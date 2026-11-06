@@ -8,7 +8,7 @@
 
 **Notoli and MacroMapper own product-specific behavior**, domain models, UX, application credentials/configuration, bug reproduction and domain MCP tools. A specific integration bug may be kept in its application repo when the fix is not portable. Shareable improvements discovered there should have a single canonical FullStackTemplate parent with the app issue cross-referenced.
 
-Do not force identical implementations when architectures differ. Record what is intentionally different and why. Notoli's enabled MCP tools and MacroMapper's disabled scaffolding, or Infrastructure's Required CI and extra secrets gate, are not automatic parity defects.
+Do not force identical implementations when architectures differ. Record what is intentionally different and why. Application-specific MCP tools/readiness profiles and Infrastructure's Required CI and extra secrets gate are intentional differences, not automatic parity defects. Read each application's current policy and release guide for its active profile.
 
 ## Shared-ticket definition of done
 
