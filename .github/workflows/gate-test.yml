@@ -304,7 +304,7 @@ jobs:
             python3 deploy/check_parity.py || exit 1
             group_status=0
             python3 -m unittest discover -s deploy/tests -v || group_status=$?
-            node --test .github/actions/custom-regressions/*.test.js .github/actions/collect-prior-ai-reviews/*.test.js .github/actions/check-workflow-security/*.test.js .github/actions/review-npm-malware/*.test.js .github/actions/dependabot-auto-merge/*.test.js .github/actions/check-codeql-pins/*.test.js .github/actions/prepare-vulnerability-report/prepare-vulnerability-report.test.js tests/*.test.cjs \
+            node --test .github/actions/custom-regressions/*.test.js .github/actions/promotion-summary/*.test.js .github/actions/collect-prior-ai-reviews/*.test.js .github/actions/check-workflow-security/*.test.js .github/actions/review-npm-malware/*.test.js .github/actions/dependabot-auto-merge/*.test.js .github/actions/check-codeql-pins/*.test.js .github/actions/prepare-vulnerability-report/prepare-vulnerability-report.test.js tests/*.test.cjs \
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
             .github/actions/collect-upstream-major-upgrade-evidence/*.test.js \
             .github/actions/publish-ai-review/publish-ai-review.test.js \
