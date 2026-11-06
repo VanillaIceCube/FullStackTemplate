@@ -1,5 +1,13 @@
 import { apiFetch } from './requestClient';
 
+async function safeReadJson(response) {
+  try {
+    return await response.json();
+  } catch (_err) {
+    return null;
+  }
+}
+
 async function request(path, returnTo, body) {
   const response = await apiFetch(path, {
     method: body ? 'POST' : 'GET',
@@ -12,9 +20,17 @@ async function request(path, returnTo, body) {
     ...(body ? { body: new URLSearchParams(body).toString() } : {}),
     authReturnTo: returnTo,
   });
-  const data = await response.json();
+  const data = await safeReadJson(response);
   if (!response.ok) {
-    throw new Error(data.error_description || data.detail || data.error || 'Request failed.');
+    const message =
+      data?.error_description ||
+      data?.detail ||
+      data?.error ||
+      `HTTP ${response?.status ?? 'error'}`;
+    throw new Error(message);
+  }
+  if (!data) {
+    throw new Error('Request failed.');
   }
   return data;
 }
