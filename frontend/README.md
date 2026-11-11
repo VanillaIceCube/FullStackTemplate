@@ -97,7 +97,7 @@ Run `node --test tests/dev-dependencies.test.cjs` from the repository root for t
 credential-free mocked lifecycle/exit-status regression. Compose configuration
 checks do not deploy or touch application data.
 
-Supported test/build runtimes are Node24.15+ within24.x or Node26.x. jsdom30 explicitly excludes the end-of-life Node25 line; do not treat >=24 as universal support. Use the same supported runtime for before/after timings.
+Supported test/build runtimes are Node24.15+ within24.x or Node26.x. jsdom31 explicitly excludes the end-of-life Node25 line; do not treat >=24 as universal support. Use the same supported runtime for before/after timings.
 
 ## Optional isolated browser tests
 
