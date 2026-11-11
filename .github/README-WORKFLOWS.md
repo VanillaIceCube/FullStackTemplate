@@ -641,3 +641,14 @@ Infrastructure release template. Change shared deployment actions upstream, upda
 `deploy/shared-source.json`, run `python deploy/check_parity.py --sync`, then
 regenerate `python scripts/ci_architecture.py`. Both parity checks must pass before
 merging; this source update does not provision or activate a template deployment.
+
+
+## Dependency maintenance inventory
+
+CodeQL init and analyze references must move together to the same immutable
+revision. After any workflow action update, regenerate the source-linked snapshot
+with `python scripts/ci_architecture.py` and verify it with
+`python scripts/ci_architecture.py --check`; action-only changes alter the stored
+workflow hash even when the workflow diagram stays the same. Deployment action
+changes must originate in Infrastructure’s shared release template and propagate
+through `deploy/shared-source.json` and `deploy/check_parity.py --sync`.
