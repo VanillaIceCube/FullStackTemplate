@@ -1,12 +1,5 @@
 import { apiFetch } from './requestClient';
-
-async function safeReadJson(response) {
-  try {
-    return await response.json();
-  } catch (_err) {
-    return null;
-  }
-}
+import { safeReadJson } from './authSession';
 
 async function request(path, returnTo, body) {
   const response = await apiFetch(path, {
@@ -22,14 +15,13 @@ async function request(path, returnTo, body) {
   });
   const data = await safeReadJson(response);
   if (!response.ok) {
-    const message =
-      data?.error_description ||
-      data?.detail ||
-      data?.error ||
-      `HTTP ${response?.status ?? 'error'}`;
-    throw new Error(message);
+    // Only documented error fields may reach the UI; never stringify arbitrary payloads.
+    const message = [data?.error_description, data?.detail, data?.error].find(
+      (value) => typeof value === 'string' && value.trim(),
+    );
+    throw new Error(message || `HTTP ${response.status}`);
   }
-  if (!data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new Error('Request failed.');
   }
   return data;
