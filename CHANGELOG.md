@@ -4,6 +4,12 @@
 
 ### Fixed
 
+- Handle non-JSON Connections API responses with safe HTTP status errors, preserve structured OAuth errors, and reject invalid success payloads without exposing response bodies. Reuse the existing safe parser and cover consent, listing, revocation and session recovery regressions ([shared rollout](https://github.com/VanillaIceCube/FullStackTemplate/issues/311)).
+
+## 2026-11-11
+
+### Fixed
+
 - Regenerate the workflow architecture inventory for the atomic CodeQL v4.39.3 action update and document dependency maintenance parity.
 - Keep the shared release action-upgrade fixture independent of the previous pinned action version.
 
