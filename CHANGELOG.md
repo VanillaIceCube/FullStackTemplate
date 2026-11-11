@@ -15,6 +15,7 @@
 
 ### Changed
 
+- Align transitive Babel 7.29.13 tooling with the validated Notoli patch without adding a direct dependency or changing supported ranges.
 - Synchronize Docker login action v4.8.0 from the canonical Infrastructure release source.
 - Upgrade the template test environment to jsdom 31; the frontend suite and production build remain compatible.
 
