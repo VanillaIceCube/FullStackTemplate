@@ -632,3 +632,14 @@ GitHub runner. After a reviewed repair, run one fresh controlled dispatch of eac
 alert workflow from corrected `main`, after checking managed labels/Project side
 effects. Record runner loading/empty-feed evidence separately from nonempty mock
 coverage; never rerun an old failed revision as proof of the new source.
+
+
+## Dependency maintenance inventory
+
+CodeQL init and analyze references must move together to the same immutable
+revision. After any workflow action update, regenerate the source-linked snapshot
+with `python scripts/ci_architecture.py` and verify it with
+`python scripts/ci_architecture.py --check`; action-only changes alter the stored
+workflow hash even when the workflow diagram stays the same. Deployment action
+changes must originate in Infrastructure’s shared release template and propagate
+through `deploy/shared-source.json` and `deploy/check_parity.py --sync`.

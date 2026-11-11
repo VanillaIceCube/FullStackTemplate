@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-11
+
+### Fixed
+
+- Regenerate the workflow architecture inventory for the atomic CodeQL v4.39.3 action update and document dependency maintenance parity.
+
+### Changed
+
+- Upgrade the template test environment to jsdom 31; the frontend suite and production build remain compatible.
+
 ## 2026-11-06
 
 ### Fixed
