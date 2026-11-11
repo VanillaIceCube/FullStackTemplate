@@ -8,6 +8,12 @@ Change the shared source, regenerate its manifest, and synchronize every consume
 
 ## Ownership and onboarding gate
 
+Follow the [main-first release policy](../../docs/SHARED-ROLLOUT-POLICY.md#main-first-releases).
+Ordinary changes merge through reviewed main before promotion; exceptional
+owner-authorized deployment experiments return to main promptly through review.
+Intentional release lag is allowed until features are ready. This template has
+no active `env-prod` branch; branch parity does not authorize provisioning one.
+
 Infrastructure owns shared Nginx, TLS certificates, ports 80/443, route-network
 lifecycle, and host capacity. This repository owns only its backend, frontend,
 database, immutable images, and private release/recovery records. The template
@@ -28,6 +34,11 @@ workflow while preserving canonical shared-source ownership and vendored bytes.
 Review its diff before adopting a generated app. The database must already be a
 nonempty, valid SQLite file created through a separately approved bootstrap;
 the release engine never silently creates or truncates an existing database.
+
+
+The release controller verifies running frontend bindings against the accepted
+app policy and checks rendered Compose and Docker against the candidate policy.
+Change both Compose and app.json when changing a publication.
 
 ## Production settings
 
@@ -91,10 +102,15 @@ node --test tests/*.test.cjs .github/actions/*/*.test.js
 
 The full common suite needs Linux and a disposable Docker daemon. It creates
 unique temporary resources and fake credentials, never the production host.
+Fixtures derive synthetic values for additional required backend settings from
+`app.json`; production bundling still requires explicit operator credentials.
+Contract checks cover the existing gateway networks and application-owned MCP
+readiness. Application-owned MCP profiles are defined by each app's current
+policy; the template does not activate a production instance.
 For local source development only, `--source-root <infrastructure-checkout>`
 checks the same common hashes offline. CI always verifies the immutable pin.
 
 
 ## 🔌 Shared MCP framework
 
-Follow the [MCP framework contract](../../docs/MCP-FRAMEWORK.md) before activating an optional app. Notoli keeps its current MCP profile; MacroMapper ships the framework with MCP disabled. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.
+Follow the [MCP framework contract](../../docs/MCP-FRAMEWORK.md) before activating an optional app. Notoli and MacroMapper retain their app-owned production MCP profiles and readiness contracts; consult each app's policy and release evidence for the accepted state. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.

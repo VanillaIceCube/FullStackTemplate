@@ -54,3 +54,9 @@ certs/*.der
 .ruff_cache/
 coverage/
 release_bundle/
+
+# Disposable browser test artifacts
+frontend/playwright-report/
+frontend/test-results/
+
+browser-evidence/

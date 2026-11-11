@@ -11,6 +11,16 @@ the package/manifest/checker and pin the same commit in every consumer. Never
 brand or independently patch the shared package. CI checks the remote pin;
 `--source-root ../FullStackTemplate` is a local development override only.
 
+Infrastructure routes requests through nginx to each application's own MCP
+endpoint and OAuth provider. The framework is shared source, deployed inside each
+application; it does not introduce a shared authorization service or another
+account registry. `create_server(instructions=...)` uses that application's
+`MCP_BASE_URL` as its issuer and `MCP_RESOURCE_URL` as its protected resource.
+Accounts, client registrations, grants and tool permissions remain application
+owned. Ordinary website login/REST JWTs retain their existing local behavior.
+The previous external-issuer extension and centralized rollout are withdrawn;
+template scaffolding remains disabled until an app implements its own tools.
+
 ## ⚙️ Enabling a derived application
 
 MCP is off by default in the template and MacroMapper. Disabled applications keep

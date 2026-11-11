@@ -1,5 +1,142 @@
 # Changelog
 
+## 2026-11-11
+
+### Fixed
+
+- Regenerate the workflow architecture inventory for the atomic CodeQL v4.39.3 action update and document dependency maintenance parity.
+- Keep the shared release action-upgrade fixture independent of the previous pinned action version.
+
+### Changed
+
+- Synchronize Docker login action v4.8.0 from the canonical Infrastructure release source.
+- Upgrade the template test environment to jsdom 31; the frontend suite and production build remain compatible.
+
+## 2026-11-06
+
+### Fixed
+
+- Restore security-alert action loading by resolving repository variables in caller workflows and passing validated explicit composite inputs.
+- Cover default, empty, explicit and invalid configuration plus empty/nonempty mocked alert pipelines and all three caller contracts.
+
+## 2026-11-06
+
+### Fixed
+
+- Transactional email failures now expose safe categories/status codes without exception payloads, tracebacks or recipient/token data; reset responses remain generic.
+- Resend requests use a finite bounded timeout, with explicit safe fallback and mocked coverage for failure policy and both fail_silently modes.
+
+## 2026-11-06
+
+### Added
+
+- Managed production-promotion impact summaries from the actual current target comparison, with bounded metadata, owned-comment updates and race/permission coverage.
+- Source-linked Mermaid CI/CD architecture and checked per-repository workflow/action inventories, preserving application and gateway trust differences.
+
+### Fixed
+
+- Architecture guidance no longer presents completed reviewer credential migration or obsolete test/runtime assumptions as future work.
+
+## 2026-11-06
+
+### Added
+
+- Bounded, attributed human discussion context and conservative App-owned reviewer follow-ups, with adversarial, stale-head, idempotency and permission regressions.
+- Safe Responses token/latency evidence, dated partial cost estimates and validated owner configuration/recovery controls; existing Luna model selection is preserved.
+
+### Fixed
+
+- Reviewer ownership no longer falls back to persona-name matching; old-head verdicts are rejected and writer runs serialize.
+
+## 2026-11-05
+### Added
+- Shared isolated authentication browser tests with disposable data and local-only reset mail.
+- Repository syntax/Compose validation and mocked request/history/lint attribution coverage.
+### Fixed
+- Preserve early, failing and late CI diagnostics within bounded reviewer context and failure artifacts.
+### Changed
+- Use bulk form setup for validation/API unit cases while retaining typed happy paths and assertions.
+
+## 2026-11-05
+### Added
+- Shared development dependency lifecycle regression for fresh, unchanged, changed and failed installs.
+### Changed
+- Pin development Node/Miniforge multi-platform image digests and refresh frontend dependencies only when manifests change.
+
+## 2026-11-05
+### Added
+- Immutable workflow-policy and bounded changed-version malware regression coverage.
+- Evidence-based Python malware scanning decision and shared release upgrade regression.
+### Fixed
+- Missing or invalid dependency evidence now fails PR malware review visibly.
+### Changed
+- Explicit scanner/path-filter grants support read-only repository defaults; unused orchestration issue writes removed.
+- Adopt the reviewed Infrastructure release template/test contract with readable Action versions.
+
+## 2026-11-05
+
+### Fixed
+- Bound malware classification to repository source advisories instead of scanning the global catalogue.
+- Recover the exact structured concurrent-close response only after verifying saved lifecycle state and body.
+- Recover omitted alert refs deterministically and interrupted Project synchronization without duplicate issues or resetting planning.
+- Retry inconsistent exact-head Dependabot check readiness safely and route signed SHA-only Action updates to manual review.
+
+
+## 2026-11-03
+
+### Fixed
+
+- Collect usage evidence for every Dependabot dependency and use each major update's own versions and ecosystem for upstream release evidence.
+- Preserve independent AI review findings during duplicate suppression and require valid HTTP(S) sources in major-upgrade briefs.
+- Validate each deployment against its accepted frontend port policy and block unexpected candidate port bindings before release acceptance.
+- Exclude credential-bearing URLs from published major-upgrade briefs.
+
+## 2026-11-02
+
+### Fixed
+
+- Hold native Dependabot auto-merge behind a required policy result for each head; validate signed single-commit group metadata, paginate all open dependency alerts and support configured reviewer bot identities.
+
+- Enforce atomic immutable CodeQL revisions with negative regression tests and guard Dependabot auto-merge with current-head approvals, live required checks, trusted default-branch execution and idempotent native activation (#240).
+
+- Resolve the transitive minimatch advisory with a scoped modern-version override and regenerated frontend lockfile; document parent API compatibility and removal checks ([FullStackTemplate #267](https://github.com/VanillaIceCube/FullStackTemplate/issues/267)).
+- Pin CodeQL init/analyze to the same immutable v4.39.1 revision as all three downstream repositories.
+
+### Changed
+
+- Group all CodeQL action entry points in coordinated Dependabot version and security updates while preserving existing schedules and review gates ([FullStackTemplate #271](https://github.com/VanillaIceCube/FullStackTemplate/issues/271)).
+
+## 2026-10-30
+
+### Changed
+
+- Synchronize canonical release-contract regressions for app-owned MacroMapper MCP, preserving this application’s existing runtime, framework and OAuth policy.
+- Use GPT-6 Luna for all OpenAI PR reviewers and security-alert grouping while preserving existing review gates, isolated credentials and token budgets.
+
+- Document main-first release lineage across the four repositories, prompt
+  reconciliation of exceptional deployment fixes, and intentional release holds.
+  Treat the template's absent production branch as not applicable to deployment.
+
+### Removed
+
+- Withdraw the separate MCP issuer extension and restore the canonical app-owned
+  OAuth framework pin. Each app manages MCP and authorization behind shared nginx;
+  the optional template scaffold and ordinary app login remain unchanged.
+
+## 2026-10-29
+
+### Added
+
+- Allow an application-owned MCP verifier to select a separate authorization
+  issuer without changing resource identity or transport Host/Origin trust.
+
+### Fixed
+
+- Adopt the same reviewed Infrastructure release fixture pin `ee9c0d40421a8b3f4886340b188a21e86c6429cf` across all consumers, including exact app-mode topology and metadata content-type checks.
+
+- Synchronize the shared release fixtures for required backend settings and
+  reviewed MCP gateway/readiness profiles from Infrastructure PR #77.
+
 ## 2026-10-28
 
 ### Fixed

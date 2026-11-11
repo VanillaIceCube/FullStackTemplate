@@ -5,6 +5,10 @@ on:
     - cron: "10 11 * * *"
   workflow_dispatch:
 
+concurrency:
+  group: security-alerts-codeql
+  cancel-in-progress: false
+
 jobs:
   aggregate:
     permissions:
@@ -13,7 +17,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out workflow actions
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
@@ -32,6 +36,9 @@ jobs:
         uses: ./.github/actions/security-alerts
         with:
           feed: codeql
+          model: ${{ vars.AI_REVIEW_MODEL || 'gpt-6-luna' }}
+          reasoning-effort: ${{ vars.AI_REVIEW_REASONING_EFFORT || 'medium' }}
+          max-output-tokens: ${{ vars.AI_REVIEW_MAX_OUTPUT_TOKENS || '16000' }}
           robocop-token: ${{ steps.robocop-token.outputs.token }}
           project-token: ${{ secrets.SECURITY_ALERTS_TOKEN }}
           openai-api-key: ${{ secrets.ROBOCOP_OPENAI_API_KEY }}

@@ -1,4 +1,9 @@
 # AGENTS.md
+
+Shared MCP changes follow [docs/MCP-FRAMEWORK.md](docs/MCP-FRAMEWORK.md).
+Each application owns its MCP endpoint, OAuth provider and permissions behind
+the shared nginx gateway. Synchronize canonical framework hashes/pins; do not
+introduce a shared authorization service or cross-application account mapping.
 FullStackTemplate uses manual setup steps; do not assume Django or Node dependencies are installed.
 
 When setup, routing, environment variables, deployment, or CI/CD changes, update the relevant documentation:
@@ -73,6 +78,13 @@ npm run build
 ```
 
 ## Production
+
+Follow [main-first releases](docs/SHARED-ROLLOUT-POLICY.md#main-first-releases):
+review and merge ordinary changes into `main` before promoting an exact reviewed
+source tree to `env-prod`. Return explicitly authorized deployment experiments
+to `main` promptly through review. Preserve history and intentional release holds;
+do not deploy unready features or create an absent production branch for parity.
+
 Production is designed for `https://app.example.com` behind Cloudflare and an origin Nginx proxy.
 
 - Frontend: `/`
@@ -128,3 +140,7 @@ MCP framework changes follow [docs/MCP-FRAMEWORK.md](docs/MCP-FRAMEWORK.md). Ful
 ## Shared application ownership and downstream rollout
 
 For any reusable framework, GitHub automation, test or security change, follow [docs/SHARED-ROLLOUT-POLICY.md](docs/SHARED-ROLLOUT-POLICY.md): one FullStackTemplate canonical issue must track applicability, implementation and verification in MacroMapper, Notoli and Infrastructure. The parent is not done when only the template merges. Infrastructure remains the source owner for the shared gateway/release engine and host operations; application domain work stays in each app. Preserve live PRs, production controls, issue history and non-triggering labels during consolidation.
+
+## 🤖 Reviewer model policy
+
+Use `gpt-6-luna` for OpenAI code, build and security reviewers and security-alert grouping. Preserve each reviewer’s existing key/project isolation, budgets and blocking gates. Application AI model selection remains app-owned.

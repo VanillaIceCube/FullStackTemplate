@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { register } from '../../services/authApiClient';
 import { renderWithProviders } from '../../test-support/utils';
@@ -48,8 +48,8 @@ describe('Register', () => {
       routeEntries: ['/register'],
     });
 
-    await userEvent.type(screen.getByLabelText('Password'), 'one');
-    await userEvent.type(screen.getByLabelText('Confirm Password'), 'two');
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'one' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'two' } });
     await userEvent.click(screen.getByRole('button', { name: 'Register' }));
 
     expect(register).not.toHaveBeenCalled();
@@ -69,9 +69,9 @@ describe('Register', () => {
       routeEntries: ['/register'],
     });
 
-    await userEvent.type(screen.getByLabelText('Email'), 'mapper@example.com');
-    await userEvent.type(screen.getByLabelText('Password'), 'short');
-    await userEvent.type(screen.getByLabelText('Confirm Password'), 'short');
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'mapper@example.com' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'short' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'short' } });
 
     const submitBtn = screen.getByRole('button', { name: 'Register' });
     await userEvent.click(submitBtn);

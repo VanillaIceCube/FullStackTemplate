@@ -8,7 +8,7 @@
 
 **Notoli and MacroMapper own product-specific behavior**, domain models, UX, application credentials/configuration, bug reproduction and domain MCP tools. A specific integration bug may be kept in its application repo when the fix is not portable. Shareable improvements discovered there should have a single canonical FullStackTemplate parent with the app issue cross-referenced.
 
-Do not force identical implementations when architectures differ. Record what is intentionally different and why. Notoli's enabled MCP tools and MacroMapper's disabled scaffolding, or Infrastructure's Required CI and extra secrets gate, are not automatic parity defects.
+Do not force identical implementations when architectures differ. Record what is intentionally different and why. Application-specific MCP tools/readiness profiles and Infrastructure's Required CI and extra secrets gate are intentional differences, not automatic parity defects. Read each application's current policy and release guide for its active profile.
 
 ## Shared-ticket definition of done
 
@@ -51,4 +51,34 @@ Never add `jules` or other automation-triggering labels just to reorganize issue
 
 ## Drift prevention
 
+See [main-first releases](#main-first-releases) for source and production branch
+lineage; intentional unreleased source is distinct from production-only drift.
+
 Where possible, write parity checks against **behavioral contracts**, immutable source manifests and explicit exceptions, not arbitrary byte-for-byte equality of app-specific workflow files. FullStackTemplate owns reusable checks for workflow emitted names versus required GitHub rulesets, common reviewer outcomes, immutable Actions, security gates, framework pin hashes and downstream adoption. Link changes in the shared policy to the affected consumers before declaring completion.
+
+## Main-first releases
+
+Ordinary source changes must merge through reviewed `main` before promotion to
+`env-prod`. Promote an exact reviewed main source tree through the repository's
+existing release process; do not add implementation changes on a promotion
+branch. A promotion merge commit may have a different SHA while retaining that
+exact tree. Required CI, reviewers, owner authorization and recovery gates remain
+in force.
+
+The owner may explicitly authorize a narrow, quick deployment experiment outside
+that sequence. Return its production-only changes and history to `main` promptly
+through a reviewed PR before resuming ordinary promotions. Preserve newer main
+work and both histories; never force-push or discard changes to manufacture parity.
+
+Audit exact branch heads, merge ancestry and file differences separately. Merge
+commits alone do not establish missing source. Reconcile production-only work
+into main, but allow main to stay ahead when features are not ready for release.
+Record the held changes and their prerequisite tickets; do not activate a deferred
+migration merely to make tree hashes equal. When both branches are ready for the
+same release, verify their source trees match and record deployment acceptance.
+
+An absent `env-prod` branch is an explicit non-applicable case, not a reason to
+create a production deployment. FullStackTemplate currently supplies release
+examples without an active production branch. Its adopters still follow this
+policy when provisioned. The four-repository audit is tracked in
+[#262](https://github.com/VanillaIceCube/FullStackTemplate/issues/262).
