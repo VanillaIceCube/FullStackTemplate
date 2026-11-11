@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-11
+
+### Changed
+
+- Synchronize Docker login action v4.8.0 from the canonical Infrastructure release source and regenerate the workflow architecture inventory.
+
 ## 2026-11-06
 
 ### Fixed

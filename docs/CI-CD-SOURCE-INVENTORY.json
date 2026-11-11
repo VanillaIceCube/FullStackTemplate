@@ -198,7 +198,7 @@
         "contents": "read",
         "packages": "write"
       },
-      "source_sha256": "41e2eb6512b897a13954f23fbed97d1da9c672bda92f112e51de59e8dcb9df05",
+      "source_sha256": "6fb01f24cfcee5b42a4ee6fc6e91c7ca190c196d1c4723b63e068d5c75480013",
       "variable_names": [
         "DEPLOY_HOST",
         "DEPLOY_HOST_FINGERPRINT",

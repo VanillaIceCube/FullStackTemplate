@@ -632,3 +632,12 @@ GitHub runner. After a reviewed repair, run one fresh controlled dispatch of eac
 alert workflow from corrected `main`, after checking managed labels/Project side
 effects. Record runner loading/empty-feed evidence separately from nonempty mock
 coverage; never rerun an old failed revision as proof of the new source.
+
+
+### Shared deployment action maintenance
+
+Docker login v4.8.0 uses the immutable action revision supplied by the canonical
+Infrastructure release template. Change shared deployment actions upstream, update
+`deploy/shared-source.json`, run `python deploy/check_parity.py --sync`, then
+regenerate `python scripts/ci_architecture.py`. Both parity checks must pass before
+merging; this source update does not provision or activate a template deployment.
