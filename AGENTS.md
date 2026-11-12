@@ -117,12 +117,6 @@ never edit only a vendored copy. Keep new-app onboarding/capacity and live
 activation separate from source review. Initializer changes must preserve
 canonical shared-source metadata and hash-verified files.
 
-## Jules recurring agents
-
-Nora and Marty use the [v3 operating rules](.jules/README.md): at most one open
-PR per agent per repository. Repeat runs maintain the existing PR, integrate
-current main, and verify its latest head instead of opening another PR.
-
 ## 🔑 OpenAI reviewer isolation
 
 Use `OBI_WAN_OPENAI_API_KEY`, `LINT_EASTWOOD_OPENAI_API_KEY`, and

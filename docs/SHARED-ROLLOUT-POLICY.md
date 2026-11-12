@@ -47,7 +47,7 @@ Prefer one open canonical FullStackTemplate ticket over multiple copies of the *
 
 Retain separate downstream tickets for sizeable app-specific implementations, independent approvals, existing in-flight PRs, security-alert issues managed automatically, and post-release/runtime validation. Keep the FullStackTemplate parent linked to these, rather than creating contradictory duplicate descriptions.
 
-Never add `jules` or other automation-triggering labels just to reorganize issues; preserve appropriate assignees, project fields, statuses, and references. Do not move or close an issue that Codex/Jules is actively implementing without reconciling that active work. No automatic merge, production rollout, changes to live agent schedules, credential rotation, or security bypass is implied by consolidation.
+Never add `jules` or other automation-triggering labels just to reorganize issues; preserve appropriate assignees, project fields, statuses, and references. Do not move or close an issue with active implementation without reconciling that work. No automatic merge, production rollout, changes to live agent schedules, credential rotation, or security bypass is implied by consolidation.
 
 ## Drift prevention
 
