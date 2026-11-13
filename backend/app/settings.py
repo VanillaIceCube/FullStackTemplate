@@ -28,6 +28,8 @@ SECRET_KEY = (
     or "fullstacktemplate-local-development-key-change-before-production-2026"
 )
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "fullstacktemplate.localhost"]
 
@@ -217,6 +219,4 @@ INSTALLED_APPS += ["mcp_framework"]
 if MCP_SETTINGS["MCP_ENABLED"]:
     INSTALLED_APPS += ["oauth2_provider"]
     SECURE_PROXY_SSL_HEADER = None
-    SESSION_COOKIE_SECURE = not DEBUG
-    CSRF_COOKIE_SECURE = not DEBUG
 ASGI_APPLICATION = "app.asgi.application"

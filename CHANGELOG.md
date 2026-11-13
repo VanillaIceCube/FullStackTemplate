@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-12
+
+### Fixed
+
+- Require secure session and CSRF cookies whenever production mode is active, including when optional MCP is disabled. Add production verification guidance and independent repository acceptance evidence (#299).
+
 ## 2026-11-11
 
 ### Removed

@@ -114,3 +114,7 @@ checks the same common hashes offline. CI always verifies the immutable pin.
 ## 🔌 Shared MCP framework
 
 Follow the [MCP framework contract](../../docs/MCP-FRAMEWORK.md) before activating an optional app. Notoli and MacroMapper retain their app-owned production MCP profiles and readiness contracts; consult each app's policy and release evidence for the accepted state. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.
+
+## Production verification
+
+Use the [verification checklist and acceptance matrix](../../docs/PRODUCTION-VERIFICATION.md) before recording production-hardening acceptance. Capture current backend checks and authenticated edge/origin observations for each app.
