@@ -217,3 +217,7 @@ Notification bulk mutations remain atomic and recipient-scoped; UI pending
 controls must cover fetch and response parsing, including retry/error paths.
 Mail changes retain reply-to, HTML/plain multipart and both silent-mode tests;
 diagnostics follow the redacted delivery policy above.
+
+## Production verification
+
+Session and CSRF cookies require HTTPS when DJANGO_DEBUG=0 in both ordinary and MCP profiles. Follow the [per-application verification checklist](../docs/PRODUCTION-VERIFICATION.md) for deployment checks, gateway trust and current runtime evidence.
