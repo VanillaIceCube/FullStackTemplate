@@ -39,7 +39,54 @@ FullStackTemplate is an onboarding example with no production target.
    Link independent app receipts. Keep the parent open while required runtime
    checks remain unverified.
 
-## Source and current observations
+## Accepted production state
+
+The owner requested completion of the remaining hardening work on November 12,
+2026 Pacific. The [final receipt](https://github.com/VanillaIceCube/FullStackTemplate/issues/299#issuecomment-6845431487)
+records the release links and sanitized observations.
+
+| Repository | Accepted state |
+| --- | --- |
+| FullStackTemplate | Production cookie regression passed for both MCP profiles. Reusable checklist and matrix delivered. Owner retained the template without a production target. |
+| Notoli | Signing key rotated through the repository secret and normal release workflow; W009 cleared. Authenticated notification, connection and admin responses stayed uncached through CDN and origin. Reset email reached Inbox with a valid token. |
+| MacroMapper | Authenticated notification and connection responses stayed uncached through CDN and origin. Zero active staff accounts; ordinary-user admin access stayed denied and uncached. Reset email reached Inbox with a valid token. Current source/provenance and unmatched-item tests passed. |
+| Infrastructure | One-hour HSTS policy reviewed and deployed through #137/#138. Exact header passed 28 public/origin route checks. Existing HTTPS redirects and private TLS/env permissions verified. |
+
+The gateway sends Strict-Transport-Security with max-age=3600 on both app hosts.
+Subdomain and preload directives are omitted. This is an intentional initial
+one-hour policy, with expiry and max-age=0 recovery documented in
+[the gateway architecture](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/1ecf9d08336ea4b4df387c59c2cc29d5c5ba5f97/docs/architecture-v2.md).
+Django W004/W008 remain visible because HSTS and HTTPS redirects are enforced by
+the verified gateway. No warnings were silenced.
+
+Cache checks used anonymous, authenticated and then anonymous requests against
+the same protected URLs, with no forced cache-bypass request header. API and
+connection responses were 401, 200, 401, all no-store with no Age or cache-hit
+status. Notoli admin responses were 302, 200, 302. The origin TLS connection used
+the installed origin certificate as its trust anchor. Temporary verification
+sessions were removed; short-lived JWTs expired after two minutes.
+
+Exactly one password-reset email per app was requested for the owner-designated
+mailbox. Both arrived in Inbox with SPF and DKIM passing. Their received links
+used the correct HTTPS origin and reset path; Django validated each token
+read-only. Passwords were unchanged. New signing credentials and reset tokens
+were excluded from public evidence. Existing Notoli signed sessions/JWTs may
+require signing in again after rotation.
+
+Current MacroMapper evidence includes 38 backend integrity/recipe tests and
+57 diary/meal-item frontend tests using mocked providers. Historical paid AI
+acceptance remains explicitly historical. No new paid request was needed.
+
+Auth/signup throttle inspection found no explicit application throttle. AI
+timeouts/concurrency do not provide per-user quotas. The separate work in
+[#298](https://github.com/VanillaIceCube/FullStackTemplate/issues/298) and
+[MacroMapper #289](https://github.com/VanillaIceCube/MacroMapper/issues/289)
+continues under its own acceptance criteria.
+
+The following initial observations are retained as history and are superseded
+by the accepted production state and linked receipts above.
+
+## Initial source and observations
 
 Reviewed on November 12, 2026 Pacific. Source baselines are Template
 `161b7cd`, Notoli `baf9564`, MacroMapper `59e8942` and Infrastructure
@@ -90,11 +137,9 @@ Notoli owns its enabled OAuth profile and requires its documented dependencies.
   [Notoli #1033](https://github.com/VanillaIceCube/Notoli/pull/1033).
   Historical dependency-upgrade failures are not current deployment failures.
 
-## Remaining acceptance
+## Completion
 
-The app owner/operator must supply current in-container deployment-check output,
-authenticated edge/origin cache receipts, deployed TLS/env permission receipts,
-sender/domain and reset return-URL evidence, and current provenance/unmatched-food
-acceptance. The domain owner must record the intended HSTS policy. Quotas and
-dual runtime credentials retain their own implementation tickets. Issue #299
-continues to track these gaps after the template PR merges.
+The final production receipt resolves the runtime evidence gaps from the initial
+review. Re-run the checklist when application settings, ingress, authentication,
+mail delivery or AI behavior changes. Independent quota/key features retain
+their own tickets.
