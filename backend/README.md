@@ -7,7 +7,7 @@ permissions, notifications, and application integrations.
 
 - `app/`: settings and server entry points.
 - `authentication/`, `notifications/`: accounts and notifications.
-- `mcp_framework/`: reusable MCP transport and OAuth.
+- `app_mcp/`: reusable MCP transport and OAuth.
 
 ## 💻 Local development
 
@@ -36,13 +36,13 @@ python backend/manage.py makemigrations --check --dry-run
 
 ## 🔌 MCP integration
 
-The [MCP framework README](mcp_framework/README.md) explains shared transport,
+The [MCP framework README](app_mcp/README.md) explains shared transport,
 OAuth, configuration, and verification.
 
 The template is disabled by default and provides a sample connection tool;
 derived applications implement and enable their own tools.
 
-[Plugin packages and client connections](../plugins/README.md) are documented
+[Plugin packages and client connections](app_mcp/README.md) are documented
 separately from backend deployment.
 
 ## 📚 Reference

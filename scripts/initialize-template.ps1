@@ -51,7 +51,7 @@ $explicitTextNames = @('.gitignore', 'Dockerfile', 'Dockerfile.dev')
 # These exact bytes are owned by the pinned Infrastructure standard, not branding.
 $sharedFiles = @(
     'deploy/shared-source.json', 'deploy/check_parity.py',
-    'mcp-framework-source.json', 'backend/mcp-framework-manifest.json', 'scripts/check_mcp_framework.py',
+    'backend/app_mcp/source.json', 'backend/app_mcp/manifest.json', 'scripts/check_app_mcp.py',
     'docs/MCP-FRAMEWORK.md',
     'deploy/production/release.py', 'deploy/production/build_bundle.py'
 )
@@ -60,7 +60,7 @@ $sharedFiles = @(
 $files = Get-ChildItem -LiteralPath $repoRoot -Recurse -File -Force | Where-Object {
     $relativePath = $_.FullName.Substring($repoRoot.Length).TrimStart([char[]]@('\', '/'))
     $normalizedPath = $relativePath.Replace('\', '/')
-    if ($sharedFiles -contains $normalizedPath -or $normalizedPath.StartsWith('deploy/tests/') -or $normalizedPath.StartsWith('backend/mcp_framework/')) { return $false }
+    if ($sharedFiles -contains $normalizedPath -or $normalizedPath.StartsWith('deploy/tests/') -or $normalizedPath.StartsWith('backend/app_mcp/')) { return $false }
     $segments = $relativePath -split '[\\/]'
     $isExcluded = $segments | Where-Object { $excludedDirectories -contains $_ }
     (-not $isExcluded) -and (
