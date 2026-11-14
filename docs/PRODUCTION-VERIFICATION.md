@@ -123,8 +123,6 @@ Notoli owns its enabled OAuth profile and requires its documented dependencies.
 - [Gateway vhosts](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/tree/af21c6d4c96138eccef0abd2a9b7d39f91ff660b/nginx/vhosts),
   [private routing](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/af21c6d4c96138eccef0abd2a9b7d39f91ff660b/nginx/snippets/private.conf),
   and [ingress tests](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/af21c6d4c96138eccef0abd2a9b7d39f91ff660b/tests/test_ingress.py).
-- [Batch 2 parity](BATCH2-PARITY.md) and [Batch 3 parity](BATCH3-PARITY.md)
-  supply source/CI adoption evidence. Their runtime limitations still apply.
 - [Historical functional acceptance](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/issues/4#issuecomment-6136015187)
   and [cleanup checkpoint](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/issues/4#issuecomment-6136067190)
   cover prior functional checks. MacroMapper reset mail reached Spam.

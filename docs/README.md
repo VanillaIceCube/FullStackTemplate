@@ -27,6 +27,4 @@ integration contracts, maintenance, and recorded verification.
 
 ## 🗂️ Verification and history
 
-- [Batch 2 adoption and acceptance record](BATCH2-PARITY.md).
-- [Batch 3 shared capability parity](BATCH3-PARITY.md).
 - [Production verification](PRODUCTION-VERIFICATION.md).
