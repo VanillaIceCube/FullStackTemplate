@@ -366,4 +366,4 @@ if ($reuseExistingProject) {
 }
 Write-Output "Verified fields, views, and copied workflows against $($sourceProject.url)"
 Write-Output 'Set repository variable SECURITY_ALERTS_PROJECT_ID.'
-Write-Output "GitHub does not copy the repository-scoped 'Auto-add to project' workflow; configure it for the target repository as documented in .github/GITHUB_SETUP.md."
+Write-Output "GitHub does not copy the repository-scoped 'Auto-add to project' workflow; configure it for the target repository as documented in docs/GITHUB_SETUP.md."

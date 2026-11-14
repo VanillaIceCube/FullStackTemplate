@@ -28,7 +28,7 @@ unconfigured because the pinned CodeQL workflows in this repository provide the
 scanner. The `dependencies`, `codeql`, `vulnerability`, `malware`, and `codex`
 labels are used by the alert and operational automation. New repositories must
 recreate these settings, labels, and the `SECURITY_ALERTS_TOKEN` secret; see
-[`.github/GITHUB_SETUP.md`](GITHUB_SETUP.md).
+[`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md).
 
 ## Pull-request CI
 `.github/workflows/ci-orchestrator.yml` coordinates:
@@ -101,7 +101,7 @@ Required repository secrets:
 - `ROBOCOP_PRIVATE_KEY`
 
 Install the Apps on the generated repository with the permissions in
-[`.github/GITHUB_SETUP.md`](GITHUB_SETUP.md). Store the same six review
+[`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md). Store the same six review
 secrets in both the Actions and Dependabot secret stores. Dependabot workflows
 receive only Dependabot secrets, so this duplication lets their pull requests
 run the required reviewers. Fork pull requests never receive either store's
@@ -134,7 +134,7 @@ to the target repository, verifies its fields, views, and supported workflows,
 and sets `SECURITY_ALERTS_PROJECT_ID`. GitHub excludes the repository-scoped
 `Auto-add to project` workflow from Project copies, so configure it for the
 target repository in the GitHub UI as described in
-[`.github/GITHUB_SETUP.md`](GITHUB_SETUP.md).
+[`docs/GITHUB_SETUP.md`](../docs/GITHUB_SETUP.md).
 
 ## Deployment
 `.github/workflows/ci-deploy.yml` runs on `env-prod` pushes or manually. It:
@@ -330,7 +330,7 @@ See [OpenAI key security, expiration and usage guidance](https://developers.open
 
 ## 🔌 Shared MCP framework
 
-The backend test gate checks the pinned MCP framework manifest and each repository's documented ordinary/MCP-enabled profiles. Template sample fixtures do not create a production target; Notoli and MacroMapper retain their app-owned enabled protocol/domain acceptance. See [the framework guide](../backend/app_mcp/README.md) and the application MCP guide where present.
+The backend test gate checks the pinned MCP framework manifest and each repository's documented ordinary/MCP-enabled profiles. Template sample fixtures do not create a production target; Notoli and MacroMapper retain their app-owned enabled protocol/domain acceptance. See [the framework guide](../docs/MCP-FRAMEWORK.md) and the application MCP guide where present.
 
 ## 🛡️ Dependency evidence and alert lifecycle parity
 
@@ -522,6 +522,7 @@ versions, API/range evidence failures and known malware fail visibly. Removing t
 whole frontend has no remaining npm graph. This gate is distinct from the scheduled
 repository-alert feed. Mocked regressions make no API writes or model calls.
 
+Python malware coverage follows [the canonical decision](../docs/PYTHON-MALWARE-DECISION.md).
 Shared deployment files are synchronized to the Infrastructure source pin, including
 the approved Action-upgrade/unauthorized-drift regression. Update the source before
 consumers; never edit a vendored workflow or test independently.
@@ -551,6 +552,7 @@ The path-aware test gate includes `.github/**`, `scripts/**`, `deploy/**`,
 `tests/**` and maintained docs in automation validation. It runs workflow and
 composite syntax, parser-only script checks and synthetic Compose configuration
 plus the existing Batch 1 suites and focused mocked composite regressions.
+[Coverage and external boundaries](../docs/AUTOMATION-COVERAGE.md) are explicit.
 
 `scripts/bounded_log.py` retains early, sampled failing and late context within
 16,000 characters for reviewers. Full output is streamed with `tee`; failed

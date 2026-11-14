@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Shared MCP changes follow [backend/app_mcp/README.md](backend/app_mcp/README.md).
+Shared MCP changes follow [docs/MCP-FRAMEWORK.md](backend/app_mcp/README.md).
 Each application owns its MCP endpoint, OAuth provider and permissions behind
 the shared nginx gateway. Synchronize canonical framework hashes/pins; do not
 introduce a shared authorization service or cross-application account mapping.
@@ -129,7 +129,7 @@ cutover steps in `.github/README-WORKFLOWS.md`.
 
 ## 🔌 Shared MCP framework
 
-MCP framework changes follow [backend/app_mcp/README.md](backend/app_mcp/README.md). FullStackTemplate owns the canonical Python package; keep all consumer hashes/pins aligned. Derived applications own enablement and their business tools. Preserve Notoli credentials, scopes, tool permissions and exact proxy trust.
+MCP framework changes follow [docs/MCP-FRAMEWORK.md](backend/app_mcp/README.md). FullStackTemplate owns the canonical Python package; keep all consumer hashes/pins aligned. Derived applications own enablement and their business tools. Preserve Notoli credentials, scopes, tool permissions and exact proxy trust.
 
 ## Shared application ownership and downstream rollout
 
@@ -145,3 +145,4 @@ The main README introduces the repository. Keep setup, commands, configuration,
 and maintenance details in the owning folder README and its linked references.
 Use consistent headings: 🧭 Structure, 💻 Local development, ⚙️ Configuration,
 🧪 Checks, 🔌 MCP integration, and 📚 Reference where applicable.
+See the [documentation index](docs/README.md) for scripts, tests, and other guides.

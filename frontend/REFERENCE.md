@@ -39,7 +39,7 @@ defaults to localhost:8000. Leave it unset or blank for production same-origin
 requests. Vite exposes this value to the browser: never put secrets in `VITE_*`.
 `import.meta.env.BASE_URL` provides the router/asset base; subdomain-root `/`
 remains the default. `REACT_APP_*` and `PUBLIC_URL` are legacy CRA settings and
-are not read by this template.
+are not read by this template. See [the alignment and upgrade guide](../docs/FRONTEND-ALIGNMENT.md).
 
 Keep React/React DOM on matching versions and Material UI/icons on compatible
 v9 versions. Use `sx` for layout and `slotProps` for component slots. Supported
@@ -52,7 +52,7 @@ base. Follow [the production guide](../deploy/production/README.md).
 
 ## 🔌 Shared MCP framework
 
-See [the MCP framework guide](../backend/app_mcp/README.md). Optional consent and Connected Apps routes require `VITE_MCP_ENABLED=1` in the template/MacroMapper; Notoli keeps its existing enabled UI. Preserve JWT-only consent and validated connection return paths.
+See [the MCP framework guide](../docs/MCP-FRAMEWORK.md). Optional consent and Connected Apps routes require `VITE_MCP_ENABLED=1` in the template/MacroMapper; Notoli keeps its existing enabled UI. Preserve JWT-only consent and validated connection return paths.
 
 ## Shared request and session handling
 
