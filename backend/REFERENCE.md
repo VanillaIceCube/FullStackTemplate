@@ -208,12 +208,4 @@ diagnostics follow the redacted delivery policy above.
 
 ## Production verification
 
-Session and CSRF cookies require HTTPS when DJANGO_DEBUG=0 in both ordinary and MCP profiles. Follow the [per-application verification checklist](../deploy/production/README.md#-production-verification-checklist) to check deployments and gateway trust and collect current runtime evidence.
-
-## 🔐 Authentication maintenance
-
-Validate registration passwords against the prospective user and reset passwords
-against the existing user. Preserve password whitespace, generic recovery
-responses, recipient-scoped notifications, and atomic bulk operations. Keep
-pending/error handling and JWT retry behavior aligned with the frontend.
-Regression suites, rather than old adoption reports, are the current contract.
+Session and CSRF cookies require HTTPS when DJANGO_DEBUG=0 in both ordinary and MCP profiles.

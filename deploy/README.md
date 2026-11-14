@@ -73,8 +73,7 @@ multiple backend replicas.
 
 The frontend Docker build accepts `VITE_API_BASE_URL` and copies `dist/` into
 Nginx. The development Compose file uses the same variable and explicit Vite
-polling. Blank production API origins retain same-origin routing. See
-[frontend alignment](../frontend/REFERENCE.md#-toolchain-maintenance).
+polling. Blank production API origins retain same-origin routing.
 
 
 ## 🔌 Shared MCP framework

@@ -27,8 +27,6 @@ and the development and automation tooling used by Notoli and MacroMapper.
 - [Frontend](frontend/README.md) — setup, pages, components, and browser tests.
 - [Deployment](deploy/README.md) — local Docker, configuration, and live-server guides.
 - [GitHub setup and workflows](.github/README-WORKFLOWS.md) — first-PR setup and automation.
-- [Scripts](scripts/README.md) — repository helpers.
-- [Tests](tests/README.md) — validation commands and coverage.
 - [Changelog](CHANGELOG.md) — project updates.
 
 ## 📜 License

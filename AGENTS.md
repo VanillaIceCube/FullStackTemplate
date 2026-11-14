@@ -79,7 +79,7 @@ npm run build
 
 ## Production
 
-Follow [main-first releases](AGENTS.md#shared-application-ownership-and-downstream-rollout):
+Follow [main-first releases](docs/SHARED-ROLLOUT-POLICY.md#main-first-releases):
 review and merge ordinary changes into `main` before promoting an exact reviewed
 source tree to `env-prod`. Return explicitly authorized deployment experiments
 to `main` promptly through review. Preserve history and intentional release holds;
@@ -108,7 +108,7 @@ Secret-dependent workflows must fail visibly when their credentials are unavaila
 
 Frontend tooling uses Vite 8, Vitest 5/jsdom, and ESLint 10 flat configuration.
 Build output is `frontend/dist/`. Keep Docker, CI, `VITE_API_BASE_URL`, and
-template-initializer coverage aligned; see `frontend/REFERENCE.md`.
+template-initializer coverage aligned; see `docs/FRONTEND-ALIGNMENT.md`.
 
 Production release ownership follows `deploy/production/README.md`. Common
 release code/tests/checker/workflow are pinned to Infrastructure in
@@ -133,7 +133,7 @@ MCP framework changes follow [backend/app_mcp/README.md](backend/app_mcp/README.
 
 ## Shared application ownership and downstream rollout
 
-For any reusable framework, GitHub automation, test or security change, follow [AGENTS.md](AGENTS.md#shared-application-ownership-and-downstream-rollout): one FullStackTemplate canonical issue must track applicability, implementation and verification in MacroMapper, Notoli and Infrastructure. The parent is not done when only the template merges. Infrastructure remains the source owner for the shared gateway/release engine and host operations; application domain work stays in each app. Preserve live PRs, production controls, issue history and non-triggering labels during consolidation.
+For any reusable framework, GitHub automation, test or security change, follow [docs/SHARED-ROLLOUT-POLICY.md](docs/SHARED-ROLLOUT-POLICY.md): one FullStackTemplate canonical issue must track applicability, implementation and verification in MacroMapper, Notoli and Infrastructure. The parent is not done when only the template merges. Infrastructure remains the source owner for the shared gateway/release engine and host operations; application domain work stays in each app. Preserve live PRs, production controls, issue history and non-triggering labels during consolidation.
 
 ## 🤖 Reviewer model policy
 
@@ -145,20 +145,3 @@ The main README introduces the repository. Keep setup, commands, configuration,
 and maintenance details in the owning folder README and its linked references.
 Use consistent headings: 🧭 Structure, 💻 Local development, ⚙️ Configuration,
 🧪 Checks, 🔌 MCP integration, and 📚 Reference where applicable.
-Use the folder READMEs linked from the [main README](README.md#-documentation) for scripts, tests, and other guides.
-
-## Shared rollout acceptance
-
-FullStackTemplate owns reusable application/framework/CI changes; Infrastructure
-owns shared ingress and release-engine code. For a shared change, inventory all
-four repositories in one canonical issue, record applicability and intentional
-differences, and verify independent adoption. Keep the parent open until the
-required downstream reviews, merges, and final results are verified or explicitly
-deferred with an owner and tracking link. Preserve issue/PR history and avoid
-automation-triggering labels during coordination.
-
-Ordinary releases promote an exact reviewed `main` source tree through existing
-`env-prod` controls. Preserve intentional release lag and both branch histories;
-do not force-push, create a missing production branch, bypass checks, or infer
-deployment authorization from source/CI approval. Owner-authorized experiments
-must return through reviewed main before subsequent promotions.

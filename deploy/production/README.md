@@ -3,14 +3,14 @@
 For local development, use the [deployment README](../README.md).
 
 FullStackTemplate adopts the versioned release standard from
-[JudeAndrewAlabaInfrastructure](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/main/app-release/REFERENCE.md).
+[JudeAndrewAlabaInfrastructure](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/main/docs/app-release-standard.md).
 The exact source commit is in `deploy/shared-source.json`; common runtime, tests,
 checker, and workflow are hash-checked. Do not edit a vendored common file.
 Change the shared source, regenerate its manifest, and synchronize every consumer.
 
 ## Ownership and onboarding gate
 
-Follow the [main-first release policy](../../AGENTS.md#shared-application-ownership-and-downstream-rollout).
+Follow the [main-first release policy](../../docs/SHARED-ROLLOUT-POLICY.md#main-first-releases).
 Ordinary changes merge through reviewed main before promotion; exceptional
 owner-authorized deployment experiments return to main promptly through review.
 Intentional release lag is allowed until features are ready. This template has
@@ -119,18 +119,4 @@ Follow the [MCP framework contract](../../backend/app_mcp/README.md) before acti
 
 ## Production verification
 
-Use the [verification checklist](#-production-verification-checklist) before recording production-hardening acceptance. Capture current backend checks and authenticated edge/origin observations for each app.
-
-## 🧪 Production verification checklist
-
-Record expected source/image identities, observation time, and sanitized results.
-Run Django deployment checks in the accepted container; verify DEBUG, explicit
-hosts, Secure session/CSRF cookies, and each supported MCP profile. Check HTTPS
-redirects, the owner-approved HSTS policy, exact trusted proxies, uncached
-authenticated responses, SPA deep links, and unknown API behavior.
-
-Reconcile secret/variable names and private-file permissions without exposing
-values. Inventory abuse controls separately from AI timeouts. Public readiness
-does not establish authenticated writes, reset-email receipt, paid AI behavior,
-or recovery. Those operations need their own authorized acceptance and evidence.
-FullStackTemplate remains an onboarding example without a production target.
+Capture current backend checks and authenticated edge/origin observations for each app.
