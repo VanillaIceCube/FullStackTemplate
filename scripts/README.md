@@ -59,7 +59,7 @@ tests. Host replacement precedes slug replacement; inserted values are applied
 once so overlapping names cannot rewrite the chosen host. Canonical shared
 framework and release files retain their pinned bytes.
 
-Complete the [GitHub setup](../.github/GITHUB_SETUP.md) before the first pull request.
+Complete the [GitHub setup](../.github/README.md#-before-your-first-pull-request) before the first pull request.
 Local development can begin before reviewer credentials are configured.
 Production onboarding and deployment follow the separate
 [release and recovery guide](../deploy/production/README.md).
@@ -72,5 +72,5 @@ source ownership, manifests, and the local `--source-root` verification option.
 ## 📚 Further reading
 
 - [Tests and validation](../tests/README.md).
-- [GitHub setup and workflows](../.github/README-WORKFLOWS.md).
+- [GitHub setup and workflows](../.github/README.md).
 - [Documentation index](../docs/README.md).

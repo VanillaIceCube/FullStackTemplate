@@ -1,13 +1,38 @@
-# ⚙️ GitHub setup
-Complete this setup before opening the first pull request so every required workflow can run.
+# ⚙️ GitHub automation
 
-## 0. Match the repository settings
+GitHub Actions, repository setup, dependency updates, and AI reviews for FullStackTemplate.
+Source-controlled configuration and GitHub account/repository settings are separate.
+
+## 🧭 Structure
+
+- [Workflows](workflows/README.md): triggers, required gates, security checks, releases, and diagnostics.
+- [Local actions](actions/README.md): reviewer context, feedback lifecycle, request policy, and regression tests.
+- `dependabot.yml`: dependency-update configuration.
+- `workflows/*.yml` and `actions/*/action.yml`: executable automation definitions.
+
+## 🚦 Before your first pull request
+
+1. Configure Actions, dependency alerts, advanced CodeQL, and available secret scanning/push protection using this repository's settings below.
+2. Install the three reviewer GitHub Apps and set their App ID variables.
+3. Store each persona's OpenAI key and App private key in both Actions and Dependabot secrets: six reviewer secrets in each store.
+4. Configure this repository's reviewer project, security-alert Project, and separate Project token.
+5. Verify fresh same-repository human and Dependabot PR results before activating or changing required checks.
+6. Configure deployment separately through the app or gateway production guide.
+
+Missing credentials and unavailable review evidence fail visibly. Existing secret
+values are not recoverable from GitHub; use the original credentials through the
+owner's approved process. Never weaken checks to make setup pass.
+
+## ⚙️ Repository setup
+
+### 0. Match the repository settings
+
 FullStackTemplate starts from the live Notoli repository baseline. Apply this
 configuration to a new repository before opening its first pull request. The
 template intentionally keeps a read-only Actions default and omits the
 standalone `CodeQL` required check; see the rationale below.
 
-### General
+#### General
 
 - Keep the default branch named `main`.
 - Keep the repository public with Issues, Projects, Wiki, and Discussions
@@ -18,7 +43,7 @@ standalone `CodeQL` required check; see the rationale below.
 - Keep the default merge titles/messages (`PR_TITLE`, `MERGE_MESSAGE`,
   `COMMIT_OR_PR_TITLE`, and `COMMIT_MESSAGES`).
 
-### Actions → General
+#### Actions → General
 
 - Enable Actions and allow all actions and reusable workflows.
 - Set workflow permissions to **Read repository contents and packages
@@ -31,7 +56,7 @@ The repository and workflow permissions are intentionally different: the
 repository default matches Notoli, while individual workflows still request
 the narrowest permissions they need.
 
-### Security → Code security and analysis
+#### Security → Code security and analysis
 
 Enable the following repository controls:
 
@@ -46,7 +71,7 @@ already supplied by the pinned workflows under `.github/workflows/`; those
 workflows upload the results to **Security → Code scanning**. The template
 uses the same `actions`, JavaScript/TypeScript, and Python coverage as Notoli.
 
-### Labels used by security automation
+#### Labels used by security automation
 
 Create these labels with the following descriptions so the scheduled alert
 workflows can group and update their managed issues:
@@ -59,7 +84,8 @@ workflows can group and update their managed issues:
 | `malware` | Grouped Dependabot malware alerts. |
 | `codex` | Work generated or assisted by Codex |
 
-## 1. Create the Project
+### 1. Create the Project
+
 Authenticate GitHub CLI with repository and Projects access:
 
 ```powershell
@@ -84,7 +110,7 @@ The copied fields match Notoli:
 
 - `Status`: `Backlog`, `Ready`, `In Progress`, `In Review`, `Done`
 - `Domain`: `Frontend`, `Backend`, `UX/UI`, `Data Model`, `Deployment`, `CI/CD`
-- `Type`: `Bug`, `Feature`, `Enhancement`, `Refactor`, `Chore`, `Research`,
+- `Work type`: `Bug`, `Feature`, `Enhancement`, `Refactor`, `Chore`, `Research`,
   `Security`
 - `Priority`: `P0`, `P1`, `P2`, `P3`
 - `Size`: `XS`, `S`, `M`, `L`, `XL`
@@ -105,7 +131,8 @@ GitHub documents this behavior in
 Notoli is the default source (`VanillaIceCube` Project `8`). A different source
 can be supplied with `-SourceProjectOwner` and `-SourceProjectNumber`.
 
-## 2. Register the AI reviewer GitHub Apps
+### 2. Register the AI reviewer GitHub Apps
+
 Create three private GitHub Apps under the repository owner. Give each app only
 the listed repository permissions, generate one private key, and install it on
 this repository.
@@ -136,7 +163,8 @@ LINT_EASTWOOD_PRIVATE_KEY
 ROBOCOP_PRIVATE_KEY
 ```
 
-## 3. Configure secrets for Dependabot-triggered reviews
+### 3. Configure secrets for Dependabot-triggered reviews
+
 Dependabot-triggered workflows receive only **Dependabot** secrets, not the
 normal **Actions** secrets. To run the same required AI reviewers for trusted
 Dependabot pull requests, add these six values again under **Settings →
@@ -156,7 +184,8 @@ or copies secret values between the stores, so this is a deliberate manual
 setup step. Repository variables, including the OpenAI project and GitHub App
 IDs, remain configured under **Actions → Variables**.
 
-## 4. Configure OpenAI and security aggregation
+### 4. Configure OpenAI and security aggregation
+
 Set:
 
 ```text
@@ -181,7 +210,84 @@ copied from Notoli because it is a credential.
 Run each `Alert: ...` workflow manually once after the first successful CI run.
 No-alert runs should succeed without creating issues.
 
-## 5. Branch rules after the first PR
+### 6. Deployment configuration
+
+The complete deployment variables and secrets are in
+[the deployment guide](../deploy/README.md). The deploy workflow only runs on
+`env-prod` pushes or manual dispatch, so application CI can be proven before
+production credentials are ready.
+
+### Production model for generated apps
+
+Use the [app-only production guide](../deploy/production/README.md) for current
+settings and onboarding. Infrastructure owns TLS and shared routing; the new
+workflow does not consume `CLOUDFLARE_ORIGIN_CERT_PEM` or
+`CLOUDFLARE_ORIGIN_KEY_PEM`. Configure the SSH host fingerprint and per-app
+credentials, preserve the canonical shared source pin when initializing, and
+protect `env-prod`. Main merges and source review do not authorize activation.
+
+### 🔑 Separate reviewer keys
+
+Use the [exact key names and deferred migration steps](README.md#-credential-ownership). Each generated repository needs its own reviewer project and credentials; never copy this template's secrets.
+
+## 🔑 Credential ownership
+
+The four existing repositories already use the accepted persona-specific
+credentials and reviewer projects. The following is an onboarding/operator
+reference, not a pending model or credential migration. Configure these names
+before activating a new installation; missing keys fail visibly and there is
+no fallback to a shared `OPENAI_API_KEY`.
+
+Use a dedicated **FullStackTemplate · AI Reviewers** OpenAI project (or the
+repository's existing reviewer-only project). Never share credentials between
+repositories. Create three distinct keys with these exact display names:
+
+| OpenAI key display name | GitHub secret | Consumer |
+| --- | --- | --- |
+| `CI · Obi-Wan · Code Review` | `OBI_WAN_OPENAI_API_KEY` | Obi-Wan PR reviews |
+| `CI · Lint Eastwood · Build Review` | `LINT_EASTWOOD_OPENAI_API_KEY` | Lint Eastwood PR reviews |
+| `CI · RoboCop · Security Review` | `ROBOCOP_OPENAI_API_KEY` | RoboCop PR reviews and all three scheduled/manual alert feeds |
+
+In this repository, add all three keys as **Actions repository secrets** and
+also as **Dependabot repository secrets**, with identical names and values in
+both stores. Keep the three existing GitHub App private-key secrets in both
+stores as well (six review secrets total).
+
+1. In OpenAI Platform, select the repository's reviewer project, open its API
+   keys page, and create the three keys above. Restrict each key to the API
+   permissions needed for Responses requests; retain model access and Obi-Wan's
+   existing semver-major web-search capability. Choose an expiration under your
+   rotation policy and record when replacement is due.
+2. In GitHub **Settings → Secrets and variables → Actions → Secrets**, add the
+   exact secret names in the table. Each value is the full secret key from its
+   matching OpenAI entry, not its display name or key ID. Use Dependabot's
+   separate secret settings too where specified above.
+3. In **Actions → Variables**, set `OPENAI_REVIEWERS_PROJECT_ID` to that same OpenAI
+   project's actual `proj_...` ID. All three keys and the project header must
+   match. This is an OpenAI project ID; `SECURITY_ALERTS_PROJECT_ID` is a separate
+   GitHub Project node ID and stays unchanged. App identity variables/private
+   keys and deployment credentials also stay unchanged.
+4. Run a same-repository PR smoke test for all three reviewers. Where supported,
+   also verify a Dependabot PR using its separate secret store. After an
+   approved merge, manually run CodeQL Alert, Vulnerability Alert, and Malware
+   Alert on the default branch and observe their next scheduled runs. Do not
+   run production deployment to test reviewer credentials.
+5. In OpenAI Usage, filter by the reviewer project and individual API key to
+   confirm each persona's attribution. An empty alert feed may make no model
+   call; record that outcome rather than assuming usage was verified.
+6. For configuration recovery, restore the last accepted persona-specific key/
+   project bindings and validated reviewer variables, then rerun the latest head.
+   Any source revert must use ordinary protected review and retain its matching
+   credential contract. A legacy key used elsewhere is not an active reviewer
+   fallback; never copy it into all three persona slots or expose key values.
+   This reference does not rotate or provision credentials during Batch 3.
+
+See [OpenAI key security, expiration and usage guidance](https://developers.openai.com/api/docs/guides/production-best-practices#api-keys).
+
+## 🔒 Branch protection
+
+### 5. Branch rules after the first PR
+
 Wait until one pull request has produced the actual check names, then add the
 Notoli-inspired ruleset for `main`:
 
@@ -218,7 +324,7 @@ before considering a prior failure resolved. Check both a human and a trusted
 Dependabot PR before activating requirements. A missing check stays pending,
 and a skipped reviewer must be rerun: GitHub itself accepts skipped required
 jobs. Use the read-only audit in
-[`README-WORKFLOWS.md`](README-WORKFLOWS.md#main-branch-protection)
+[the branch-protection guidance](README.md#-branch-protection)
 to verify actual successful reviewer results.
 
 The reviewers run for trusted same-repository pull requests, including
@@ -238,26 +344,7 @@ trusted same-repository branch before merging it.
 
 Do not require branches to be up to date before merging.
 
-## 6. Deployment configuration
-The complete deployment variables and secrets are in
-[the deployment guide](../deploy/README.md). The deploy workflow only runs on
-`env-prod` pushes or manual dispatch, so application CI can be proven before
-production credentials are ready.
-
-## Production model for generated apps
-
-Use the [app-only production guide](../deploy/production/README.md) for current
-settings and onboarding. Infrastructure owns TLS and shared routing; the new
-workflow does not consume `CLOUDFLARE_ORIGIN_CERT_PEM` or
-`CLOUDFLARE_ORIGIN_KEY_PEM`. Configure the SSH host fingerprint and per-app
-credentials, preserve the canonical shared source pin when initializing, and
-protect `env-prod`. Main merges and source review do not authorize activation.
-
-## 🔑 Separate reviewer keys
-
-Use the [exact key names and deferred migration steps](README-WORKFLOWS.md#-separate-openai-reviewer-credentials). Each generated repository needs its own reviewer project and credentials; never copy this template's secrets.
-
-## 🔒 Per-head Dependabot policy activation
+### 🔒 Per-head Dependabot policy activation
 
 After the protected auto-merge source is on main, add `Dependabot Policy` from
 GitHub Actions (integration 15368) to the active main ruleset. Preserve all other
@@ -269,3 +356,62 @@ When using newly created reviewer Apps, set `OBI_WAN_REVIEWER_LOGIN`,
 `LINT_EASTWOOD_REVIEWER_LOGIN`, and `ROBOCOP_REVIEWER_LOGIN` to their actual bot
 logins including `[bot]`; defaults use this template's existing persona Apps.
 See the workflow guide for signed metadata, alert scope and activation evidence.
+
+The active `main` ruleset requires pull requests, resolved review threads, the
+lint/test/CodeQL scope and analyzer/dependency checks, the Automation Tests
+check, all three AI reviewer child checks, and `Auto Merge`. The reviewers run
+for trusted same-repository pull requests, including Dependabot once its six
+review secrets are configured. The ruleset blocks force pushes and branch
+deletion and has no bypass actors. The standalone `CodeQL` context is
+intentionally not required because the scope-aware workflow does not emit that
+parent check for scope-empty pull requests. Notoli now requires the same three
+reviewer contexts and excludes that standalone CodeQL context. Validate exact
+check names after the first CI run when creating a generated app's ruleset.
+
+The required reviewer contexts are:
+
+- `AI Code Review / Obi-Wan Code-nobi code review`
+- `AI Build Sheriff Review / Lint Eastwood build sheriff review`
+- `AI Security Review / RoboCop security review`
+
+The shared publisher submits the native review first, then fails the job for
+`REQUEST_CHANGES`, including repeated/unchanged verdicts. Valid `APPROVE` and
+`COMMENT` succeed; an approval on a later head can restore a passing check.
+Missing credentials, missing/invalid verdicts, malformed output, incomplete major
+briefs and over-budget diffs continue to fail visibly. Build/security reviews
+use `always()` so upstream failures or skipped gates cannot suppress them.
+All eligible same-repository PRs, including Dependabot and documentation changes,
+run the reviewers. Forks receive no private reviewer secrets; bring the change
+to a trusted same-repository branch for review.
+
+Missing required checks remain pending; failed/cancelled checks require a clean
+rerun on the current head. GitHub accepts skipped jobs for required checks, so a
+skipped reviewer is not proof of a review. The read-only audit below rejects
+missing, skipped, cancelled, neutral and all other non-success reviewer results.
+It publishes no aggregator and changes no rules. [The dated ruleset
+snapshot](review-gating-evidence.json) records the existing requirements,
+Notoli's live verdict/failure/recovery parity reference, and PR #236's own native
+requested-changes reviews, failed required checks and blocked merge state.
+The PR's final validation tracks approval/check recovery after the completed fix.
+
+```powershell
+gh api repos/VanillaIceCube/FullStackTemplate/rulesets/19855608 > ruleset.json
+gh api "repos/VanillaIceCube/FullStackTemplate/commits/<HEAD_SHA>/check-runs?per_page=100" > head-check-runs.json
+node .github/actions/publish-ai-review/verify-gates.js ruleset.json head-check-runs.json
+```
+
+## 🧪 Verification
+
+Verify the current head's independent checks and all three native review identities.
+Distinguish synthetic local tests from actual GitHub runner/credential acceptance.
+After an authorized merge, verify default-branch baselines and separately review
+alert-workflow side effects before fresh manual dispatches. A successful human PR
+does not prove access to the separate Dependabot secret store. Source review does
+not authorize merging, branch promotion, production deployment, or key rotation.
+
+## 📚 Related guides
+
+- [Workflow behavior and maintenance](workflows/README.md).
+- [Shared action and reviewer contracts](actions/README.md).
+- [CI/CD architecture](../docs/CI-CD-ARCHITECTURE.md).
+- [Application production setup and recovery](../deploy/production/README.md).

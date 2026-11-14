@@ -19,20 +19,97 @@ python backend/manage.py migrate
 python backend/manage.py runserver 8000
 ```
 
-Local settings can be supplied in ignored `backend/.env`. See the
-[configuration and API reference](REFERENCE.md) for settings and endpoint details.
+Local settings can be supplied in ignored `backend/.env`.
 For Docker hot reload, follow the [deployment guide](../deploy/README.md).
 
-## 🧪 Checks
+## ⚙️ Configuration
 
-From the repository root:
+Local runs load ignored `backend/.env`. The database defaults to
+`backend/db.sqlite3`; set `DJANGO_SQLITE_PATH` to use another local database.
+Use `app/settings.py` for current defaults.
 
-```powershell
-python backend/manage.py test
-ruff check backend
-ruff format backend --check
-python backend/manage.py makemigrations --check --dry-run
+| Setting | Purpose |
+| --- | --- |
+| `DJANGO_SECRET_KEY`, `DJANGO_DEBUG` | Stable local signing key and debug mode; use a private key and disable debug in production. |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated accepted hosts. |
+| `DJANGO_CORS_ALLOWED_ORIGINS`, `DJANGO_CSRF_TRUSTED_ORIGINS` | Explicit frontend origins, including the port during development. |
+| `DJANGO_FRONTEND_BASE_URL` | Browser redirects and password-reset links. |
+| `DJANGO_EMAIL_BACKEND`, `DJANGO_DEFAULT_FROM_EMAIL` | Delivery backend and sender. |
+| `DJANGO_EMAIL_HOST`, `DJANGO_EMAIL_PORT`, `DJANGO_EMAIL_USE_TLS` | SMTP configuration when using an SMTP backend. |
+| `DJANGO_EMAIL_HOST_USER`, `DJANGO_EMAIL_HOST_KEY`, `DJANGO_EMAIL_TIMEOUT` | Delivery credentials and timeout; keep credentials out of source control. |
+
+For Docker hot reload and dependency volumes, use the
+[deployment README](../deploy/README.md).
+
+## 🔐 Authentication API
+
+- `POST /auth/register/`
+  - Body: `email`, `password`, and optional `username`
+  - Enforces configured Django password validators, including similarity to the prospective username/email; invalid passwords return HTTP 400 before account creation.
+  - Returns: `access`, `refresh`, `username`, `email`, and a success message
+- `POST /auth/login/`
+  - Body: `email`, `password`
+  - Returns: `access`, `refresh`, `username`, and `email`
+- `POST /auth/refresh/`
+  - Body: `refresh`
+  - Returns a new access token
+- `POST /auth/forgot-password/`
+  - Body: `email`
+  - Always returns a generic success response for valid email-shaped input
+- `POST /auth/reset-password/`
+  - Body: `uid`, `token`, `password`
+  - Validates passwords against the existing user and preserves password whitespace exactly.
+
+## 🔔 Notification API
+
+All `/api/` endpoints require a JWT access token. Notification querysets are
+always scoped to the authenticated recipient.
+
+- `GET /api/notifications/`
+- `PATCH /api/notifications/{id}/` with `{"is_read": true}` or
+  `{"is_read": false}`
+- `DELETE /api/notifications/{id}/`
+- `PATCH /api/notifications/mark-all-read/`
+- `DELETE /api/notifications/clear-all/`
+
+Bulk mark-read and clear operations run in atomic transactions and accept empty
+recipient lists. Authentication and recipient scoping apply to both actions.
+
+Notifications retain a generic event type, title, message, optional actor, and
+optional frontend `target_path`. Future application apps can create them
+without depending on a template-owned domain model.
+
+## ✉️ Email
+
+Local development uses Django's console email backend. The included
+Resend HTTPS backend is configured with:
+
+```env
+DJANGO_EMAIL_BACKEND=authentication.email_backends.ResendApiEmailBackend
+DJANGO_EMAIL_HOST_KEY=<resend-api-key>
+DJANGO_EMAIL_TIMEOUT=10
+DJANGO_DEFAULT_FROM_EMAIL=<sender-on-a-verified-domain>
 ```
+
+Keep `.localhost` senders with console delivery. Live delivery uses an approved
+sender domain and private credentials configured through the production guide.
+Plain text, HTML, multipart alternatives, `cc`, `bcc`, and `reply_to` are supported.
+
+The socket-operation timeout defaults to 10 seconds and supports `0 < seconds <= 30`.
+The environment value is parsed as an integer. Invalid runtime timeout values fall
+back safely; malformed startup configuration fails visibly. A successful provider
+response means acceptance, not confirmed inbox delivery.
+
+Failures preserve `fail_silently`: false re-raises, while true skips failures and
+returns the number sent. Password reset returns a generic response for known and
+unknown accounts, including delivery failures. Logger `authentication.email_backends`
+records safe category/status fields: `configuration`, `request`, `rate_limit`,
+`provider`, `timeout`, `network`, or `unexpected`. Never log provider response
+bodies, recipient details, reset tokens, message contents, or credentials.
+
+Diagnose failures using those categories and the existing provider dashboard.
+There is no automatic retry or resend: a timeout may occur after acceptance.
+Use mocked delivery tests; production email receipt requires separate verification.
 
 ## 🔌 MCP integration
 
@@ -45,70 +122,39 @@ derived applications implement and enable their own tools.
 Connection manifests, artwork, and package builders live in
 [chatgpt/](app_mcp/chatgpt/README.md).
 
-## 📚 Reference
+## 🧪 Checks
 
-Use the [backend reference](REFERENCE.md) for API contracts, configuration,
-email delivery, and maintenance details. Live-server procedures belong to
-the [production guide](../deploy/production/README.md).
+From the repository root:
 
+```powershell
+python backend/manage.py test
+ruff check backend
+ruff format backend --check
+python backend/manage.py makemigrations --check --dry-run
+```
 
-<details>
-<summary>API, configuration, and maintenance sections</summary>
+## 🛠️ Maintenance
 
-<a id="structure"></a>
+Keep registration and reset validation against the prospective/existing user,
+preserve password whitespace, and retain generic account-recovery responses.
+Notification operations remain recipient-scoped; bulk mutations are atomic.
+Preserve pending/error handling through response parsing in the frontend.
 
-- [Structure](REFERENCE.md#structure)
+Maintain the Python version in `environment.yml` and pip dependencies in
+`requirements.txt` together with CI and Docker. The test runner's fast password
+hasher applies only during tests; normal settings retain secure hashing.
+See [Docker dependency maintenance](../deploy/README.md#development-dependency-reproducibility).
 
-<a id="authentication-api"></a>
+The browser-test backend uses disposable SQLite, synthetic users, local file mail,
+and loopback binding. It does not load developer dotenv files or use the developer
+database. Install backend requirements before running the frontend browser suite.
 
-- [Authentication API](REFERENCE.md#authentication-api)
+## 🚀 Production
 
-<a id="notification-api"></a>
+Use the [production release and recovery guide](../deploy/production/README.md)
+for private configuration, exact proxy trust, migrations, static files and readiness.
+Production sessions/CSRF cookies require HTTPS with debug disabled; backend ports
+remain private. Local Docker files are development tools, not production release inputs.
 
-- [Notification API](REFERENCE.md#notification-api)
-
-<a id="local-setup"></a>
-
-- [Local setup](REFERENCE.md#local-setup)
-
-<a id="docker-hot-reload"></a>
-
-- [Docker hot reload](REFERENCE.md#docker-hot-reload)
-
-<a id="email"></a>
-
-- [Email](REFERENCE.md#email)
-
-<a id="checks"></a>
-
-- [Checks](REFERENCE.md#checks)
-
-<a id="shared-gateway-production-boundary"></a>
-
-- [Shared-gateway production boundary](REFERENCE.md#shared-gateway-production-boundary)
-
-<a id="-shared-mcp-framework"></a>
-
-- [🔌 Shared MCP framework](REFERENCE.md#-shared-mcp-framework)
-
-<a id="development-dependency-reproducibility"></a>
-
-- [Development dependency reproducibility](REFERENCE.md#development-dependency-reproducibility)
-
-<a id="disposable-browser-test-backend"></a>
-
-- [Disposable browser-test backend](REFERENCE.md#disposable-browser-test-backend)
-
-<a id="transactional-email-failure-handling"></a>
-
-- [Transactional email failure handling](REFERENCE.md#transactional-email-failure-handling)
-
-<a id="authentication-and-notification-maintenance"></a>
-
-- [Authentication and notification maintenance](REFERENCE.md#authentication-and-notification-maintenance)
-
-<a id="production-verification"></a>
-
-- [Production verification](REFERENCE.md#production-verification)
-
-</details>
+See the [production verification checklist](../docs/PRODUCTION-VERIFICATION.md).
+The template is an onboarding example without an active production target.

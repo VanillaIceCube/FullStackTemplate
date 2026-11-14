@@ -12,7 +12,7 @@ When setup, routing, environment variables, deployment, or CI/CD changes, update
 - Backend/authentication: `backend/README.md`
 - Frontend/routing: `frontend/README.md`
 - Deployment: `deploy/README.md`
-- GitHub automation: `.github/README-WORKFLOWS.md`
+- GitHub automation: `.github/README.md`
 - User-visible or operational changes: `CHANGELOG.md`
 
 ## Changelog format
@@ -101,10 +101,10 @@ proxy/Compose files are not production release inputs.
 
 ## GitHub automation
 
-Main requires `AI Code Review / Obi-Wan Code-nobi code review`, `AI Build Sheriff Review / Lint Eastwood build sheriff review`, and `AI Security Review / RoboCop security review`. The shared publisher must fail after publishing any `REQUEST_CHANGES`, including unchanged verdicts; valid `APPROVE`/`COMMENT` pass and unavailable/invalid output fails. Preserve all existing required checks, same-repository human/Dependabot eligibility and fork credential isolation. Run both publisher test files and Actionlint when changing this contract; use the read-only `verify-gates.js` audit for actual successful reviewer results. See `.github/README-WORKFLOWS.md`.
+Main requires `AI Code Review / Obi-Wan Code-nobi code review`, `AI Build Sheriff Review / Lint Eastwood build sheriff review`, and `AI Security Review / RoboCop security review`. The shared publisher must fail after publishing any `REQUEST_CHANGES`, including unchanged verdicts; valid `APPROVE`/`COMMENT` pass and unavailable/invalid output fails. Preserve all existing required checks, same-repository human/Dependabot eligibility and fork credential isolation. Run both publisher test files and Actionlint when changing this contract; use the read-only `verify-gates.js` audit for actual successful reviewer results. See `.github/README.md`.
 The copied Notoli automation includes lint, tests, CodeQL, dependency review, npm malware review, Dependabot auto-merge, AI PR reviewers, deployment, and scheduled security-alert aggregation.
 
-Secret-dependent workflows must fail visibly when their credentials are unavailable. Keep GitHub App permissions and the credential separation described in `.github/README-WORKFLOWS.md`.
+Secret-dependent workflows must fail visibly when their credentials are unavailable. Keep GitHub App permissions and the credential separation described in `.github/README.md`.
 
 Frontend tooling uses Vite 8, Vitest 5/jsdom, and ESLint 10 flat configuration.
 Build output is `frontend/dist/`. Keep Docker, CI, `VITE_API_BASE_URL`, and
@@ -124,7 +124,7 @@ Use `OBI_WAN_OPENAI_API_KEY`, `LINT_EASTWOOD_OPENAI_API_KEY`, and
 all security-alert model calls. `OPENAI_REVIEWERS_PROJECT_ID` identifies this repository's
 reviewer project. Keep credentials separate across repositories and application
 environments, preserve visible missing-key failures, and follow the deferred
-cutover steps in `.github/README-WORKFLOWS.md`.
+cutover steps in `.github/README.md`.
 
 
 ## 🔌 Shared MCP framework
