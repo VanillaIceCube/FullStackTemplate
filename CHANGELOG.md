@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-13
+
+### Removed
+
+- Remove obsolete third-party Conda export attribution from the license and environment helper documentation.
+
 ## 2026-11-12
 
 ### Fixed
