@@ -1,4 +1,6 @@
-# App-only production release and recovery
+# 🚀 Production releases and recovery
+
+For local development, use the [deployment README](../README.md).
 
 FullStackTemplate adopts the versioned release standard from
 [JudeAndrewAlabaInfrastructure](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/main/docs/app-release-standard.md).

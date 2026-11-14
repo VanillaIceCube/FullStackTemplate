@@ -1,325 +1,36 @@
-# FullStackTemplate
-An authentication-first React, Material UI, Django REST Framework, Docker,
-notification, CI/CD, and deployment foundation. It keeps the proven stack and
-automation patterns from Notoli without carrying an opinionated application
-domain.
+# 🧱 FullStackTemplate
 
-## Before the first pull request
-Start here. The pull-request workflow deliberately exposes missing reviewer
-configuration, so add these GitHub repository settings before asking CI to run.
+**An authentication-first full-stack application template**
 
-The complete Notoli-derived repository baseline is in
-[the GitHub setup guide](docs/GITHUB_SETUP.md#0-match-the-repository-settings).
-It covers merge methods, auto-merge, least-privilege Actions permissions, fork
-approvals,
-Dependabot, secret scanning, CodeQL, required labels, and the main-branch
-ruleset. Apply it before opening the first pull request; repository settings are
-not copied automatically when a repository is created from this template.
+FullStackTemplate provides a reusable React and Django foundation for building
+new applications. It includes accounts, notifications, an application shell,
+and the development and automation tooling used by Notoli and MacroMapper.
 
-### Required CI and reviewer secrets
-Add these under both **Settings → Secrets and variables → Actions → Secrets**
-and **Settings → Secrets and variables → Dependabot → Secrets**:
+## ✨ Features
 
-```text
-OBI_WAN_OPENAI_API_KEY
-LINT_EASTWOOD_OPENAI_API_KEY
-ROBOCOP_OPENAI_API_KEY
-OBI_WAN_CODE_NOBI_PRIVATE_KEY
-LINT_EASTWOOD_PRIVATE_KEY
-ROBOCOP_PRIVATE_KEY
-```
+- Email-first registration, JWT sessions, and password-reset email.
+- Responsive navigation, protected pages, profiles, and notifications.
+- A starter backend and frontend ready for application-specific features.
+- Docker development, automated tests, security checks, and AI reviewers.
+- An optional MCP framework for adding application-owned integrations.
 
-GitHub isolates workflows triggered by Dependabot from the Actions secret
-store. Keeping the same six values in the Dependabot store lets its pull
-requests run the required AI reviews; GitHub does not provide a way to copy
-secret values between the two stores.
+## 🚀 Tech stack
 
-Add under **Actions → Variables**:
+- **Frontend:** React, Vite, and Material UI.
+- **Backend:** Django REST Framework and JWT authentication.
+- **Development and hosting:** Docker, Nginx, and GitHub Actions.
 
-```text
-OPENAI_REVIEWERS_PROJECT_ID
-OBI_WAN_CODE_NOBI_APP_ID
-LINT_EASTWOOD_APP_ID
-ROBOCOP_APP_ID
-```
+## 📚 Documentation
 
-The three private keys come from three GitHub Apps:
+- [Create an application](scripts/README.md#-create-an-application) — template initialization.
+- [Backend](backend/README.md) — setup, APIs, authentication, email, and MCP.
+- [Frontend](frontend/README.md) — setup, pages, components, and browser tests.
+- [Deployment](deploy/README.md) — local Docker, configuration, and live-server guides.
+- [GitHub setup and workflows](.github/README-WORKFLOWS.md) — first-PR setup and automation.
+- [Additional documentation](docs/README.md) — architecture, maintenance, scripts, and testing.
+- [Changelog](CHANGELOG.md) — project updates.
 
-- Obi-Wan Code-nobi reviews application code.
-- Lint Eastwood reviews build failures and can push lint-only fixes.
-- RoboCop reviews security results and manages security-alert issues.
+## 📜 License
 
-Use [the GitHub setup guide](docs/GITHUB_SETUP.md) to create the Apps with the
-correct minimum permissions, install them on the repository, and create the
-matching GitHub Project.
-
-### Required security aggregation settings
-```text
-Variable: SECURITY_ALERTS_PROJECT_ID
-Secret:   SECURITY_ALERTS_TOKEN
-```
-
-The Project initializer copies Notoli's Project structure, links the new
-repository, verifies its fields/views/workflows, and sets
-`SECURITY_ALERTS_PROJECT_ID` automatically.
-`SECURITY_ALERTS_TOKEN` is a separate user token with access to that Project.
-It is not copied from Notoli and must be created in the new repository. Code
-scanning, Dependabot alerts/security updates, secret scanning, and push
-protection must also be enabled in repository settings; the exact switches are
-listed in the setup guide.
-
-### Deployment settings can wait
-The deploy workflow runs only from `env-prod` or manual dispatch. It needs the
-DigitalOcean, Cloudflare, and Resend values listed in
-[deploy/README.md](deploy/README.md), but those do not block the first
-application pull request.
-
-## Create an application from this template
-After creating a repository from FullStackTemplate, clone it and run:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/initialize-template.ps1 `
-  -ApplicationName 'ExampleApplication' `
-  -ApplicationSlug 'example-application' `
-  -ProductionHost 'example-application.example.com' `
-  -GitHubOwner 'YOUR_GITHUB_OWNER'
-```
-
-Use `-WhatIf` first to preview the files and renames. The initializer updates
-display names, Docker/Conda identifiers, GHCR image names, workflow markers,
-the production host, and every local host to:
-
-```text
-https://[application-slug].localhost
-```
-
-Initializer checks are retained in generated repositories. They verify branding
-again in a disposable copy, including slug-prefixed production hosts and renamed
-theme tests. Host replacement takes precedence over slug replacement, and new
-values are inserted once so overlapping names cannot rewrite the chosen host.
-
-That subdomain convention is an invariant of the template. Browsers resolve
-`.localhost` names to loopback, so no hosts-file entry is normally needed.
-Production uses the same shape: `https://[application-slug].[base-domain]`.
-All browser traffic stays same-origin; Nginx routes `/auth`, `/api`, and
-`/admin` to Django and all other paths to React.
-
-Review the initializer diff, replace the starter SVG mark, then complete the
-GitHub settings above before opening the first PR.
-
-## What is included
-- React 19, Vite, Material UI, and a responsive application shell
-- Django REST Framework, custom user model, and versioned migrations
-- Email-first registration and JWT login/refresh
-- Forgot-password and tokenized reset email delivery through Resend
-- Protected routes and automatic session renewal
-- Header with a generic navigation drawer, notifications, profile details, and
-  logout
-- Recipient-scoped notification APIs with read and clear actions
-- One intentionally minimal protected Material UI Paper ready to replace with
-  application-specific content
-- Docker images, local Compose/HTTPS, GHCR, and app-only production releases
-  behind the shared Infrastructure gateway
-- Ruff, ESLint, Prettier, React/Django tests, CodeQL, dependency review, malware
-  review, Dependabot, and auto-merge gates
-- Three AI reviewer identities and scheduled security-alert-to-Project
-  aggregation
-- Modified MIT License restricted to non-commercial use
-
-## Run locally in Docker
-Requirements: Docker Desktop and either `mkcert` or OpenSSL.
-
-```powershell
-if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
-if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
-./deploy/create-local-certificate.ps1
-
-docker build -t ghcr.io/vanillaicecube/fullstacktemplate-backend:latest ./backend
-docker build -t ghcr.io/vanillaicecube/fullstacktemplate-frontend:latest ./frontend
-
-Set-Location deploy
-docker compose up -d
-docker compose exec -T backend python manage.py migrate
-```
-
-Open `https://fullstacktemplate.localhost`, register, and log in. The protected
-home page contains the reusable application header and a minimal placeholder
-Paper.
-
-`deploy/.env`, `deploy/db.sqlite3`, and certificate keys are ignored. Do not
-commit them.
-
-## Run Docker hot-reload development
-Use the development Compose file when iterating on source code. It mounts the
-frontend and backend directories into development containers, so React and
-Django reload changes without rebuilding production images:
-
-```powershell
-if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
-if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
-docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml up --build -d
-docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
-```
-
-Open `http://fullstacktemplate.localhost:3000`. The frontend calls Django at
-`http://fullstacktemplate.localhost:8000`. Both ports bind to localhost only.
-To override them, set `FULLSTACKTEMPLATE_DEV_FRONTEND_PORT` or
-`FULLSTACKTEMPLATE_DEV_BACKEND_PORT` in `deploy/.env`. Stop this workflow with:
-
-```powershell
-docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml down
-```
-
-This development workflow does not need a local certificate or Nginx proxy.
-Use the standalone local HTTPS Compose workflow above when testing the HTTPS proxy and
-deployment-shaped containers.
-
-## Run without Docker
-Requirements: Python 3.12 and Node.js 24.15 or newer. Docker remains the simplest option
-when those exact versions are not already installed.
-
-Backend:
-
-```powershell
-python -m pip install -r backend/requirements.txt
-python backend/manage.py migrate
-python backend/manage.py runserver 8000
-```
-
-Frontend:
-
-```powershell
-Set-Location frontend
-npm ci
-npm start
-```
-
-Open `http://fullstacktemplate.localhost:3000`.
-
-## Validate changes
-```powershell
-Set-Location frontend
-npm run format:check
-npm run lint:strict
-npm test
-npm run build
-
-Set-Location ../backend
-ruff format --check .
-ruff check .
-python manage.py makemigrations --check --dry-run
-python manage.py test
-
-Set-Location ..
-node --test tests/*.test.cjs .github/actions/collect-upstream-major-upgrade-evidence/collect-upstream-major-upgrade-evidence.test.js `
-  .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js `
-  .github/actions/publish-ai-review/publish-ai-review.test.js `
-  .github/actions/security-alerts/sync-security-alerts.test.js
-```
-
-CI runs the same application and automation checks, plus CodeQL, dependency,
-malware, AI review gates, and a stable `Auto Merge` status check. The latter
-reports every pull request while a separate Dependabot-only job enables
-auto-merge for eligible dependency updates.
-
-The Linux frontend gate also runs `python tests/test_frontend_container.py`
-from the repository root. It needs a disposable Docker daemon and PowerShell,
-initializes a sample app, builds its frontend image, and verifies assets and SPA
-history fallback on loopback before removing its own test resources.
-
-RoboCop treats a path-scoped CodeQL language skip as expected only when the
-scope detector and aggregate gate succeed and the omitted language has a
-default-branch baseline. Neutral GitHub summaries for those expected omissions
-are informational; failed scope detection, failed gates, and missing baselines
-remain review-blocking evidence gaps.
-
-Obi-Wan's review adds an advisory **Major upgrade brief** to Dependabot
-semver-major updates. It combines upstream release evidence, primary-source
-web research, and a bounded search of tracked repository usage to explain why
-the upstream project drew a major-version boundary, whether this application
-uses the affected behavior, what the upgrade provides, and what verification
-remains. The brief keeps that explanation compact: dependency, why the upgrade
-matters, repository impact, recommendation, and sources. The verdict retains
-Obi-Wan's calm mentor voice while the structured brief stays technically
-direct; it is not an extra merge gate.
-
-## Documentation
-- [GitHub Apps, Project, reviewers, and branch rules](docs/GITHUB_SETUP.md)
-- [Cloudflare, DigitalOcean, Resend, Docker, and deployment](deploy/README.md)
-- [Backend API and email settings](backend/README.md)
-- [Frontend routes and component conventions](frontend/README.md)
-- [Workflow behavior](.github/README-WORKFLOWS.md)
-- [Repository working conventions](AGENTS.md)
-- [Changelog](CHANGELOG.md)
-
-## License
-FullStackTemplate uses the
-[Modified MIT License (Non-Commercial Use Only)](LICENSE.md). It permits use,
-copying, modification, and distribution for non-commercial purposes; commercial
-use requires separate permission from the copyright holder.
-
-Frontend builds now use Vite/Vitest with the same baseline as MacroMapper and
-Notoli. See [the cross-app alignment and upgrade guide](docs/FRONTEND-ALIGNMENT.md).
-
-## Production release architecture
-
-Production follows [the app-only release/recovery guide](deploy/production/README.md).
-Infrastructure owns ingress, TLS, route networks, and host capacity; this app
-owns only its services, database, immutable images, and private recovery records.
-The default app/domain/subnet are onboarding examples, not an approved third
-deployment. Main does not deploy. Promotion, shared-host onboarding, bootstrap,
-and production actions each require the designated operator's approved plan.
-
-## 🔑 AI reviewer credentials
-
-Obi-Wan, Lint Eastwood, and RoboCop use separate OpenAI keys scoped to this
-repository. See the [workflow setup and deferred migration](.github/README-WORKFLOWS.md#-separate-openai-reviewer-credentials)
-for exact secret names, project configuration, verification, and rollback.
-
-
-## 🔌 Shared MCP framework
-
-Optional MCP transport/OAuth and application adoption are described in [the framework guide](docs/MCP-FRAMEWORK.md).
-
-Security-alert maintenance validates complete source coverage and supports bounded,
-idempotent Project recovery; see [.github/README-WORKFLOWS.md](.github/README-WORKFLOWS.md#security-alert-recovery).
-
-## Development dependency reproducibility
-
-Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
-registry digests. Production Dockerfiles and the independent release engine are
-unchanged by this development-image policy. Refresh tags/digests together after
-registry verification and a disposable build/configuration check.
-
-The frontend development entrypoint hashes both `package.json` and
-`package-lock.json` inside its persistent `node_modules` volume. Fresh volumes
-install with `npm ci`; unchanged restarts reuse dependencies; changing either
-manifest reinstalls. Missing manifests or a failed installation stop startup and
-retry on the next invocation. Use one volume per checkout and restart after edits.
-Run `node --test tests/dev-dependencies.test.cjs` from the repository root for the
-credential-free mocked lifecycle/exit-status regression. Compose configuration
-checks do not deploy or touch application data.
-
-## Isolated browser and automation checks
-
-The optional Chromium foundation exercises existing authentication/session and
-password-recovery behavior using a fresh disposable SQLite database and local
-file mail. Setup, commands and extension points are in [frontend/README.md](frontend/README.md).
-CI runs it only for relevant changes. No application credentials are required.
-See [automation coverage](docs/AUTOMATION-COVERAGE.md) and the
-[Batch 2 parity record](docs/BATCH2-PARITY.md) for cross-repository adoption and limits.
-
-
-Reviewer discussion, feedback ownership, safe usage evidence and recovery are
-documented in [.github/AI-REVIEWERS.md](.github/AI-REVIEWERS.md).
-
-
-CI/CD events, reviewer flow, credential boundaries and production-summary behavior
-are mapped in [the architecture reference](docs/CI-CD-ARCHITECTURE.md).
-Shared adoption and justified differences are recorded in [Batch 3 parity](docs/BATCH3-PARITY.md).
-
-Transactional mail failure categories, finite timeouts and password-reset recovery
-are documented in [backend/README.md](backend/README.md#transactional-email-failure-handling).
-
-Security-alert model overrides are resolved by the three caller workflows and passed
-through validated composite inputs; see the [configuration contract](.github/README-WORKFLOWS.md#security-alert-configuration-contract).
+[Modified MIT License (Non-Commercial Use Only)](LICENSE.md).
+Commercial use requires separate permission from the copyright holder.
