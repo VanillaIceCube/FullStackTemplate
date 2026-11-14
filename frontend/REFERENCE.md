@@ -39,7 +39,7 @@ defaults to localhost:8000. Leave it unset or blank for production same-origin
 requests. Vite exposes this value to the browser: never put secrets in `VITE_*`.
 `import.meta.env.BASE_URL` provides the router/asset base; subdomain-root `/`
 remains the default. `REACT_APP_*` and `PUBLIC_URL` are legacy CRA settings and
-are not read by this template. See [the alignment and upgrade guide](../docs/FRONTEND-ALIGNMENT.md).
+are not read by this template. See [the alignment and upgrade guide](REFERENCE.md#-toolchain-maintenance).
 
 Keep React/React DOM on matching versions and Material UI/icons on compatible
 v9 versions. Use `sx` for layout and `slotProps` for component slots. Supported
@@ -117,3 +117,20 @@ Add product journeys under `e2e/` using these isolated users and existing APIs.
 Keep authentication journeys shared; domain fixtures belong to their app. Do not
 add real customer accounts, external email or paid-model requests. Infrastructure
 has no browser application and retains its ingress/Docker protocol suites.
+
+## 🔌 Connection response handling
+
+Connection API successes must contain JSON objects; empty, unreadable, null,
+scalar, and array success bodies fail safely. Error messages use the first
+nonblank `error_description`, `detail`, or `error`, then an HTTP-status fallback.
+Never display raw HTML, parser errors, or unrelated response fields. Preserve
+JWT refresh/retry, validated return paths, consent, and revocation behavior;
+cover these paths with mocked-fetch service and integration tests.
+
+## 🔄 Toolchain maintenance
+
+Keep React/React DOM and Material UI/icons on compatible versions. Use the
+Node range in `package.json`, the checked-in lockfile, and this app's Vite
+configuration. Preserve its API variable and build-output conventions. After
+dependency changes, verify a clean install, strict lint, formatting, tests, and
+production build; extend browser journeys with disposable application fixtures.
