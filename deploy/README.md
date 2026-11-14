@@ -79,7 +79,7 @@ polling. Blank production API origins retain same-origin routing. See
 
 ## 🔌 Shared MCP framework
 
-The [MCP framework guide](../docs/MCP-FRAMEWORK.md) defines opt-in ASGI/proxy/readiness requirements. Local development can call the backend directly; do not treat a local/legacy proxy as production MCP onboarding.
+The [MCP framework guide](../backend/app_mcp/README.md) defines opt-in ASGI/proxy/readiness requirements. Local development can call the backend directly; do not treat a local/legacy proxy as production MCP onboarding.
 
 <a id="development-dependency-reproducibility"></a>
 

@@ -52,7 +52,6 @@ $explicitTextNames = @('.gitignore', 'Dockerfile', 'Dockerfile.dev')
 $sharedFiles = @(
     'deploy/shared-source.json', 'deploy/check_parity.py',
     'backend/app_mcp/source.json', 'backend/app_mcp/manifest.json', 'scripts/check_app_mcp.py',
-    'docs/MCP-FRAMEWORK.md',
     'deploy/production/release.py', 'deploy/production/build_bundle.py'
 )
 

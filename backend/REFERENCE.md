@@ -137,7 +137,7 @@ Bootstrap, migration, backup, and explicit recovery follow
 
 ## 🔌 Shared MCP framework
 
-See [the MCP framework guide](../docs/MCP-FRAMEWORK.md) for opt-in settings, ASGI startup, OAuth migrations/client registration, consent, scope/ownership requirements and disabled-profile tests.
+See [the MCP framework guide](app_mcp/README.md) for opt-in settings, ASGI startup, OAuth migrations/client registration, consent, scope/ownership requirements and disabled-profile tests.
 
 ## Development dependency reproducibility
 

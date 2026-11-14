@@ -69,7 +69,7 @@ test('initialization changes app policy while preserving canonical shared source
   const destination = sample(t);
   const files = [
     'backend/app_mcp/source.json', 'backend/app_mcp/manifest.json',
-    'scripts/check_app_mcp.py', 'docs/MCP-FRAMEWORK.md',
+    'scripts/check_app_mcp.py', 'backend/app_mcp/README.md',
     ...fs.readdirSync(path.join(destination, 'backend/app_mcp'), { recursive: true })
       .filter((name) => name.endsWith('.py')).map((name) => 'backend/app_mcp/' + name),
     'deploy/shared-source.json', 'deploy/check_parity.py',

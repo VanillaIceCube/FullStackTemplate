@@ -14,6 +14,8 @@
 
 ### Removed
 
+- Remove superseded MCP and GitHub setup documentation redirects; point links, initializer coverage, and project-helper guidance at their current owning guides.
+
 - Remove obsolete third-party Conda export attribution from the license and environment helper documentation.
 
 ## 2026-11-12
