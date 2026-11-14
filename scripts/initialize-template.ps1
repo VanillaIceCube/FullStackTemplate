@@ -60,7 +60,8 @@ $sharedFiles = @(
 $files = Get-ChildItem -LiteralPath $repoRoot -Recurse -File -Force | Where-Object {
     $relativePath = $_.FullName.Substring($repoRoot.Length).TrimStart([char[]]@('\', '/'))
     $normalizedPath = $relativePath.Replace('\', '/')
-    if ($sharedFiles -contains $normalizedPath -or $normalizedPath.StartsWith('deploy/tests/') -or $normalizedPath.StartsWith('backend/app_mcp/')) { return $false }
+    if ($normalizedPath.StartsWith('backend/app_mcp/chatgpt/') -and $_.Extension -eq '.py') { return $false }
+    if ($sharedFiles -contains $normalizedPath -or $normalizedPath.StartsWith('deploy/tests/') -or ($normalizedPath.StartsWith('backend/app_mcp/') -and -not $normalizedPath.StartsWith('backend/app_mcp/chatgpt/'))) { return $false }
     $segments = $relativePath -split '[\\/]'
     $isExcluded = $segments | Where-Object { $excludedDirectories -contains $_ }
     (-not $isExcluded) -and (

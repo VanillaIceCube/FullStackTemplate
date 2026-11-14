@@ -1,7 +1,57 @@
-# 🔌 FullStackTemplate ChatGPT connection
+# 🔌 FullStackTemplate ChatGPT starter
 
-FullStackTemplate is an opt-in starter; configure a derived application before connecting.
+This is a starter package for a derived application. Its `app.example.com`
+origin is an example, and the backend MCP profile is disabled by default.
+The package builder refuses that unchanged example endpoint.
 
-This folder owns client-facing connection instructions, manifests, branding,
-and package helpers. Backend transport and OAuth are documented in the
-[MCP README](../README.md).
+## 🚦 Prepare a derived application
+
+1. Run the [template initializer](../../../scripts/README.md#-create-an-application)
+   to update the application name, slug, host, client ID, scopes, and artwork text.
+2. Implement and review the application-owned tools and permissions. The sample
+   `connection_status` tool reads no application data.
+3. Configure the real HTTPS origin and enable the backend/frontend MCP profiles
+   as described in the [MCP README](../README.md).
+4. Register the public OAuth client using the exact callback supplied by the
+   client. Review the application branding and package metadata before building.
+
+## 🧭 Files
+
+- `plugin.json`: starter listing metadata and presentation.
+- `mcp.json`: predefined public OAuth client and connection scope.
+- `assets/`: copied starter artwork; replace with the application's own mark.
+- `build_package.py`, `build_listing.py`: portable and existing-listing builders.
+
+
+## 🧰 Build and validate packages
+
+Run the offline regression suite from the repository root:
+
+```powershell
+python -m unittest discover -s backend/app_mcp/chatgpt -p "test_*.py" -v
+```
+
+To build a portable ZIP containing only `plugin.json`, `mcp.json`, and referenced
+artwork, write the output outside the source directory:
+
+```powershell
+python backend/app_mcp/chatgpt/build_package.py --output "$env:TEMP/application-chatgpt.zip"
+```
+
+The portable archive contains no account-specific `.app.json`, source code,
+test files, or exported account credentials. Building it does not install,
+register, publish, or deploy the integration.
+
+For an existing personal listing, download that plugin's export first and run:
+
+```powershell
+python backend/app_mcp/chatgpt/build_listing.py `
+  --export "$env:USERPROFILE/Downloads/plugin.zip" `
+  --output "$env:TEMP/application-listing.zip" `
+  --version 1.0.1
+```
+
+Choose a version greater than the export's current version. The overlay verifies
+the expected display name and preserves the exported plugin name, app mapping,
+and other exported files. Upload through the existing plugin's update flow
+when authorized. No registered app ID is stored or invented in this repository.

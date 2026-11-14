@@ -129,3 +129,25 @@ test('inserts overlapping application names and production hosts only once', (t)
   assert.equal(JSON.parse(read('frontend/package.json')).name, `${branding.slug}-frontend`);
   assert.ok(read('frontend/index.html').includes(`<title>${branding.name}</title>`));
 });
+
+test('initializes a buildable ChatGPT package while preserving the shared runtime', (t) => {
+  const destination = sample(t);
+  initialize(destination);
+  const packageRoot = path.join(destination, 'backend/app_mcp/chatgpt');
+  const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'plugin.json'), 'utf8'));
+  const connection = JSON.parse(fs.readFileSync(path.join(packageRoot, 'mcp.json'), 'utf8'));
+  assert.equal(manifest.name, 'sample-atlas');
+  assert.equal(manifest.repository, 'https://github.com/exampleowner/SampleAtlas');
+  assert.equal(manifest.extensions['com.openai'].interface.supportURL, 'https://github.com/exampleowner/SampleAtlas/issues');
+  assert.equal(manifest.extensions['com.openai'].interface.displayName, 'SampleAtlas');
+  assert.equal(connection.mcpServers['sample-atlas'].url, 'https://sample-atlas.example.net/mcp');
+  const auth = connection.mcpServers['sample-atlas'].extensions['com.openai'].auth;
+  assert.equal(auth.client.clientId, 'sample-atlas-chatgpt');
+  assert.deepEqual(auth.baseScopes, ['sample-atlas:connect']);
+  assert.ok(fs.existsSync(path.join(packageRoot, 'assets/logo.svg')));
+  const output = path.join(destination, 'sample-atlas.zip');
+  execFileSync(process.platform === 'win32' ? 'python' : 'python3', [
+    path.join(packageRoot, 'build_package.py'), '--output', output,
+  ], { cwd: destination, stdio: 'pipe' });
+  assert.ok(fs.statSync(output).size > 0);
+});

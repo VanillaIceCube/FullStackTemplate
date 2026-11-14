@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Standardize ChatGPT package metadata, artwork, offline validation, portable archives, and existing-listing overlays under `backend/app_mcp/chatgpt/` (#324).
+
 - Rename the shared MCP Python package to `app_mcp`, consolidate source pins and hashes beside it, and retain its existing Django app label and OAuth behavior (#324).
 
 - Reorganize the main README as a project introduction with folder guides; consolidate setup, API/workflow references, scripts, tests, and documentation indexes with consistent emoji headings.
