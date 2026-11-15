@@ -206,12 +206,9 @@ The Project must contain:
 - Numeric `Estimate`
 - `Start date` and `End date`
 
-`scripts/create-github-project.ps1` copies Notoli's Project structure, links it
-to the target repository, verifies its fields, views, and supported workflows,
-and sets `SECURITY_ALERTS_PROJECT_ID`. GitHub excludes the repository-scoped
-`Auto-add to project` workflow from Project copies, so configure it for the
-target repository in the GitHub UI as described in
-[repository setup](../README.md#-repository-setup).
+Create or copy the Project in GitHub, link the target repository, verify its
+fields and workflows, and set `SECURITY_ALERTS_PROJECT_ID` manually as described
+in [repository setup](../README.md#-repository-setup).
 
 ### 🛡️ Dependency evidence and alert lifecycle parity
 
@@ -462,13 +459,13 @@ repository automation tests. The current reviewed action revision is
 The frontend test gate runs Vitest and the production Vite build as one failure
 gate. The development-image job still builds both reviewed development Dockerfiles.
 The former root initializer, initialized sample-app image/SPA smoke, and dependency
-volume lifecycle suites have been removed. The manual PowerShell initializer
-retains `.mjs`/`.cjs` branding support for Vite and flat ESLint. The browser API
-variable is `VITE_API_BASE_URL`; never publish secrets through Vite env.
+volume lifecycle suites have been removed. Application branding is configured
+manually. The browser API variable is `VITE_API_BASE_URL`; never publish secrets
+through Vite env.
 
 ### Repository validation and browser diagnostics
 
-The path-aware test gate includes `.github/**`, `frontend/e2e/**`, `scripts/**`, `deploy/**`,
+The path-aware test gate includes `.github/**`, `frontend/e2e/**`, `deploy/**`,
 and maintained docs in automation validation. It runs workflow and
 composite syntax, parser-only script checks and synthetic Compose configuration
 plus the existing Batch 1 suites and focused mocked composite regressions.

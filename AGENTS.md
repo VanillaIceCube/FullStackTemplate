@@ -168,8 +168,8 @@ This template has no active `env-prod` branch. `https://app.example.com`,
 `/opt/apps/fullstacktemplate` and the template subnet are isolated examples;
 source review does not approve a third application on the existing host. Keep
 new-app onboarding/capacity and live activation separate from source review.
-The initializer must preserve canonical shared-source metadata and hash-verified
-files, and generated configuration requires review before activation.
+Manual application setup must preserve canonical shared-source metadata and
+hash-verified files; review configuration before activation.
 
 - Frontend: `/`; authentication: `/auth/`; admin: `/admin/`; application APIs: `/api/`.
 - Example GHCR images: `fullstacktemplate-backend`, `fullstacktemplate-frontend`.
@@ -254,6 +254,6 @@ owns the canonical package; derived applications own enablement and business too
 ## 🧩 Repository-specific contracts
 
 Frontend tooling uses Vite 8, Vitest 5/jsdom and ESLint 10 flat configuration.
-Build output is `frontend/dist/`. Keep Docker, CI, `VITE_API_BASE_URL` and
-template-initializer coverage aligned; see
+Build output is `frontend/dist/`. Keep Docker, CI and `VITE_API_BASE_URL`
+aligned; see
 [frontend guide](frontend/README.md).

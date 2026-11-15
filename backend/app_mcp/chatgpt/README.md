@@ -6,8 +6,8 @@ The package builder refuses that unchanged example endpoint.
 
 ## 🚦 Prepare a derived application
 
-1. Run the [template initializer](../../../scripts/README.md#-create-an-application)
-   to update the application name, slug, host, client ID, scopes, and artwork text.
+1. Manually update the application name, slug, host, client ID, scopes, and artwork
+   text in the starter configuration and package metadata.
 2. Implement and review the application-owned tools and permissions. The sample
    `connection_status` tool reads no application data.
 3. Configure the real HTTPS origin and enable the backend/frontend MCP profiles

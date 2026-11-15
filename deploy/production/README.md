@@ -31,9 +31,9 @@ apps. Replace the example `gateway` policy with the reviewed complete topology;
 the preflight intentionally rejects a different active gateway network set.
 See [Infrastructure coordination #4](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/issues/4).
 
-The initializer brands `deploy/production/app.json`, Compose, and the rendered
-workflow while preserving canonical shared-source ownership and vendored bytes.
-Review its diff before adopting a generated app. The database must already be a
+Configure `deploy/production/app.json`, Compose, and the application workflow
+manually while preserving canonical shared-source ownership and vendored bytes.
+Review the configuration before adoption. The database must already be a
 nonempty, valid SQLite file created through a separately approved bootstrap;
 the release engine never silently creates or truncates an existing database.
 

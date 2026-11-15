@@ -86,27 +86,12 @@ workflows can group and update their managed issues:
 
 ### 1. Create the Project
 
-Authenticate GitHub CLI with repository and Projects access:
+Create a Project in GitHub or copy Notoli's Project (`VanillaIceCube` Project `8`)
+without its linked issues. Update the Project title, description and README,
+link the target repository, and set the repository variable
+`SECURITY_ALERTS_PROJECT_ID` to the Project v2 node ID.
 
-```powershell
-gh auth login
-gh auth refresh -s project
-powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/create-github-project.ps1 `
-  -Owner YOUR_GITHUB_OWNER `
-  -Repository YOUR_REPOSITORY
-```
-
-The script uses Notoli's Project as the reusable Project template. It:
-
-1. Refuses to create a duplicate Project with the same title.
-2. Copies Notoli's views, custom fields, configured workflows, and insights
-   without copying its linked issues.
-3. Rewrites the Project description and README for the target repository.
-4. Links the copied Project to the target repository.
-5. Verifies the copied fields, views, and supported workflows against Notoli.
-6. Sets the target repository variable `SECURITY_ALERTS_PROJECT_ID`.
-
-The copied fields match Notoli:
+Verify the following fields against Notoli:
 
 - `Status`: `Backlog`, `Ready`, `In Progress`, `In Review`, `Done`
 - `Domain`: `Frontend`, `Backend`, `UX/UI`, `Data Model`, `Deployment`, `CI/CD`
@@ -120,16 +105,10 @@ The copied views match Notoli's `Kanban`, `Detailed Kanban`, `New Issues`,
 `Updated Issues`, `Issue Picker`, and `Roadmap` layouts, including their visible
 fields, filters, grouping, and sorting.
 
-GitHub does not copy the repository-scoped `Auto-add to project` workflow.
-After the script completes, open the new Project's **Workflows** page and
-configure `Auto-add to project` for the target repository. The remaining
-configured workflows, including `Auto-add sub-issues to project`, are copied
-and verified by the script.
+Open the new Project's **Workflows** page and configure `Auto-add to project`
+for the target repository. Verify the other workflows and views after copying.
 GitHub documents this behavior in
 [Copying an existing project](https://docs.github.com/en/issues/planning-and-tracking-with-projects/creating-projects/copying-an-existing-project).
-
-Notoli is the default source (`VanillaIceCube` Project `8`). A different source
-can be supplied with `-SourceProjectOwner` and `-SourceProjectNumber`.
 
 ### 2. Register the AI reviewer GitHub Apps
 

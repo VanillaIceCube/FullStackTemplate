@@ -9,8 +9,8 @@ them over shared host ingress or use them as production rollback scripts.
 <a id="local-docker-with-applicationlocalhost"></a>
 
 ## 💻 Local Docker with `[application].localhost`
-The template itself uses `fullstacktemplate.localhost`. A generated repository
-uses the slug passed to `initialize-template.ps1`.
+The template itself uses `fullstacktemplate.localhost`. When creating an application,
+update its branding, Compose identifiers, and local hostnames manually.
 
 For fast source iteration, start the development Compose workflow over HTTP
 (no certificate required):
@@ -110,4 +110,3 @@ See [workflow checks and validation](../.github/workflows/README.md#-checks-and-
 - [Live-server releases and recovery](production/README.md).
 - [Backend configuration](../backend/README.md).
 - [Frontend development](../frontend/README.md).
-- [Repository scripts](../scripts/README.md).

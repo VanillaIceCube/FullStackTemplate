@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove the root `scripts/` folder, template initializer and GitHub Project helper; use manual application and Project setup.
 - Remove duplicate documentation indexes, redirects, stale narratives and historical receipts after preserving useful contracts.
 - Remove the root `tests/` directory and its CI invocations; retain backend, frontend/browser, action-local, and shared release suites.
 

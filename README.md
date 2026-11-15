@@ -22,7 +22,6 @@ and the development and automation tooling used by Notoli and MacroMapper.
 
 ## 📚 Documentation
 
-- [Create an application](scripts/README.md#-create-an-application) — template initialization.
 - [Backend](backend/README.md) — setup, APIs, authentication, email, and MCP.
 - [Frontend](frontend/README.md) — setup, pages, components, and browser tests.
 - [Deployment](deploy/README.md) — local Docker, configuration, and live-server guides.

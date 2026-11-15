@@ -54,7 +54,6 @@ jobs:
             frontend:
               - 'frontend/**'
               - '.github/actions/read-versions/**'
-              - 'scripts/initialize-template.ps1'
               - '.github/workflows/gate-test.yml'
             backend:
               - 'backend/**'
@@ -82,7 +81,6 @@ jobs:
               - '.github/workflows/gate-test.yml'
             automation:
               - 'frontend/e2e/**'
-              - 'scripts/**'
               - 'docs/**'
               - 'README.md'
               - 'CHANGELOG.md'
@@ -102,7 +100,6 @@ jobs:
               - '.github/actions/publish-ai-review/**'
               - '.github/actions/security-alerts/**'
               - 'deploy/**'
-              - 'scripts/**'
               - '.github/workflows/gate-test.yml'
               - '.github/workflows/review-build.yml'
               - '.github/workflows/review-code.yml'
