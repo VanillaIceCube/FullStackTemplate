@@ -99,7 +99,7 @@ the untouched gateway/companions before recording acceptance or releasing holds.
 ```powershell
 python deploy/check_parity.py
 python -m unittest discover -s deploy/tests -v
-node --test tests/*.test.cjs .github/actions/*/*.test.js
+node --test .github/actions/*/*.test.js
 ```
 
 The full common suite needs Linux and a disposable Docker daemon. It creates

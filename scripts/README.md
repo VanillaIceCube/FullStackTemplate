@@ -1,24 +1,14 @@
-# 🧰 FullStackTemplate scripts
+# 🧰 FullStackTemplate onboarding scripts
 
-Repository maintenance helpers live here. Run documented commands from the
-repository root with the dependencies required by the relevant guide.
+This folder retains the two manual onboarding tools. Run them from the repository
+root; active CI, browser, backend, and test helpers live beside their owners.
 
 ## 🧭 Script index
 
 | Script | Purpose |
 | --- | --- |
-| [bounded_log.py](bounded_log.py) | Bound reviewer logs while retaining early, failing, and late evidence. |
-| [check_app_mcp.py](check_app_mcp.py) | Verify shared Python framework hashes against the canonical source pin. |
-| [ci_architecture.py](ci_architecture.py) | Validate documented CI contracts and regenerate the source inventory. |
-| [collect_browser_artifacts.py](collect_browser_artifacts.py) | Collect a bounded set of generated browser failure artifacts. |
-| [create-github-project.ps1](create-github-project.ps1) | Create or copy the application GitHub Project; supports a preview. |
-| [e2e_backend.py](e2e_backend.py) | Start only the isolated loopback backend used by browser tests. |
-| [e2e_settings.py](e2e_settings.py) | Disposable test settings; excludes developer and production environment files. |
 | [initialize-template.ps1](initialize-template.ps1) | Apply application branding and hostnames; supports `-WhatIf`. |
-| [install_actionlint.sh](install_actionlint.sh) | Install the pinned, checksum-verified Linux Actionlint release. |
-| [run_e2e.cjs](run_e2e.cjs) | Run isolated frontend/backend browser journeys and remove their generated state. |
-| [test_dev_container.py](test_dev_container.py) | Verify dependency startup with a disposable Docker volume. |
-| [validate_repository.py](validate_repository.py) | Validate workflow/script syntax and synthetic Compose configuration. |
+| [create-github-project.ps1](create-github-project.ps1) | Create or copy the application GitHub Project; supports a preview. |
 
 ## 🧱 Create an application
 
@@ -53,24 +43,20 @@ names to loopback without a hosts-file entry. Production uses a subdomain such
 as `https://[application-slug].[base-domain]`; the gateway routes `/auth`,
 `/api`, and `/admin` to Django and other application paths to React.
 
-Initializer tests remain in generated repositories and verify branding in
-disposable copies, including slug-prefixed production hosts and renamed theme
-tests. Host replacement precedes slug replacement; inserted values are applied
-once so overlapping names cannot rewrite the chosen host. Canonical shared
-framework and release files retain their pinned bytes.
+Host replacement precedes slug replacement; inserted values are applied once
+so overlapping names cannot rewrite the chosen host. Canonical shared framework
+and release files retain their pinned bytes. The former root initializer regression
+suite has been removed; review generated configuration and branding before use.
 
 Complete the [GitHub setup](../.github/README.md#-before-your-first-pull-request) before the first pull request.
 Local development can begin before reviewer credentials are configured.
 Production onboarding and deployment follow the separate
 [release and recovery guide](../deploy/production/README.md).
 
-## 🔌 MCP maintenance
-
-See the [framework README](../backend/app_mcp/README.md) for canonical
-source ownership, manifests, and the local `--source-root` verification option.
-
 ## 📚 Further reading
 
-- [Tests and validation](../tests/README.md).
-- [GitHub setup and workflows](../.github/README.md).
+- [GitHub Project setup](../.github/README.md#1-create-the-project).
+- [Workflow checks and validation](../.github/workflows/README.md#-checks-and-diagnostics).
+- [Browser helpers](../frontend/README.md#-browser-tests).
+- [MCP verification](../backend/app_mcp/README.md#-verification).
 - [Documentation index](../docs/README.md).

@@ -42,7 +42,7 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "test:watch": "vitest",
-    "test:e2e": "node ../scripts/run_e2e.cjs"
+    "test:e2e": "node e2e/run_e2e.cjs"
   },
   "overrides": {
     "minimatch@>=9 <11.0.1": "^11.0.1"

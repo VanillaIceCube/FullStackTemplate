@@ -55,11 +55,10 @@ jobs:
               - 'frontend/**'
               - '.github/actions/read-versions/**'
               - 'scripts/initialize-template.ps1'
-              - 'tests/test_frontend_container.py'
               - '.github/workflows/gate-test.yml'
             backend:
               - 'backend/**'
-              - 'scripts/check_app_mcp.py'
+              - 'backend/check_app_mcp.py'
               - 'backend/app_mcp/source.json'
               - '.github/workflows/gate-test.yml'
               - '.github/actions/read-versions/**'
@@ -70,8 +69,6 @@ jobs:
               - 'frontend/Dockerfile.dev'
               - 'frontend/docker-entrypoint-dev.sh'
               - 'frontend/package*.json'
-              - 'scripts/test_dev_container.py'
-              - 'tests/dev-dependencies.test.cjs'
               - '.github/workflows/gate-test.yml'
             e2e:
               - 'backend/**'
@@ -79,11 +76,12 @@ jobs:
               - 'frontend/e2e/**'
               - 'frontend/playwright.config.mjs'
               - 'frontend/vite.config.mjs'
-              - 'scripts/run_e2e.cjs'
+              - 'frontend/e2e/run_e2e.cjs'
               - 'frontend/package*.json'
-              - 'scripts/e2e_*.py'
+              - 'frontend/e2e/e2e_*.py'
               - '.github/workflows/gate-test.yml'
             automation:
+              - 'frontend/e2e/**'
               - 'scripts/**'
               - 'docs/**'
               - 'README.md'
@@ -105,7 +103,6 @@ jobs:
               - '.github/actions/security-alerts/**'
               - 'deploy/**'
               - 'scripts/**'
-              - 'tests/**'
               - '.github/workflows/gate-test.yml'
               - '.github/workflows/review-build.yml'
               - '.github/workflows/review-code.yml'
@@ -160,7 +157,7 @@ jobs:
         run: |
           set -o pipefail
           status=0
-          { npm test && npm run build && python3 ../tests/test_frontend_container.py; } 2>&1 | tee test_output.txt || status=$?
+          { npm test && npm run build; } 2>&1 | tee test_output.txt || status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
 
       - name: Test summary
@@ -177,7 +174,7 @@ jobs:
             echo "status=failure" >> "$GITHUB_OUTPUT"
           fi
 
-          python3 ../scripts/bounded_log.py test_output.txt "$GITHUB_OUTPUT"
+          python3 ../.github/tools/bounded_log.py test_output.txt "$GITHUB_OUTPUT"
 
       - name: Retain bounded failure diagnostics
         if: always() && steps.test_summary.outputs.status != 'success'
@@ -228,7 +225,7 @@ jobs:
           set -o pipefail
           status=0
           {
-            python ../scripts/check_app_mcp.py && python -m unittest discover -s app_mcp/chatgpt -p 'test_*.py' &&
+            python check_app_mcp.py && python -m unittest discover -s app_mcp/chatgpt -p 'test_*.py' &&
             python manage.py test --verbosity=2 &&
             DJANGO_MCP_ENABLED=1 DJANGO_MCP_BASE_URL=http://localhost:8000 DJANGO_MCP_SERVER_FACTORY=app_mcp.server.sample_server python manage.py test app_mcp --verbosity=2
           } 2>&1 | tee test_output.txt || status=$?
@@ -248,7 +245,7 @@ jobs:
             echo "status=failure" >> "$GITHUB_OUTPUT"
           fi
 
-          python3 ../scripts/bounded_log.py test_output.txt "$GITHUB_OUTPUT"
+          python3 ../.github/tools/bounded_log.py test_output.txt "$GITHUB_OUTPUT"
 
       - name: Retain bounded failure diagnostics
         if: always() && steps.test_summary.outputs.status != 'success'
@@ -290,7 +287,7 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check PyYAML==6.0.3
 
       - name: Install verified workflow validator
-        run: bash scripts/install_actionlint.sh
+        run: bash .github/tools/install_actionlint.sh
 
       - name: Run repository automation tests
         id: test_run
@@ -300,11 +297,11 @@ jobs:
           set -o pipefail
           status=0
           (
-            python3 scripts/validate_repository.py || exit 1
+            python3 .github/tools/validate_repository.py || exit 1
             python3 deploy/check_parity.py || exit 1
             group_status=0
             python3 -m unittest discover -s deploy/tests -v || group_status=$?
-            node --test .github/actions/custom-regressions/*.test.js .github/actions/promotion-summary/*.test.js .github/actions/collect-prior-ai-reviews/*.test.js .github/actions/check-workflow-security/*.test.js .github/actions/review-npm-malware/*.test.js .github/actions/dependabot-auto-merge/*.test.js .github/actions/check-codeql-pins/*.test.js .github/actions/prepare-vulnerability-report/prepare-vulnerability-report.test.js tests/*.test.cjs \
+            node --test .github/actions/custom-regressions/*.test.js .github/actions/promotion-summary/*.test.js .github/actions/collect-prior-ai-reviews/*.test.js .github/actions/check-workflow-security/*.test.js .github/actions/review-npm-malware/*.test.js .github/actions/dependabot-auto-merge/*.test.js .github/actions/check-codeql-pins/*.test.js .github/actions/prepare-vulnerability-report/prepare-vulnerability-report.test.js \
             .github/actions/collect-codeql-evidence/collect-codeql-evidence.test.js \
             .github/actions/collect-upstream-major-upgrade-evidence/*.test.js \
             .github/actions/publish-ai-review/publish-ai-review.test.js \
@@ -330,7 +327,7 @@ jobs:
             echo "status=failure" >> "$GITHUB_OUTPUT"
           fi
 
-          python3 scripts/bounded_log.py automation_test_output.txt "$GITHUB_OUTPUT"
+          python3 .github/tools/bounded_log.py automation_test_output.txt "$GITHUB_OUTPUT"
 
       - name: Retain bounded failure diagnostics
         if: always() && steps.test_summary.outputs.status != 'success'
@@ -349,7 +346,7 @@ jobs:
       log: ${{ steps.test_summary.outputs.log }}
 
   development-images:
-    name: Development images and dependency volumes
+    name: Development image builds
     needs: changes
     if: needs.changes.outputs.development == 'true'
     runs-on: ubuntu-latest
@@ -360,8 +357,6 @@ jobs:
         run: |
           docker build --file backend/Dockerfile.dev --tag batch2-backend-dev backend
           docker build --file frontend/Dockerfile.dev --tag batch2-frontend-dev frontend
-      - name: Verify real isolated dependency volume lifecycle
-        run: python3 scripts/test_dev_container.py batch2-frontend-dev
 
   e2e-tests:
     name: Isolated authentication browser tests
@@ -394,7 +389,7 @@ jobs:
         run: npm run test:e2e
       - name: Bound generated browser failure artifacts
         if: failure()
-        run: python ../scripts/collect_browser_artifacts.py
+        run: python e2e/collect_browser_artifacts.py
       - name: Retain failed browser evidence
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

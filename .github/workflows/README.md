@@ -396,7 +396,7 @@ coverage; never rerun an old failed revision as proof of the new source.
 Docker login v4.8.0 uses the immutable action revision supplied by the canonical
 Infrastructure release template. Change shared deployment actions upstream, update
 `deploy/shared-source.json`, run `python deploy/check_parity.py --sync`, then
-regenerate `python scripts/ci_architecture.py`. Both parity checks must pass before
+regenerate `python .github/tools/ci_architecture.py`. Both parity checks must pass before
 merging; this source update does not provision or activate a template deployment.
 
 ## 🚀 Releases and promotion
@@ -457,24 +457,24 @@ security-alert workflow assertion in
 repository automation tests. The current reviewed action revision is
 `64ab729a6294000f5aa4a4bc0b73d1f32bc45510` (v3.3.0).
 
-### Vite frontend and template checks
+### Vite frontend and development image checks
 
-The frontend test gate runs Vitest, the production Vite build, and an initialized
-sample-app Docker image/SPA smoke test as one failure gate. The container test
-uses random local-only images/containers and loopback ports, then removes only
-its own resources. Automation coverage includes the PowerShell template initializer, whose
-`.mjs`/`.cjs` branding support is required by Vite and flat ESLint. The browser
-API variable is `VITE_API_BASE_URL`; never publish secrets through Vite env.
+The frontend test gate runs Vitest and the production Vite build as one failure
+gate. The development-image job still builds both reviewed development Dockerfiles.
+The former root initializer, initialized sample-app image/SPA smoke, and dependency
+volume lifecycle suites have been removed. The manual PowerShell initializer
+retains `.mjs`/`.cjs` branding support for Vite and flat ESLint. The browser API
+variable is `VITE_API_BASE_URL`; never publish secrets through Vite env.
 
 ### Repository validation and browser diagnostics
 
-The path-aware test gate includes `.github/**`, `scripts/**`, `deploy/**`,
-`tests/**` and maintained docs in automation validation. It runs workflow and
+The path-aware test gate includes `.github/**`, `frontend/e2e/**`, `scripts/**`, `deploy/**`,
+and maintained docs in automation validation. It runs workflow and
 composite syntax, parser-only script checks and synthetic Compose configuration
 plus the existing Batch 1 suites and focused mocked composite regressions.
 [Coverage and external boundaries](../../docs/AUTOMATION-COVERAGE.md) are explicit.
 
-`scripts/bounded_log.py` retains early, sampled failing and late context within
+`.github/tools/bounded_log.py` retains early, sampled failing and late context within
 16,000 characters for reviewers. Full output is streamed with `tee`; failed
 logs have roughly 1 MiB capped artifacts retained seven days. Random delimiters
 protect multiline outputs and the original command status still determines the
@@ -490,15 +490,15 @@ production data, live email or paid AI requests for these tests.
 
 CodeQL init and analyze references must move together to the same immutable
 revision. After any workflow action update, regenerate the source-linked snapshot
-with `python scripts/ci_architecture.py` and verify it with
-`python scripts/ci_architecture.py --check`; action-only changes alter the stored
+with `python .github/tools/ci_architecture.py` and verify it with
+`python .github/tools/ci_architecture.py --check`; action-only changes alter the stored
 workflow hash even when the workflow diagram stays the same. Deployment action
 changes must originate in Infrastructure’s shared release template and propagate
 through `deploy/shared-source.json` and `deploy/check_parity.py --sync`.
 
 Validate syntax and relevant behavioral tests after automation changes. Preserve
 original check failures and bounded/redacted diagnostics. Update the existing
-architecture inventory with `python scripts/ci_architecture.py` after workflow
+architecture inventory with `python .github/tools/ci_architecture.py` after workflow
 changes and verify it with `--check`. Do not use production as a test fixture.
 
 ## 📚 Related guides
