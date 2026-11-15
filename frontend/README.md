@@ -159,3 +159,16 @@ See [Docker dependency maintenance](../deploy/README.md#development-dependency-r
 
 - [Backend and MCP integration](../backend/README.md).
 - [Local Docker and production releases](../deploy/README.md).
+
+### Connections response contract
+
+Successful consent, decision, list and revoke responses must be JSON objects.
+Unreadable, empty, null, scalar or array successes reject with `Request failed.`;
+a protocol failure must not follow a callback or claim revocation succeeded.
+HTTP failures use the first nonblank string in `error_description`, `detail`, then
+`error`, otherwise `HTTP <status>`. Never expose raw HTML/plaintext, parser errors,
+nested objects or unrelated JSON fields as fallback messages. Backend public error
+fields must be safe to display. Preserve JWT-only headers, omitted cookies, form
+encoding, signed consent tickets and validated callbacks. Invalid refresh credentials
+clear the session; transient proxy/refresh failures retain it for retry. Notoli
+retains its extra post-refresh 401 handling and legacy API-base compatibility.

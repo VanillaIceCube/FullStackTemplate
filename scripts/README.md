@@ -59,4 +59,3 @@ Production onboarding and deployment follow the separate
 - [Workflow checks and validation](../.github/workflows/README.md#-checks-and-diagnostics).
 - [Browser helpers](../frontend/README.md#-browser-tests).
 - [MCP verification](../backend/app_mcp/README.md#-verification).
-- [Documentation index](../docs/README.md).

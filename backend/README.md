@@ -161,5 +161,5 @@ for private configuration, exact proxy trust, migrations, static files and readi
 Production sessions/CSRF cookies require HTTPS with debug disabled; backend ports
 remain private. Local Docker files are development tools, not production release inputs.
 
-See the [production verification checklist](../docs/PRODUCTION-VERIFICATION.md).
+See the [production verification checklist](../deploy/production/README.md#-independent-production-verification).
 The template is an onboarding example without an active production target.

@@ -406,9 +406,9 @@ Repository CI helpers live in `.github/tools/`: `bounded_log.py` retains bounded
 reviewer diagnostics; `install_actionlint.sh` installs the pinned, checksum-verified
 Linux Actionlint release; `validate_repository.py` checks workflow/script syntax
 and synthetic Compose configuration; `ci_architecture.py` validates the documented
-CI contract and regenerates `docs/CI-CD-SOURCE-INVENTORY.json`. Run these from the
+CI contract and regenerates `.github/workflows/ci-source-inventory.json`. Run these from the
 repository root. See the [workflow checks](workflows/README.md#-checks-and-diagnostics)
-and [CI architecture](../docs/CI-CD-ARCHITECTURE.md) for dependencies and commands.
+and [CI architecture](workflows/README.md#-architecture-and-trust-boundaries) for dependencies and commands.
 
 Verify the current head's independent checks and all three native review identities.
 Distinguish synthetic local tests from actual GitHub runner/credential acceptance.
@@ -421,5 +421,51 @@ not authorize merging, branch promotion, production deployment, or key rotation.
 
 - [Workflow behavior and maintenance](workflows/README.md).
 - [Shared action and reviewer contracts](actions/README.md).
-- [CI/CD architecture](../docs/CI-CD-ARCHITECTURE.md).
+- [CI/CD architecture](workflows/README.md#-architecture-and-trust-boundaries).
 - [Application production setup and recovery](../deploy/production/README.md).
+
+## 🤝 Shared engineering ownership and rollout
+
+FullStackTemplate owns reusable application engineering and a canonical parent
+issue tracks the entire rollout across FullStackTemplate, Notoli, MacroMapper and
+Infrastructure. Infrastructure owns ingress, host operations and the versioned
+release engine; its changes retain an Infrastructure parent linked to downstream
+adoptions. Apps own domain behavior, UX, credentials, OAuth issuers, consent and
+MCP tools. Preserve deliberate profile differences, exact proxy trust and
+Infrastructure's Required CI/secret gate rather than forcing identical files.
+
+For each shared change, inventory every repository as required, not applicable
+with reason, already satisfied with evidence, or deferred with reason, owner,
+tracking issue and acceptance. Validate the canonical source, then propagate through
+independent reviewed PRs. Verify required checks, reviewer verdicts, documentation,
+configuration and relevant acceptance on final PR heads and main. Record exact
+PR/issue/commit/evidence links and deployment impact. Close the parent only after
+all required downstream adoptions are merged and verified or explicitly accepted
+as tracked deferrals; template-only success is insufficient. Prefer behavioral
+parity, immutable manifests and explicit exceptions over byte equality of app policy.
+
+When consolidating duplicate issues, retain original URLs, unique acceptance,
+comments and Project history with bidirectional links. Superseded unfinished work
+is not completed. Retain separate app-specific, in-flight, security-managed and
+runtime-acceptance work. Preserve assignees/fields/status and avoid adding labels
+that trigger automation. Reorganization grants no merge, deployment, schedule,
+credential-rotation or security-bypass authority.
+
+### Main-first releases
+
+Ordinary source merges through reviewed `main` before exact-tree promotion through
+the repository's existing `env-prod` process. A promotion merge may have a different
+SHA while preserving the exact reviewed tree. Keep required CI, reviewers, owner
+authorization and recovery gates. An explicitly owner-authorized narrow deployment
+experiment must return its production-only changes and history promptly to main
+through review before ordinary promotion resumes. Preserve newer main work and
+both histories; never reset or force-push to manufacture parity.
+
+Audit branch heads, ancestry and file differences separately. Main may remain ahead
+while prerequisites or acceptance are unfinished; record held work and tracking
+links rather than activating deferred changes to equalize hashes. Verify source-tree
+parity and deployment acceptance when both branches are ready. An absent production
+branch does not authorize creating one. FullStackTemplate remains an onboarding
+example without an active production target. History reconciliation never authorizes
+deployment. Infrastructure's existing owner-triggered gateway promotion decision
+and separate initial setup/recovery scope remain in force.

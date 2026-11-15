@@ -3,14 +3,14 @@
 For local development, use the [deployment README](../README.md).
 
 FullStackTemplate adopts the versioned release standard from
-[JudeAndrewAlabaInfrastructure](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/main/docs/app-release-standard.md).
+[JudeAndrewAlabaInfrastructure](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/main/app-release/README.md).
 The exact source commit is in `deploy/shared-source.json`; common runtime, tests,
 checker, and workflow are hash-checked. Do not edit a vendored common file.
 Change the shared source, regenerate its manifest, and synchronize every consumer.
 
 ## Ownership and onboarding gate
 
-Follow the [main-first release policy](../../docs/SHARED-ROLLOUT-POLICY.md#main-first-releases).
+Follow the [main-first release policy](../../.github/README.md#main-first-releases).
 Ordinary changes merge through reviewed main before promotion; exceptional
 owner-authorized deployment experiments return to main promptly through review.
 Intentional release lag is allowed until features are ready. This template has
@@ -115,8 +115,49 @@ checks the same common hashes offline. CI always verifies the immutable pin.
 
 ## 🔌 Shared MCP framework
 
-Follow the [MCP framework contract](../../docs/MCP-FRAMEWORK.md) before activating an optional app. Notoli and MacroMapper retain their app-owned production MCP profiles and readiness contracts; consult each app's policy and release evidence for the accepted state. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.
+Follow the [MCP framework contract](../../backend/app_mcp/README.md) before activating an optional app. Notoli and MacroMapper retain their app-owned production MCP profiles and readiness contracts; consult each app's policy and release evidence for the accepted state. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.
 
 ## Production verification
 
-Use the [verification checklist and acceptance matrix](../../docs/PRODUCTION-VERIFICATION.md) before recording production-hardening acceptance. Capture current backend checks and authenticated edge/origin observations for each app.
+Use the [verification checklist](README.md#-independent-production-verification) before recording production-hardening acceptance. Capture current backend checks and authenticated edge/origin observations for each app.
+
+## 🔎 Independent production verification
+
+Use this checklist for each application. Record source revision, deployed image
+identity, observation time and result. A local production-settings check verifies
+the selected settings; it cannot establish the settings of a running container.
+FullStackTemplate is an onboarding example with no production target.
+
+### Verification checklist
+
+1. In the accepted backend container, run `python manage.py check --deploy`.
+   Record check IDs and assess each warning. Verify DEBUG is false, the allowed
+   hosts are explicit, and session and CSRF cookies use Secure. Run the ordinary
+   and enabled MCP profiles independently when both are supported.
+2. Confirm HTTP redirects to HTTPS at the real edge. Review the accepted HSTS
+   policy with the domain owner before enabling it. W004 requires that decision;
+   W008 may be satisfied by an independently verified gateway redirect.
+   For ASGI, verify that only the application's exact trusted proxy can supply
+   forwarded scheme/client information.
+3. With a nonprivileged test session, inspect auth, protected API and admin
+   responses, including redirects and errors, through the public CDN and origin
+   gateway. Record status, Cache-Control, Age and cache-hit headers. Check that
+   personalized responses cannot be served from cache. Exercise a SPA deep link
+   and an unknown API path. Retain only sanitized summaries.
+4. List GitHub secret and variable **names** with `gh secret list` and
+   `gh variable list`. Reconcile them with the application deploy workflow and
+   runbook. Verify actual host key/env/TLS ownership and permissions through an
+   authorized read-only host session. Record modes and identities, never values.
+5. Inventory signup, login and reset abuse controls. Record any missing rate
+   limits explicitly. AI request timeouts and concurrency limits do not establish
+   per-user quotas. Track MacroMapper quota and credential rollout through
+   [#298](https://github.com/VanillaIceCube/FullStackTemplate/issues/298) and
+   [MacroMapper #289](https://github.com/VanillaIceCube/MacroMapper/issues/289).
+6. Cite existing sender/domain and reset return-URL evidence. Inbox/Spam delivery
+   requires an actual receipt. Reuse historical evidence with its original date.
+   New mail and paid AI requests require authorization for those operations.
+   Review provenance and unmatched-food behavior in MacroMapper's existing
+   tests and acceptance records.
+7. Mark each capability passed, failed or blocked, with the evidence type.
+   Link independent app receipts. Keep the parent open while required runtime
+   checks remain unverified.
