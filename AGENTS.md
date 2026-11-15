@@ -110,6 +110,12 @@ build-time settings. Client-side variables must contain no secrets.
 
 ## 🧪 Checks
 
+Keep backend tests in owning `tests/` packages with descriptive behavior-based
+`test_*.py` modules and empty `__init__.py` files. Shared fixture helpers must not
+define discoverable test cases or import test modules. Group modules and classes
+by behavior, preserve test discovery and assertions when splitting, and keep the
+canonical MCP framework tests aligned across applications.
+
 Run checks in proportion to the change, from the repository root:
 
 ```powershell

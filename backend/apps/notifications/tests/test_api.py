@@ -1,10 +1,10 @@
-from django.contrib.auth import get_user_model
+"""Recipient-scoped notification reads, flags and bulk actions."""
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Notification
-
-User = get_user_model()
+from ..models import Notification
+from .helpers import User
 
 
 class NotificationApiTests(APITestCase):

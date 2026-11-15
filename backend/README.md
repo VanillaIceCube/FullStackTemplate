@@ -26,6 +26,9 @@ For Docker hot reload, follow the [deployment guide](../deploy/README.md).
 
 ## ⚙️ Configuration
 
+Production (`DJANGO_DEBUG=0`) requires an explicit nonblank `DJANGO_SECRET_KEY`.
+Static files use Django's default storage and the retained WhiteNoise middleware.
+
 Local runs load ignored `backend/.env`. The database defaults to
 `backend/db.sqlite3`; set `DJANGO_SQLITE_PATH` to use another local database.
 Use `config/settings.py` for current defaults.
@@ -44,6 +47,13 @@ For Docker hot reload and dependency volumes, use the
 [deployment README](../deploy/README.md).
 
 ## 🔐 Authentication API
+
+Registration, login and reset preserve passwords exactly, including leading and
+trailing spaces. Request serializers reject malformed credential/link types with
+HTTP 400; email addresses are trimmed and normalized. Registration returns an
+explicit client error for duplicate identities and rolls back account creation,
+required onboarding and session creation together if any step fails. Recovery
+responses remain generic for valid email-shaped input.
 
 - `POST /auth/register/`
   - Body: `email`, `password`, and optional `username`
@@ -113,7 +123,7 @@ Anymail exceptions can carry provider data: do not log exception representations
 or enable `DEBUG_API_REQUESTS`. Provider acceptance does not prove inbox delivery.
 
 Project-owned configuration and mocked provider-boundary tests live in
-`config/test_email.py`; authentication retains real reset-call privacy regressions.
+`config/tests/`; authentication retains real reset-call privacy regressions.
 Plain text, HTML, reply-to, cc and bcc use Anymail's maintained serialization.
 
 ## 🔌 MCP integration
@@ -129,10 +139,25 @@ Connection manifests and artwork live in
 
 ## 🧪 Checks
 
+Backend tests live in an owning `tests/` package beside each app or configuration
+module. Use descriptive `test_*.py` filenames and behavior-based test class names,
+keep `__init__.py` empty, and put shared setup/builders in fixture-only modules
+such as `helpers.py`. Helpers must not define test cases or import test modules.
+Split independent behavior groups when that makes failures easier to locate;
+keep related end-to-end scenarios together.
+
+Authentication packages share registration, login, password recovery/reset and
+recovery-privacy groups. Configuration owns production settings and email
+configuration/delivery. The canonical MCP framework has identical profile, OAuth
+and transport test modules in all three applications; app tools remain app-owned.
+
+Notification API tests remain in `apps/notifications/tests/`. The default profile
+keeps MCP disabled; run the enabled profile described in the MCP guide as well.
+
 From the repository root:
 
 ```powershell
-uv run --locked --project backend python backend/manage.py test
+uv run --locked --project backend python backend/manage.py test backend
 uv run --locked --project backend ruff check backend
 uv run --locked --project backend ruff format backend --check
 uv run --locked --project backend python backend/manage.py makemigrations --check --dry-run
@@ -148,8 +173,8 @@ Preserve pending/error handling through response parsing in the frontend.
 Maintain the Python 3.12 constraint in `pyproject.toml`; declare dependencies
 in `pyproject.toml` and commit `uv.lock`. Use `uv add --project backend <package>`
 or `uv lock --project backend --upgrade-package <package>` for deliberate changes,
-then `uv sync --locked --project backend`. CI and Docker consume the same lockfile. The test runner's fast password
-hasher applies only during tests; normal settings retain secure hashing.
+then `uv sync --locked --project backend`. CI and Docker consume the same lockfile. Django uses its default test runner and secure password hashing; focused tests may
+override hashing within their own test scope.
 See [Docker dependency maintenance](../deploy/README.md#development-dependency-reproducibility).
 
 ## 🚀 Production

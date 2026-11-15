@@ -1,3 +1,5 @@
+"""Signing keys, cookie policy and production configuration."""
+
 import importlib.util
 import os
 from pathlib import Path
@@ -6,8 +8,49 @@ from unittest.mock import patch
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
 
+class ProductionSecretContractTests(SimpleTestCase):
+    def settings_values(self, secret):
+        import os
+        import runpy
+        from pathlib import Path
+        from unittest.mock import patch
+
+        environment = {
+            "DJANGO_DEBUG": "0",
+            "DJANGO_ALLOWED_HOSTS": "app.example.com",
+        }
+        if secret is not None:
+            environment["DJANGO_SECRET_KEY"] = secret
+        with (
+            patch.dict(os.environ, environment, clear=True),
+            patch("dotenv.load_dotenv"),
+        ):
+            return runpy.run_path(
+                str(Path(__file__).resolve().parents[1] / "settings.py")
+            )
+
+    def test_production_rejects_missing_empty_and_whitespace_secrets(self):
+        from django.core.exceptions import ImproperlyConfigured
+
+        for secret in (None, "", "   "):
+            with self.subTest(secret=secret):
+                with self.assertRaisesMessage(
+                    ImproperlyConfigured, "DJANGO_SECRET_KEY is required"
+                ):
+                    self.settings_values(secret)
+
+    def test_production_accepts_an_explicit_secret(self):
+        value = "isolated-production-settings-contract-key"
+        settings = self.settings_values(value)
+        self.assertEqual(settings["SECRET_KEY"], value)
+        self.assertFalse(settings["DEBUG"])
+
+
 class GatewayHostTests(SimpleTestCase):
-    @override_settings(ALLOWED_HOSTS=["app.example.com"])
+    @override_settings(
+        ALLOWED_HOSTS=["app.example.com"],
+        SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO", "https"),
+    )
     def test_canonical_host_wins_over_a_forwarded_host(self):
         request = RequestFactory().get(
             "/api/notifications/",
@@ -31,7 +74,8 @@ class ProductionCookieTests(SimpleTestCase):
                         "DJANGO_ALLOWED_HOSTS": "app.example.com",
                     }
                     spec = importlib.util.spec_from_file_location(
-                        "cookie_test_settings", Path(__file__).with_name("settings.py")
+                        "cookie_test_settings",
+                        Path(__file__).resolve().parents[1] / "settings.py",
                     )
                     module = importlib.util.module_from_spec(spec)
                     with (
