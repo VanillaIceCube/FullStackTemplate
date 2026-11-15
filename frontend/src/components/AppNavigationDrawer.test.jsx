@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppNavigationDrawer from './AppNavigationDrawer';
-import { renderWithProviders } from '../test-support/utils';
+import { renderWithProviders } from '../tests/utils';
 
 describe('AppNavigationDrawer', () => {
   test('renders generic navigation without workspace controls', () => {

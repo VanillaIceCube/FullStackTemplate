@@ -16,7 +16,7 @@ export default defineConfig({
     clearMocks: true,
     environment: 'jsdom',
     globals: true,
-    setupFiles: './src/setupTests.js',
+    setupFiles: './src/tests/setup.js',
     testTimeout: 15_000,
     unstubEnvs: true,
     unstubGlobals: true,
