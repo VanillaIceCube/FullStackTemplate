@@ -9,6 +9,7 @@ them over shared host ingress or use them as production rollback scripts.
 <a id="local-docker-with-applicationlocalhost"></a>
 
 ## 💻 Local Docker with `[application].localhost`
+
 The template itself uses `fullstacktemplate.localhost`. When creating an application,
 update its branding, Compose identifiers, and local hostnames manually.
 
@@ -62,6 +63,7 @@ direct host ports instead.
 <a id="routing-and-persistence"></a>
 
 ## 🧭 Routing and persistence
+
 Nginx routes:
 
 - `/` and SPA deep links to the frontend;
@@ -115,12 +117,16 @@ checks do not deploy or touch application data.
 
 <a id="non-deploying-repository-validation"></a>
 
-## 🧪 Repository validation
+<a id="-repository-validation"></a>
+
+## 🧪 Checks
 
 See [workflow checks and validation](../.github/workflows/README.md#-checks-and-diagnostics).
 
 
-## 📚 Further reading
+<a id="-further-reading"></a>
+
+## 📚 Reference
 
 - [Live-server releases and recovery](production/README.md).
 - [Backend configuration](../backend/README.md).

@@ -87,6 +87,7 @@ retains its extra post-refresh 401 handling and legacy API-base compatibility.
 ## 🎨 Style guide
 
 ### Foundations
+
 - Use Material UI components and responsive `sx` values before adding custom
   layout primitives.
 - Keep colors in the CSS custom properties declared in `src/index.css`.
@@ -99,6 +100,7 @@ retains its extra post-refresh 401 handling and legacy API-base compatibility.
   application shell.
 
 ### Authentication
+
 - Build public authentication pages with `AuthPageShell`.
 - Give every form a visible heading, native submit behavior, and browser
   autocomplete metadata.
@@ -107,6 +109,7 @@ retains its extra post-refresh 401 handling and legacy API-base compatibility.
   forgot-password responses.
 
 ### Application shell
+
 - Keep `Full Stack Template` as the placeholder app-header title until a
   generated application replaces it.
 - Preserve the generic drawer, notification, profile, and logout entry points
@@ -160,7 +163,9 @@ responsive geometry in a browser. Follow the Node range in `package.json`,
 and verify clean installs, strict lint, formatting, tests and production builds.
 See [Docker dependency maintenance](../deploy/README.md#development-dependency-reproducibility).
 
-## 📚 Related guides
+<a id="-related-guides"></a>
+
+## 📚 Reference
 
 - [Backend and MCP integration](../backend/README.md).
 - [Local Docker and production releases](../deploy/README.md).

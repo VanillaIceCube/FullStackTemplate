@@ -78,7 +78,9 @@ to `gate-codeql.yml`, `ci-orchestrator.yml`, `review-security.yml`, and
 `gate-test.yml`. Newly generated repositories inherit the policy from the
 template automatically.
 
-### 🔌 Shared MCP framework
+<a id="-shared-mcp-framework"></a>
+
+### Shared MCP framework
 
 The backend test gate checks the pinned MCP framework manifest and each repository's documented ordinary/MCP-enabled profiles. Template sample fixtures do not create a production target; Notoli and MacroMapper retain their app-owned enabled protocol/domain acceptance. See [the framework guide](../../backend/app_mcp/README.md) and the application MCP guide where present.
 
@@ -121,7 +123,9 @@ OpenAI review requests also cap combined reasoning and visible output at 16,000
 tokens so they do not reserve the model's full output allowance against project
 rate limits.
 
-### 🔒 Protected Dependabot auto-merge
+<a id="-protected-dependabot-auto-merge"></a>
+
+### Protected Dependabot auto-merge
 
 FullStackTemplate (#240) owns the canonical application policy. After successful
 PR CI, `ci-auto-merge.yml` runs only reviewed main code, with no PR checkout,
@@ -210,7 +214,9 @@ Create or copy the Project in GitHub, link the target repository, verify its
 fields and workflows, and set `SECURITY_ALERTS_PROJECT_ID` manually as described
 in [repository setup](../README.md#-repository-setup).
 
-### 🛡️ Dependency evidence and alert lifecycle parity
+<a id="-dependency-evidence-and-alert-lifecycle-parity"></a>
+
+### Dependency evidence and alert lifecycle parity
 
 The reusable baseline is FullStackTemplate's `.github/actions/prepare-vulnerability-report`.
 MacroMapper, Notoli and Infrastructure carry the same report implementation and
@@ -243,7 +249,9 @@ the competing-close ordering; GitHub's internal validation cause is not exposed.
 Mocks reproduce that interleaving and reject unrelated errors. Empty scheduled
 feeds do not establish that a live close race occurred.
 
-### 📦 Compatible CodeQL updates
+<a id="-compatible-codeql-updates"></a>
+
+### Compatible CodeQL updates
 
 Dependabot groups all `github/codeql-action` entry points (including `init`,
 `analyze`, `autobuild` and `upload-sarif`) in `codeql` version-update PRs.
@@ -260,7 +268,9 @@ immutable v4.39.1 revision. Scanner scope, permissions and merge/deployment
 gates remain unchanged. Canonical rollout:
 [FullStackTemplate #271](https://github.com/VanillaIceCube/FullStackTemplate/issues/271).
 
-### 🧪 Atomic CodeQL regression guard
+<a id="-atomic-codeql-regression-guard"></a>
+
+### Atomic CodeQL regression guard
 
 Before required scope detection, all CodeQL action entry points in workflow and
 composite-action YAML must share one full immutable SHA. Structural safe parsing
@@ -496,7 +506,9 @@ original check failures and bounded/redacted diagnostics. Update the existing
 architecture inventory with `python .github/tools/ci_architecture.py` after workflow
 changes and verify it with `--check`. Do not use production as a test fixture.
 
-## 📚 Related guides
+<a id="-related-guides"></a>
+
+## 📚 Reference
 
 - [Repository setup and credentials](../README.md).
 - [Local actions and reviewer contract](../actions/README.md).
