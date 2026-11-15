@@ -23,7 +23,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router';
 import {
   clearAllNotifications,
   clearNotification,
@@ -76,7 +76,9 @@ export default function AppHeader({ title, setDrawerOpen }) {
     try {
       const response = await fetchNotifications(accessToken);
       if (!response?.ok) throw new Error('Unable to load notifications.');
-      setNotifications(await response.json());
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error('Invalid notification response.');
+      setNotifications(data);
     } catch (_error) {
       setNotificationError('Notifications are unavailable right now.');
     } finally {
@@ -370,6 +372,15 @@ export default function AppHeader({ title, setDrawerOpen }) {
               variant="middle"
               sx={{ my: 0.25, mx: 1, borderBottomWidth: 2, bgcolor: 'var(--secondary-color)' }}
             />
+            {import.meta.env.VITE_MCP_ENABLED === '1' && (
+              <MenuItem
+                component={RouterLink}
+                to="/connections"
+                onClick={() => setProfileAnchorEl(null)}
+              >
+                Connected Apps
+              </MenuItem>
+            )}
             <MenuItem
               sx={{
                 py: 0.5,

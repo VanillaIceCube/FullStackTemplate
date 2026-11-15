@@ -1,14 +1,14 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router';
 import AuthPageShell from '../../components/AuthPageShell';
 import { forgotPassword } from '../../services/authApiClient';
 import { readOkJson } from '../../services/authSession';
 
 export default function ForgotPassword({ showSnackbar }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -65,12 +65,7 @@ export default function ForgotPassword({ showSnackbar }) {
           {isSubmitting ? 'Sending...' : 'Send Reset Link'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
-          <Box
-            component="button"
-            type="button"
-            className="auth-link"
-            onClick={() => navigate('/login')}
-          >
+          <Box component={RouterLink} className="auth-link" to="/login">
             Back to Login
           </Box>
         </Typography>

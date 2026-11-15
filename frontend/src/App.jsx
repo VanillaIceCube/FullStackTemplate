@@ -1,6 +1,6 @@
 import ConnectedApps, { OAuthConsent } from './pages/connections/Connections';
 import { useState } from 'react';
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router';
 import AppHeader from './components/AppHeader';
 import AppNavigationDrawer from './components/AppNavigationDrawer';
 import AppSnackbar from './components/AppSnackbar';

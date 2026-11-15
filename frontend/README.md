@@ -54,6 +54,10 @@ routes resolve to that protected page. Tokens live in sessionStorage; a failed
 JWT refresh clears the session and redirects to login. Notifications remain
 recipient-scoped.
 
+Authentication-page destinations use React Router links with real `href` values,
+keyboard activation and native new-tab behavior. Connected Apps is discoverable
+in the profile menu when the connector is enabled.
+
 ## 🔐 Sessions and connections
 
 Authentication forms disable submission while pending. Tokens and profile data
@@ -62,8 +66,12 @@ Protected requests use the stored JWT when the caller omits Authorization.
 Public authentication forms do not receive an injected access token.
 
 The request wrapper preserves object, tuple-array, and native `Headers` values
-through one JWT refresh/retry. Invalid refresh credentials clear the session;
-temporary refresh failures retain it. Notification failures keep actions available
+through one JWT refresh/retry. Invalid refresh credentials or a second protected
+401 after refresh clear the session;
+temporary refresh failures retain it. Refresh results belong to the login that
+started them: logout or a new login invalidates pending work. Background failures
+preserve an active, validated connection path and query through login.
+Notification failures keep actions available
 for Retry, and malformed mark-read responses must not navigate away.
 Use semantic links for destinations and buttons for actions, with keyboard and
 native new-tab coverage.
@@ -81,8 +89,8 @@ HTTP failures use the first nonblank string in `error_description`, `detail`, th
 nested objects or unrelated JSON fields as fallback messages. Backend public error
 fields must be safe to display. Preserve JWT-only headers, omitted cookies, form
 encoding, signed consent tickets and validated callbacks. Invalid refresh credentials
-clear the session; transient proxy/refresh failures retain it for retry. Notoli
-retains its extra post-refresh 401 handling and legacy API-base compatibility.
+clear the session; transient proxy/refresh failures retain it for retry. All three applications share the same post-refresh 401
+and session-lifecycle contract.
 
 ## 🎨 Style guide
 
@@ -121,6 +129,25 @@ retains its extra post-refresh 401 handling and legacy API-base compatibility.
 
 ## 🧪 Checks
 
+Keep every test beside its implementation with the same basename and extension:
+`Component.jsx` pairs with `Component.test.jsx`, and `service.js` pairs with
+`service.test.js`. Put behavior and integration scenarios in that owning suite
+using scoped `describe` blocks, rather than adding standalone behavior-named or
+`.integration.test` files. JavaScript hooks and components that return no JSX keep
+`.test.js` harnesses using `createElement` when necessary. Shared setup and reusable
+helpers belong in `src/test-helpers/`; tests of a domain package's public API pair
+with its `index.js` entry point.
+
+Keep shared session, request, connection and navigation regressions aligned across
+FullStackTemplate, MacroMapper and Notoli when the behavior applies. Preserve real
+React Router and Material UI keyboard/exit coverage when consolidating suites;
+app-specific domain and route expectations remain in their owning application.
+
+`AuthPageShell.test.jsx` checks the accessible heading and native keyboard form
+submission. The small `sessionState.js` version counter is covered through
+`requestClient.test.js` logout, account-switch and concurrent-refresh regressions;
+avoid duplicate tests that only restate its getter/increment implementation.
+
 `src/index.test.jsx` boots the real entry point, React root and application in
 jsdom, then checks the signed-out login route and usable form without private API
 requests or uncaught startup errors. It unmounts the real root and restores test
@@ -140,6 +167,12 @@ npm run build
 ```
 
 ## 🛠️ Maintenance
+
+Shared frontend dependency ranges align across the template and both applications:
+React/React DOM 19.3.1, Material UI/icons 9.5, React Router 8.5.1, and Prettier 3.10.
+Use `react-router` imports. Testing Library belongs in development dependencies;
+TypeScript is explicitly pinned for the tooling peer graph. Keep app-specific
+packages, including Notoli drag-and-drop and its test lint plugin, app-owned.
 
 The frontend temporarily overrides `minimatch@>=9 <11.0.1` to `^11.0.1` for
 [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249).
