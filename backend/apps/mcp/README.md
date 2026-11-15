@@ -44,8 +44,20 @@ Client setup and branding live in [chatgpt/](#chatgpt).
 
 - `server.py`, `asgi.py`, `routing.py`: server factory, transport, and ASGI lifecycle.
 - `oauth.py`, `views.py`, `urls.py`: OAuth consent and connection management.
+- `errors.py`: reconnectable connection failures and sanitized MCP auth challenges.
+- `apps.py`: the canonical origin, HTTPS and registry configuration checks.
 - `config.py`, `proxy.py`: application settings and exact proxy trust.
 - `tests/`: profile, OAuth consent, and transport regressions grouped by behavior.
+
+
+Connection failures discovered during a tool invocation return a sanitized MCP
+error with `_meta["mcp/www_authenticate"]`, the local protected-resource metadata
+URL, `invalid_token` or `insufficient_scope`, and the operation's required scopes.
+Expired/revoked connections can reconnect; object ownership or membership denials
+do not request a new grant. HTTP authentication still rejects invalid credentials
+before tool dispatch. Exception bodies, tokens and record identifiers never enter
+these challenges. App-owned `permissions.py` defines scopes and live principal
+checks; `framework/oauth.py` retains the OAuth lifecycle.
 
 ### ⚙️ Enabling a derived application
 
@@ -109,7 +121,7 @@ read/write/destructive/idempotent annotations and OAuth scope metadata. Resolve
 the current OAuth token's user and check scope, ownership and current membership
 for every operation. Never trust a user ID supplied by a caller. Transport
 authentication alone does not establish object permissions. Validate consequential
-writes and confirmation in the application service; keep REST behavior aligned.
+writes and application-specific mutation controls in the application service; keep REST behavior aligned.
 
 ### 🔐 Browser consent and credentials
 
@@ -187,7 +199,9 @@ DJANGO_MCP_ENABLED=1 DJANGO_MCP_SERVER_FACTORY=apps.mcp.tools.server.create_serv
 The framework tests cover discovery/initialization/sample calls, absent/invalid
 credentials, REST-JWT rejection, token expiry/resource/scope/revocation, S256 code
 exchange and refresh rotation, account-bound consent, foreign-account revocation,
-pending grants and exact client registration. Frontend tests cover displayed
+pending grants, exact client registration and sanitized reconnect challenges.
+Keep all framework runtime files and test-package files identical across the three
+applications (line-ending normalization is allowed). Frontend tests cover displayed
 permissions, login return paths, Allow/Cancel, expired consent and revocation.
 Run frontend tests/lint/build in both default and enabled builds. Notoli also runs
 its application tool/permission/transport/proxy regressions. Live ChatGPT writes

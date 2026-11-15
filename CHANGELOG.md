@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Standardize sanitized MCP reconnect challenges and distinguish expired connections from missing scopes; synchronize framework runtime and regression coverage across applications.
 - Align authentication request validation, duplicate-registration handling and exact password preservation across applications; reject malformed reset credentials with HTTP 400 and roll back failed signup onboarding.
 - Require a nonblank production signing key consistently.
 
