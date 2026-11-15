@@ -9,8 +9,14 @@ them over shared host ingress or use them as production rollback scripts.
 <a id="local-docker-with-applicationlocalhost"></a>
 
 ## 💻 Local Docker with `[application].localhost`
+
 The template itself uses `fullstacktemplate.localhost`. When creating an application,
 update its branding, Compose identifiers, and local hostnames manually.
+
+The development Compose `environment` sets the frontend API origin. Production
+uses the Docker build argument, which is compiled into the static assets; a blank
+value selects same-origin requests. Backend settings remain in `deploy/.env`,
+created from the committed `deploy/backend.env` example below.
 
 For fast source iteration, start the development Compose workflow over HTTP
 (no certificate required):
@@ -37,7 +43,7 @@ if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
 if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
 ./deploy/create-local-certificate.ps1
 docker build -t ghcr.io/vanillaicecube/fullstacktemplate-backend:latest ./backend
-docker build -t ghcr.io/vanillaicecube/fullstacktemplate-frontend:latest ./frontend
+docker build --file frontend/docker/Dockerfile -t ghcr.io/vanillaicecube/fullstacktemplate-frontend:latest ./frontend
 Set-Location deploy
 docker compose up -d
 docker compose exec -T backend python manage.py migrate
@@ -57,6 +63,7 @@ direct host ports instead.
 <a id="routing-and-persistence"></a>
 
 ## 🧭 Routing and persistence
+
 Nginx routes:
 
 - `/` and SPA deep links to the frontend;
@@ -86,26 +93,40 @@ The [MCP framework guide](../backend/app_mcp/README.md) defines opt-in ASGI/prox
 ## 📦 Development dependency reproducibility
 
 Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
-registry digests. Production Dockerfiles and the independent release engine are
-unchanged by this development-image policy. Refresh tags/digests together after
-registry verification and a disposable build/configuration check.
+registry digests. Frontend production and development builders use the same
+immutable Node 26 digest. Refresh matching tags/digests together after registry
+verification and a disposable build/configuration check.
 
-The frontend development entrypoint hashes both `package.json` and
-`package-lock.json` inside its persistent `node_modules` volume. Fresh volumes
-install with `npm ci`; unchanged restarts reuse dependencies; changing either
-manifest reinstalls. Missing manifests or a failed installation stop startup and
-retry on the next invocation. Use one volume per checkout and restart after edits.
+Frontend production/development Dockerfiles and Nginx configuration live in
+`frontend/docker/`. The build context remains
+`frontend/`; Compose and CI select the Dockerfile explicitly.
+
+The frontend starts Vite directly with `npm start`. Source hot reload and the
+persistent `frontend_node_modules` volume remain. Dependency changes require a
+manual install in the running frontend container, followed by a restart:
+
+```powershell
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml exec -T frontend npm ci
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml restart frontend
+```
+
+If the frontend is stopped, use `run --rm --no-deps frontend npm ci` with the same
+Compose options, then start it again. Keep one dependency volume per checkout.
 Compose configuration
 checks do not deploy or touch application data.
 
 <a id="non-deploying-repository-validation"></a>
 
-## 🧪 Repository validation
+<a id="-repository-validation"></a>
+
+## 🧪 Checks
 
 See [workflow checks and validation](../.github/workflows/README.md#-checks-and-diagnostics).
 
 
-## 📚 Further reading
+<a id="-further-reading"></a>
+
+## 📚 Reference
 
 - [Live-server releases and recovery](production/README.md).
 - [Backend configuration](../backend/README.md).

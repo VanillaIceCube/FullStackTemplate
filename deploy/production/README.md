@@ -8,7 +8,9 @@ The exact source commit is in `deploy/shared-source.json`; common runtime, tests
 checker, and workflow are hash-checked. Do not edit a vendored common file.
 Change the shared source, regenerate its manifest, and synchronize every consumer.
 
-## Ownership and onboarding gate
+<a id="ownership-and-onboarding-gate"></a>
+
+## 🧭 Ownership and onboarding gate
 
 Follow the [main-first release policy](../../.github/README.md#main-first-releases).
 Ordinary changes merge through reviewed main before promotion; exceptional
@@ -42,7 +44,9 @@ The release controller verifies running frontend bindings against the accepted
 app policy and checks rendered Compose and Docker against the candidate policy.
 Change both Compose and app.json when changing a publication.
 
-## Production settings
+<a id="production-settings"></a>
+
+## ⚙️ Production settings
 
 Actions secrets: `DEPLOY_SSH_KEY`, `DJANGO_SECRET_KEY`, `DJANGO_EMAIL_HOST_KEY`.
 Actions variables: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`,
@@ -58,7 +62,9 @@ same-origin requests. The gateway must overwrite forwarded scheme/client data
 and pass the canonical Host. Django ignores forwarded host and trusts forwarded
 HTTPS only behind the reviewed, restricted backend network boundary.
 
-## Release sequence
+<a id="release-sequence"></a>
+
+## 🚀 Release sequence
 
 Only explicitly approved promotion to protected `env-prod` may activate a release.
 The workflow also refuses manual dispatch from any other branch. Merging to main
@@ -84,7 +90,9 @@ No host-wide pruning, shared proxy restart, network deletion, or automatic
 database rollback occurs. Retain prior images, private environment/configuration,
 and recovery sets until operator-reviewed retention cleanup.
 
-## Failure and explicit recovery
+<a id="failure-and-explicit-recovery"></a>
+
+## 🛟 Failure and explicit recovery
 
 Keep the failed attempt and `FAILED.json`; automatic retry cannot choose whether
 to lose later database writes. Under a separately approved recovery decision, use
@@ -94,7 +102,9 @@ the matched image/configuration/database set. Use the retained offline script;
 do not run a legacy proxy-owning deploy script as recovery. Verify this app and
 the untouched gateway/companions before recording acceptance or releasing holds.
 
-## Verification
+<a id="verification"></a>
+
+## 🧪 Checks
 
 ```powershell
 python deploy/check_parity.py
@@ -117,7 +127,9 @@ checks the same common hashes offline. CI always verifies the immutable pin.
 
 Follow the [MCP framework contract](../../backend/app_mcp/README.md) before activating an optional app. Notoli and MacroMapper retain their app-owned production MCP profiles and readiness contracts; consult each app's policy and release evidence for the accepted state. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.
 
-## Production verification
+<a id="production-verification"></a>
+
+## 🧪 Production verification
 
 Use the [verification checklist](README.md#-independent-production-verification) before recording production-hardening acceptance. Capture current backend checks and authenticated edge/origin observations for each app.
 

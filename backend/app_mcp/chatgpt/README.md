@@ -15,7 +15,9 @@ The package builder refuses that unchanged example endpoint.
 4. Register the public OAuth client using the exact callback supplied by the
    client. Review the application branding and package metadata before building.
 
-## 🧭 Files
+<a id="-files"></a>
+
+## 🧭 Structure
 
 - `plugin.json`: starter listing metadata and presentation.
 - `mcp.json`: predefined public OAuth client and connection scope.

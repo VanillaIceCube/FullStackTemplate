@@ -1,4 +1,3 @@
-import './App.css';
 import ConnectedApps, { OAuthConsent } from './pages/connections/Connections';
 import { useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';

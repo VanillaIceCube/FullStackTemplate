@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppHeader from './AppHeader';
-import { renderWithProviders } from '../test-support/utils';
+import { renderWithProviders } from '../test-helpers/utils';
 import {
   clearAllNotifications,
   clearNotification,
