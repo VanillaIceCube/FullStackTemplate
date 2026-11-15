@@ -14,7 +14,8 @@ authentication, and the application shell.
   loaded by `src/index.jsx`. Keep responsive page geometry in the owning component.
 - `src/components/`: reusable interface components.
 - `src/pages/`: application pages and routes.
-- `src/services/`: API requests and session handling.
+- `src/services/`: API requests and centralized session storage.
+- `src/hooks/`: reactive session access and shared notification lifecycle behavior.
 - `src/test-helpers/`: shared test setup and reusable helpers.
   App, startup and feature tests stay beside the files they exercise.
 
@@ -50,6 +51,13 @@ port 3000; production Nginx serves the static build and preserves SPA deep links
 
 ## 🗺️ Routes and behavior
 
+Route pages load through `React.lazy` and the shared `RouteContent` boundary.
+The application shell stays usable while a page loads. Authentication guards
+run before protected lazy pages render, and a failed import offers a full-page
+reload at the current URL, preserving its query and deployment base. Navigating
+to another route clears that route's error state. The build emits separate page
+chunks; shared vendor code remains part of the signed-out dependency graph.
+
 Public routes are `/login`, `/register`, `/forgot-password`, and
 `/reset-password?uid=...&token=...`. `/` is the protected starter page. Unknown
 routes resolve to that protected page. Tokens live in sessionStorage; a failed
@@ -61,6 +69,41 @@ keyboard activation and native new-tab behavior. Connected Apps is discoverable
 in the profile menu when the connector is enabled.
 
 ## 🔐 Sessions and connections
+
+FullStackTemplate owns the reusable session, notification and route-boundary
+contract. The local implementation rollout covers all repositories:
+
+| Repository | Applicability and implementation |
+| --- | --- |
+| FullStackTemplate | Required; canonical store, hooks, boundary and regression suites implemented. |
+| MacroMapper | Required; shared implementation and tests applied, retaining its API/error adapters and diary routes. |
+| Notoli | Required; shared implementation and tests applied, retaining board navigation, pending route slots and always-enabled connections. |
+| Infrastructure | Not applicable; it has no frontend application. |
+
+This inventory records frontend implementation coverage; merge, release and
+production authorization remain governed by the shared rollout policy.
+
+`src/services/sessionState.js` is the sole owner of the compatible access/refresh
+and username/email storage keys. Its cached snapshots and subscriptions feed
+`useSession`; login/logout replace the account generation, while guarded refresh
+updates tokens without replacing that generation. Do not read or mutate auth
+storage in components or API adapters. Use the snapshot for request-time reads,
+the hook for rendering, and the store operations for writes. The unrelated
+`pendingSnackbar` key remains the login-message handoff.
+
+The application shell and protected content reset on account changes, including
+open menus, private drafts and Notoli's board drawer state. Async continuations
+use `useSessionGuard` before account-scoped navigation or global UI updates.
+Logout/expiry queue their login message before publishing the cleared session;
+root snackbar state preserves successful login/register feedback and excludes
+messages from an older generation.
+
+`useNotifications` owns loading, retries, unread state and synchronous item/bulk
+locks. Headers inject stable app-owned API adapters and keep presentation and
+target navigation local. Generation and unmount guards discard stale lists,
+mutations and errors; token rotation preserves pending work. An earlier list
+request cannot undo a newer mutation. MacroMapper retains its existing HTTP
+error-message adapter.
 
 Authentication forms disable submission while pending. Tokens and profile data
 live in `sessionStorage`; new sessions trim profile fields and clear absent values.
@@ -157,9 +200,10 @@ React Router and Material UI keyboard/exit coverage when consolidating suites;
 app-specific domain and route expectations remain in their owning application.
 
 `AuthPageShell.test.jsx` checks the accessible heading and native keyboard form
-submission. The small `sessionState.js` version counter is covered through
-`requestClient.test.js` logout, account-switch and concurrent-refresh regressions;
-avoid duplicate tests that only restate its getter/increment implementation.
+submission. Direct session-store and hook suites cover hydration, stable snapshots,
+subscriptions, blocked storage, token rotation and stale work. Request-client
+and real App suites cover refresh races, account changes, auth feedback and consent.
+`RouteContent.test.jsx` exercises loading, failed imports and reload recovery.
 
 `src/index.test.jsx` boots the real entry point, React root and application in
 jsdom, then checks the signed-out login route and usable form without private API
