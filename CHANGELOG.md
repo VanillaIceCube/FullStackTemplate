@@ -10,6 +10,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Group frontend Dockerfiles and Nginx configuration in `frontend/docker/`; update Compose, build workflows and Docker dependency discovery while retaining the frontend build context.
 - Consolidate durable documentation into existing owning READMEs, move the active CI inventory beside workflow guidance, and repair links and architecture regressions.
 - Restore consistent changelog titles, chronological dates, ordered categories, and spacing while preserving historical entries.
 - Align shared agent instructions across the repository family while preserving application-specific contracts and Infrastructure authorization controls.
@@ -17,6 +18,8 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove the custom frontend development entrypoint and automatic dependency reinstall; start Vite directly and install changed dependencies manually in the development container.
+- Remove frontend end-to-end suites, Playwright configuration and dependencies, browser-test helpers and CI jobs; retain component, backend, action-local and shared release checks.
 - Remove the root `scripts/` folder, template initializer and GitHub Project helper; use manual application and Project setup.
 - Remove duplicate documentation indexes, redirects, stale narratives and historical receipts after preserving useful contracts.
 - Remove the root `tests/` directory and its CI invocations; retain backend, frontend/browser, action-local, and shared release suites.

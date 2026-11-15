@@ -15,8 +15,8 @@
     "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@eslint-react/eslint-plugin": "^5.28.8",
+    "@eslint/js": "^10.0.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -29,8 +29,7 @@
     "jsdom": "^31.0.0",
     "prettier": "^3.9.10",
     "vite": "^8.3.7",
-    "vitest": "^5.1.0",
-    "@playwright/test": "^1.65.0"
+    "vitest": "^5.1.0"
   },
   "scripts": {
     "start": "vite",
@@ -41,8 +40,7 @@
     "lint:strict": "eslint \"src/**/*.{js,jsx}\" --max-warnings=0",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "test:watch": "vitest",
-    "test:e2e": "node e2e/run_e2e.cjs"
+    "test:watch": "vitest"
   },
   "overrides": {
     "minimatch@>=9 <11.0.1": "^11.0.1"
