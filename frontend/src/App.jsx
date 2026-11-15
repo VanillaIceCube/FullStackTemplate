@@ -1,3 +1,5 @@
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import fullStackTheme from './theme';
 import ConnectedApps, { OAuthConsent } from './pages/connections/Connections';
 import { useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router';
@@ -25,7 +27,8 @@ export default function App() {
   };
 
   return (
-    <>
+    <ThemeProvider theme={fullStackTheme}>
+      <CssBaseline />
       <Router basename={import.meta.env.BASE_URL}>
         <NavigationBridge />
         <AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />
@@ -76,6 +79,6 @@ export default function App() {
           }
         }}
       />
-    </>
+    </ThemeProvider>
   );
 }

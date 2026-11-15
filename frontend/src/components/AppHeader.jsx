@@ -175,14 +175,7 @@ export default function AppHeader({ title, setDrawerOpen }) {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar
-        position="static"
-        sx={{
-          color: 'var(--secondary-background-color)',
-          background: 'var(--background-color)',
-          boxShadow: 'none',
-        }}
-      >
+      <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" noWrap sx={{ flexGrow: 1 }}>
             {title}
@@ -206,11 +199,6 @@ export default function AppHeader({ title, setDrawerOpen }) {
             slotProps={{
               paper: {
                 sx: {
-                  backgroundColor: 'var(--secondary-background-color)',
-                  color: 'var(--secondary-color)',
-                  boxShadow: 3,
-                  border: '2.5px solid var(--background-color)',
-                  borderRadius: 1.5,
                   width: { xs: 320, sm: 380 },
                   maxWidth: 'calc(100vw - 24px)',
                 },
@@ -341,11 +329,6 @@ export default function AppHeader({ title, setDrawerOpen }) {
             slotProps={{
               paper: {
                 sx: {
-                  backgroundColor: 'var(--secondary-background-color)',
-                  color: 'var(--secondary-color)',
-                  boxShadow: 3,
-                  border: '2.5px solid var(--background-color)',
-                  borderRadius: 1.5,
                   minWidth: 220,
                 },
               },

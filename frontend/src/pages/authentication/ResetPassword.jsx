@@ -58,7 +58,6 @@ export default function ResetPassword({ showSnackbar }) {
         <TextField
           fullWidth
           disabled={isSubmitting}
-          sx={{ background: 'white' }}
           label="New Password"
           type="password"
           autoComplete="new-password"
@@ -68,20 +67,13 @@ export default function ResetPassword({ showSnackbar }) {
         <TextField
           fullWidth
           disabled={isSubmitting}
-          sx={{ background: 'white' }}
           label="Confirm Password"
           type="password"
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
         />
-        <Button
-          fullWidth
-          disabled={isSubmitting}
-          sx={{ backgroundColor: 'var(--secondary-color)' }}
-          type="submit"
-          variant="contained"
-        >
+        <Button fullWidth disabled={isSubmitting} type="submit" variant="contained">
           {isSubmitting ? 'Resetting...' : 'Reset Password'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>

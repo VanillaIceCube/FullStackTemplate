@@ -47,7 +47,6 @@ export default function ForgotPassword({ showSnackbar }) {
         <TextField
           fullWidth
           disabled={isSubmitting}
-          sx={{ background: 'white' }}
           label="Email"
           type="email"
           name="email"
@@ -55,13 +54,7 @@ export default function ForgotPassword({ showSnackbar }) {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        <Button
-          fullWidth
-          disabled={isSubmitting}
-          sx={{ backgroundColor: 'var(--secondary-color)' }}
-          type="submit"
-          variant="contained"
-        >
+        <Button fullWidth disabled={isSubmitting} type="submit" variant="contained">
           {isSubmitting ? 'Sending...' : 'Send Reset Link'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>

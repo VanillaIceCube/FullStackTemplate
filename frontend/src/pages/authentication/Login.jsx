@@ -62,7 +62,6 @@ export default function Login({ showSnackbar }) {
         <TextField
           fullWidth
           disabled={isSubmitting}
-          sx={{ background: 'white' }}
           label="Email"
           type="email"
           name="email"
@@ -73,7 +72,6 @@ export default function Login({ showSnackbar }) {
         <TextField
           fullWidth
           disabled={isSubmitting}
-          sx={{ background: 'white' }}
           label="Password"
           type="password"
           name="password"
@@ -81,13 +79,7 @@ export default function Login({ showSnackbar }) {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
-        <Button
-          fullWidth
-          disabled={isSubmitting}
-          sx={{ backgroundColor: 'var(--secondary-color)' }}
-          type="submit"
-          variant="contained"
-        >
+        <Button fullWidth disabled={isSubmitting} type="submit" variant="contained">
           {isSubmitting ? 'Logging in...' : 'Login'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>

@@ -8,8 +8,10 @@ authentication, and the application shell.
 - `docker/`: production/development Dockerfiles and Nginx configuration.
   Docker builds keep `frontend/` as their context; `.dockerignore` stays at the
   frontend root.
-- `src/index.css`: the single global stylesheet, loaded by `src/index.jsx`; keep
-  theme tokens, document defaults, shared controls and app-specific rules here.
+- `src/theme.js`: application palette, document typography, shared Material UI defaults
+  and the existing CSS color variables, applied through `ThemeProvider` and `CssBaseline`.
+- `src/index.css`: platform font rendering and remaining app-specific global rules,
+  loaded by `src/index.jsx`. Keep responsive page geometry in the owning component.
 - `src/components/`: reusable interface components.
 - `src/pages/`: application pages and routes.
 - `src/services/`: API requests and session handling.
@@ -94,11 +96,22 @@ and session-lifecycle contract.
 
 ## 🎨 Style guide
 
+`src/theme.js` owns the dark document background, pale-yellow paper surfaces and
+neutral gray controls. MUI uses light control semantics on these pale surfaces;
+body text remains white on the dark document. Preserve the system document font,
+Roboto MUI controls and content-box document sizing when changing the baseline.
+The four existing CSS color variables come from this theme, not duplicated CSS
+literals. App bars, overlay frames, outlined white fields and focus colors share
+theme defaults. Standard inline editors remain transparent; specialized field
+surfaces, divider emphasis/insets and responsive layout remain component-owned.
+Test helpers use the actual app theme with only ripple suppression added.
+
 ### Foundations
 
 - Use Material UI components and responsive `sx` values before adding custom
   layout primitives.
-- Keep colors in the CSS custom properties declared in `src/index.css`.
+- Define colors once in `src/theme.js`; `CssBaseline` exposes the existing CSS custom
+  properties for component-specific styles.
 - Preserve Notoli's theme tokens: dark `#1a1a1a` backgrounds, pale-yellow
   `#f5e79e` surfaces, gray `#555555` controls and
   surface text, and white `#ffffff` text on dark backgrounds.
@@ -151,8 +164,9 @@ avoid duplicate tests that only restate its getter/increment implementation.
 `src/index.test.jsx` boots the real entry point, React root and application in
 jsdom, then checks the signed-out login route and usable form without private API
 requests or uncaught startup errors. It unmounts the real root and restores test
-state afterward. Existing Material UI test shims still apply; browser layout and
-built HTML are outside this test's scope.
+state afterward. It also types into the themed login field and verifies shared
+focus/action colors, document sizing and font ownership. Existing Material UI test
+shims still apply; browser layout and built HTML are outside this test's scope.
 
 `npm run build` runs strict lint before Vite's production build. Use
 `npm run lint:fix` to apply available lint fixes.

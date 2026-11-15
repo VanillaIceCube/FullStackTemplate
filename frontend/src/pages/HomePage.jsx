@@ -7,7 +7,6 @@ export default function HomePage() {
         elevation={3}
         sx={{
           p: { xs: 3, sm: 5 },
-          backgroundColor: 'var(--secondary-background-color)',
           color: 'var(--secondary-color)',
           border: '2.5px solid var(--background-color)',
         }}

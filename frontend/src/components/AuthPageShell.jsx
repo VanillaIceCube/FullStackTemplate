@@ -22,7 +22,6 @@ export default function AuthPageShell({ children, title }) {
           p: { xs: 3, sm: 4 },
           pb: 2,
           width: '100%',
-          background: 'var(--secondary-background-color)',
         }}
       >
         <Typography component="h1" variant="h5" sx={{ mb: 2, color: 'var(--secondary-color)' }}>

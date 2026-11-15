@@ -29,8 +29,6 @@ export default function AppNavigationDrawer({ open, setOpen }) {
       onClose={() => setOpen(false)}
       sx={{
         '& .MuiDrawer-paper': {
-          bgcolor: 'var(--secondary-background-color)',
-          color: 'var(--secondary-color)',
           borderTopLeftRadius: 15,
           borderBottomLeftRadius: 15,
         },
