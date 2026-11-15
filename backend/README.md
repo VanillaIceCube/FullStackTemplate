@@ -118,14 +118,14 @@ Plain text, HTML, reply-to, cc and bcc use Anymail's maintained serialization.
 
 ## 🔌 MCP integration
 
-The [MCP README](apps/mcp/framework/README.md) explains shared transport,
+The [MCP README](apps/mcp/README.md#framework) explains shared transport,
 OAuth, configuration, and verification.
 
 The template is disabled by default and provides a sample connection tool;
 derived applications implement and enable their own tools.
 
-Connection manifests, artwork, and package builders live in
-[chatgpt/](apps/mcp/chatgpt/README.md).
+Connection manifests and artwork live in
+[chatgpt/](apps/mcp/README.md#chatgpt).
 
 ## 🧪 Checks
 

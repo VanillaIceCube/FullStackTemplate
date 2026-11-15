@@ -242,7 +242,8 @@ gates. Application AI model selection remains app-owned.
 ## 🔌 MCP integration
 
 Shared MCP framework changes originate in FullStackTemplate's canonical Python
-package; synchronize consumer hashes and pins. Derived applications own enablement,
+package; synchronize reviewed runtime changes across consumers and record source
+commits in the coordinated tracking issue. Derived applications own enablement,
 registries, scopes and business tools. Infrastructure supplies ordinary gateway
 routing and its optional MCP contract. Preserve existing Notoli credentials,
 scopes, tool permissions, connection and exact proxy trust. The retired central
@@ -250,7 +251,7 @@ issuer is not a deployment prerequisite. Advertise an app service only after its
 own registry, OAuth and readiness checks pass; framework adoption alone does not
 authorize activation, client registration, owner consent or plugin installation.
 
-Follow the [MCP framework contract](backend/apps/mcp/framework/README.md). FullStackTemplate
+Follow the [MCP framework contract](backend/apps/mcp/README.md#framework). FullStackTemplate
 owns the canonical package; derived applications own enablement and business tools.
 
 ## 🧩 Repository-specific contracts

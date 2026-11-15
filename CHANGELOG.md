@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-11-15
+
+### Changed
+
+- Use Django OAuth Toolkit's built-in MCP client registration, remove custom management commands and document explicit public-client onboarding and validation behavior (#341).
+
 ## 2026-11-14
 
 ### Fixed
@@ -11,6 +17,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Consolidate MCP framework, tools and ChatGPT guidance into one `apps/mcp/README.md`, preserving permissions, tool catalogs and connection instructions.
+- Give FullStackTemplate its own layered-code SVG mark for ChatGPT connector branding.
 - Replace the custom Resend backend with pinned django-anymail, retain the existing credential/timeout environment variables, and cover masked reset failures at the maintained provider boundary (#340).
 - Move provider email delivery into `apps/email/`; keep password-reset behavior and privacy tests with authentication and preserve existing provider semantics (#339).
 - Consolidate MCP under `apps/mcp/`: canonical `framework/`, app-owned `tools/`, and `chatgpt/` packaging share one application namespace while preserving separate SDK imports and Django labels (#339).
@@ -35,6 +43,8 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove unused MCP framework source-pin and hash-manifest metadata; retain coordinated source review and runtime tests.
+- Remove the local ChatGPT package/listing builders and their test modules; retain source manifests/artwork and ordinary/MCP runtime checks.
 - Remove the frontend env example; retain `deploy/backend.env` for backend configuration.
 - Remove centralized frontend lint-configuration and theme-source suites; preserve shared support and all colocated application, component and service tests.
 - Remove the unused shared deferred-promise and loading-wait test helpers.

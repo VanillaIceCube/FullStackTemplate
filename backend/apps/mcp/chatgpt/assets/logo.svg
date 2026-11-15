@@ -1,34 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">FullStackTemplate</title>
+  <desc id="description">Three blue and violet application layers with white code brackets on a dark rounded square.</desc>
   <defs>
-    <linearGradient id="circle" x1="512" y1="72" x2="512" y2="952" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#F6DD63"/>
-      <stop offset="1" stop-color="#F2CF45"/>
+    <linearGradient id="background" x1="64" y1="40" x2="448" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#192745"/>
+      <stop offset="1" stop-color="#0B1224"/>
     </linearGradient>
-    <linearGradient id="letter" x1="300" y1="260" x2="720" y2="760" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3A210F"/>
-      <stop offset="1" stop-color="#241206"/>
+    <linearGradient id="surface" x1="144" y1="156" x2="360" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38D9F5"/>
+      <stop offset="1" stop-color="#5887FF"/>
     </linearGradient>
-    <clipPath id="circleClip">
-      <circle cx="512" cy="512" r="440"/>
-    </clipPath>
   </defs>
-
-  <circle cx="512" cy="512" r="440" fill="url(#circle)"/>
-
-  <g clip-path="url(#circleClip)" opacity="0.18" stroke="#8D6B16" stroke-width="2">
-    <line x1="96" y1="240" x2="928" y2="240"/>
-    <line x1="96" y1="288" x2="928" y2="288"/>
-    <line x1="96" y1="336" x2="928" y2="336"/>
-    <line x1="96" y1="384" x2="928" y2="384"/>
-    <line x1="96" y1="432" x2="928" y2="432"/>
-    <line x1="96" y1="480" x2="928" y2="480"/>
-    <line x1="96" y1="528" x2="928" y2="528"/>
-    <line x1="96" y1="576" x2="928" y2="576"/>
-    <line x1="96" y1="624" x2="928" y2="624"/>
-    <line x1="96" y1="672" x2="928" y2="672"/>
-    <line x1="96" y1="720" x2="928" y2="720"/>
-    <line x1="96" y1="768" x2="928" y2="768"/>
-  </g>
-
-  <path d="M242 766V258H378L512 520L646 258H782V766H668V446L556 656H468L356 446V766H242Z" fill="url(#letter)"/>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#background)"/>
+  <path d="M112 310 256 236 400 310V334L256 408 112 334Z" fill="#4338A6"/>
+  <path d="M112 310 256 236 400 310 256 384Z" fill="#6861DC"/>
+  <path d="M112 250 256 176 400 250V274L256 348 112 274Z" fill="#5750C5"/>
+  <path d="M112 250 256 176 400 250 256 324Z" fill="#938BFF"/>
+  <path d="M112 190 256 116 400 190V214L256 288 112 214Z" fill="#277AB6"/>
+  <path d="M112 190 256 116 400 190 256 264Z" fill="url(#surface)"/>
+  <path d="M226 169 194 190 226 211M286 169 318 190 286 211" stroke="white" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
