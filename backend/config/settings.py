@@ -65,8 +65,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     # My apps
-    "authentication",
-    "notifications",
+    "apps.authentication",
+    "apps.notifications",
 ]
 
 
@@ -116,7 +116,7 @@ REST_FRAMEWORK = {
 }
 
 
-ROOT_URLCONF = "app.urls"
+ROOT_URLCONF = "config.urls"
 
 
 TEMPLATES = [
@@ -136,7 +136,7 @@ TEMPLATES = [
 ]
 
 
-WSGI_APPLICATION = "app.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
@@ -211,12 +211,12 @@ DEFAULT_FROM_EMAIL = (
 
 
 # Optional MCP has no routes, OAuth tables or application tools unless explicitly enabled.
-from app_mcp.config import optional_settings  # noqa: E402
+from apps.mcp.framework.config import optional_settings  # noqa: E402
 
 MCP_SETTINGS = optional_settings("FullStackTemplate", "fullstacktemplate", sample=True)
 globals().update(MCP_SETTINGS)
-INSTALLED_APPS += ["app_mcp"]
+INSTALLED_APPS += ["apps.mcp.framework"]
 if MCP_SETTINGS["MCP_ENABLED"]:
     INSTALLED_APPS += ["oauth2_provider"]
     SECURE_PROXY_SSL_HEADER = None
-ASGI_APPLICATION = "app.asgi.application"
+ASGI_APPLICATION = "config.asgi.application"

@@ -59,5 +59,5 @@ def mcp_https_check(app_configs, **kwargs):
 
 
 class AppMCPConfig(AppConfig):
-    name = "app_mcp"
+    name = "apps.mcp.framework"
     label = "mcp_framework"

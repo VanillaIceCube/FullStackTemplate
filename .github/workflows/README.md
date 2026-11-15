@@ -82,7 +82,7 @@ template automatically.
 
 ### Shared MCP framework
 
-The backend test gate runs ChatGPT packaging tests and each repository's documented ordinary/MCP-enabled profiles. Template sample fixtures do not create a production target; Notoli and MacroMapper retain their app-owned enabled protocol/domain acceptance. See [the framework guide](../../backend/app_mcp/README.md) and the application MCP guide where present.
+The backend test gate runs ChatGPT packaging tests and each repository's documented ordinary/MCP-enabled profiles. Template sample fixtures do not create a production target; Notoli and MacroMapper retain their app-owned enabled protocol/domain acceptance. See [the framework guide](../../backend/apps/mcp/framework/README.md) and the application MCP guide where present.
 
 ## 🔒 Merge and dependency controls
 

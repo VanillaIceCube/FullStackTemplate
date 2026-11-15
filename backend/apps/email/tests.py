@@ -1,9 +1,9 @@
+import json
 from io import BytesIO
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
 
-from django.contrib.auth import get_user_model
-from django.core.mail import EmailMessage, get_connection
+from django.core.mail import EmailMessage, EmailMultiAlternatives, get_connection
 from django.test import SimpleTestCase, override_settings
 from rest_framework.test import APITestCase
 
@@ -18,7 +18,7 @@ def accepted_response():
 
 
 @override_settings(
-    EMAIL_BACKEND="authentication.email_backends.ResendApiEmailBackend",
+    EMAIL_BACKEND="apps.email.backends.ResendApiEmailBackend",
     EMAIL_HOST_PASSWORD="sk-private-key",
     EMAIL_TIMEOUT=7,
 )
@@ -45,7 +45,7 @@ class EmailReliabilityTests(SimpleTestCase):
             ]:
                 self.assertNotIn(secret, text)
 
-    @patch("authentication.email_backends.request.urlopen")
+    @patch("apps.email.backends.request.urlopen")
     def test_success_and_empty_batch(self, urlopen):
         urlopen.return_value = accepted_response()
         self.assertEqual(get_connection().send_messages([]), 0)
@@ -54,13 +54,13 @@ class EmailReliabilityTests(SimpleTestCase):
         self.assertEqual(urlopen.call_args.kwargs["timeout"], 7)
         urlopen.assert_called_once()
 
-    @patch("authentication.email_backends.request.urlopen")
+    @patch("apps.email.backends.request.urlopen")
     def test_missing_credentials_both_silent_modes_are_observable(self, urlopen):
         for silent in [True, False]:
             with (
                 self.subTest(silent=silent),
                 override_settings(EMAIL_HOST_PASSWORD=""),
-                self.assertLogs("authentication.email_backends", level="ERROR") as logs,
+                self.assertLogs("apps.email.backends", level="ERROR") as logs,
             ):
                 connection = get_connection(fail_silently=silent)
                 if silent:
@@ -72,7 +72,7 @@ class EmailReliabilityTests(SimpleTestCase):
             self.assert_safe_logs(logs.records)
         urlopen.assert_not_called()
 
-    @patch("authentication.email_backends.request.urlopen")
+    @patch("apps.email.backends.request.urlopen")
     def test_provider_network_timeout_and_unexpected_failures_preserve_original_exception(
         self, urlopen
     ):
@@ -106,9 +106,7 @@ class EmailReliabilityTests(SimpleTestCase):
                     exc = factory()
                     urlopen.reset_mock()
                     urlopen.side_effect = exc
-                    with self.assertLogs(
-                        "authentication.email_backends", level="ERROR"
-                    ) as logs:
+                    with self.assertLogs("apps.email.backends", level="ERROR") as logs:
                         if silent:
                             self.assertEqual(
                                 get_connection(fail_silently=True).send_messages(
@@ -127,7 +125,7 @@ class EmailReliabilityTests(SimpleTestCase):
                     self.assertEqual(logs.records[0].delivery_status, code)
                     self.assert_safe_logs(logs.records)
 
-    @patch("authentication.email_backends.request.urlopen")
+    @patch("apps.email.backends.request.urlopen")
     def test_nonfinite_unbounded_and_invalid_timeouts_use_documented_finite_default(
         self, urlopen
     ):
@@ -146,21 +144,19 @@ class EmailReliabilityTests(SimpleTestCase):
             with (
                 self.subTest(timeout=value),
                 override_settings(EMAIL_TIMEOUT=value),
-                self.assertLogs(
-                    "authentication.email_backends", level="WARNING"
-                ) as logs,
+                self.assertLogs("apps.email.backends", level="WARNING") as logs,
             ):
                 self.assertEqual(get_connection().send_messages([self.message()]), 1)
             self.assertEqual(urlopen.call_args.kwargs["timeout"], 10)
             self.assert_safe_logs(logs.records)
 
-    @patch("authentication.email_backends.request.urlopen")
+    @patch("apps.email.backends.request.urlopen")
     def test_returned_non_2xx_does_not_read_provider_body(self, urlopen):
         response = accepted_response()
         response.getcode.return_value = 503
         response.read.side_effect = AssertionError("Provider body must not be read")
         urlopen.return_value = response
-        with self.assertLogs("authentication.email_backends", level="ERROR") as logs:
+        with self.assertLogs("apps.email.backends", level="ERROR") as logs:
             self.assertEqual(
                 get_connection(fail_silently=True).send_messages([self.message()]), 0
             )
@@ -168,12 +164,12 @@ class EmailReliabilityTests(SimpleTestCase):
         self.assertEqual(logs.records[0].delivery_category, "provider")
         self.assert_safe_logs(logs.records)
 
-    @patch("authentication.email_backends.request.urlopen")
+    @patch("apps.email.backends.request.urlopen")
     def test_partial_batch_count_and_stop_policy(self, urlopen):
         for silent in [True, False]:
             urlopen.reset_mock()
             urlopen.side_effect = [URLError(PRIVATE), accepted_response()]
-            with self.assertLogs("authentication.email_backends", level="ERROR"):
+            with self.assertLogs("apps.email.backends", level="ERROR"):
                 if silent:
                     self.assertEqual(
                         get_connection(fail_silently=True).send_messages(
@@ -190,52 +186,141 @@ class EmailReliabilityTests(SimpleTestCase):
                     self.assertEqual(urlopen.call_count, 1)
 
 
-@override_settings(
-    EMAIL_BACKEND="authentication.email_backends.ResendApiEmailBackend",
-    EMAIL_HOST_PASSWORD="sk-private-key",
-)
-class PasswordResetFailurePrivacyTests(APITestCase):
-    def setUp(self):
-        get_user_model().objects.create_user(
-            username="fixture",
-            email="fixture@example.test",
-            password="fixture-password-123",
+class ResendApiEmailBackendTests(APITestCase):
+    @override_settings(
+        EMAIL_BACKEND="apps.email.backends.ResendApiEmailBackend",
+        EMAIL_HOST_PASSWORD="resend-api-key",
+        EMAIL_TIMEOUT=7,
+        DEFAULT_FROM_EMAIL="fullstacktemplate@example.com",
+    )
+    @patch("apps.email.backends.request.urlopen")
+    def test_send_messages_posts_to_resend_api(self, mock_urlopen):
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.getcode.return_value = 200
+        mock_urlopen.return_value = response
+
+        sent_count = get_connection().send_messages(
+            [
+                EmailMessage(
+                    "Reset your FullStackTemplate password",
+                    "Use this link.",
+                    None,
+                    ["mapper@example.com"],
+                )
+            ]
         )
 
-    @patch("authentication.email_backends.request.urlopen")
-    def test_real_reset_caller_keeps_failure_and_unknown_account_responses_equal(
-        self, urlopen
-    ):
-        for exc in [
-            HTTPError("https://api.resend.com/emails", 429, PRIVATE, {}, None),
-            TimeoutError(PRIVATE),
-            URLError(PRIVATE),
-        ]:
-            with self.subTest(error=type(exc).__name__):
-                urlopen.reset_mock()
-                urlopen.side_effect = exc
-                with self.assertLogs("authentication", level="ERROR") as logs:
-                    known = self.client.post(
-                        "/auth/forgot-password/",
-                        {"email": "fixture@example.test"},
-                        format="json",
+        self.assertEqual(sent_count, 1)
+        request_arg = mock_urlopen.call_args.args[0]
+        self.assertEqual(request_arg.full_url, "https://api.resend.com/emails")
+        self.assertEqual(
+            request_arg.get_header("Authorization"), "Bearer resend-api-key"
+        )
+        self.assertEqual(
+            request_arg.get_header("User-agent"),
+            "FullStackTemplate/1.0 (+https://app.example.com)",
+        )
+        payload = json.loads(request_arg.data.decode("utf-8"))
+        self.assertEqual(payload["from"], "fullstacktemplate@example.com")
+        self.assertEqual(payload["to"], ["mapper@example.com"])
+
+    @override_settings(
+        EMAIL_BACKEND="apps.email.backends.ResendApiEmailBackend",
+        EMAIL_HOST_PASSWORD="resend-api-key",
+        DEFAULT_FROM_EMAIL="fullstacktemplate@example.com",
+    )
+    @patch("apps.email.backends.request.urlopen")
+    def test_send_messages_includes_reply_to_and_html_body(self, mock_urlopen):
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.getcode.return_value = 200
+        mock_urlopen.return_value = response
+
+        html_msg = EmailMessage(
+            "HTML Subject",
+            "<p>HTML Content</p>",
+            "from@example.com",
+            ["to@example.com"],
+            reply_to=["reply@example.com"],
+        )
+        html_msg.content_subtype = "html"
+
+        multi_msg = EmailMultiAlternatives(
+            "Multi Subject",
+            "Plain text",
+            "from@example.com",
+            ["to@example.com"],
+            cc=["cc@example.com"],
+            bcc=["bcc@example.com"],
+        )
+        multi_msg.attach_alternative("<p>Rich text</p>", "text/html")
+
+        connection = get_connection()
+        sent_count = connection.send_messages([html_msg, multi_msg])
+
+        self.assertEqual(sent_count, 2)
+        self.assertEqual(mock_urlopen.call_count, 2)
+
+        # First email checks
+        req1 = mock_urlopen.call_args_list[0].args[0]
+        payload1 = json.loads(req1.data.decode("utf-8"))
+        self.assertEqual(payload1["reply_to"], ["reply@example.com"])
+        self.assertEqual(payload1["html"], "<p>HTML Content</p>")
+        self.assertNotIn("text", payload1)
+
+        # Second email checks
+        req2 = mock_urlopen.call_args_list[1].args[0]
+        payload2 = json.loads(req2.data.decode("utf-8"))
+        self.assertEqual(payload2["cc"], ["cc@example.com"])
+        self.assertEqual(payload2["bcc"], ["bcc@example.com"])
+        self.assertEqual(payload2["text"], "Plain text")
+        self.assertEqual(payload2["html"], "<p>Rich text</p>")
+
+    @override_settings(
+        EMAIL_BACKEND="apps.email.backends.ResendApiEmailBackend",
+        EMAIL_HOST_PASSWORD="resend-api-key",
+    )
+    @patch("apps.email.backends.request.urlopen")
+    def test_send_messages_handles_http_errors_and_fail_silently(self, mock_urlopen):
+        error_body = json.dumps(
+            {"statusCode": 422, "message": "Invalid sender address"}
+        ).encode("utf-8")
+        http_err = HTTPError(
+            "https://api.resend.com/emails",
+            422,
+            "Unprocessable Entity",
+            {},
+            BytesIO(error_body),
+        )
+        mock_urlopen.side_effect = http_err
+
+        msg = EmailMessage("Subject", "Body", "invalid@example.com", ["to@example.com"])
+
+        # fail_silently = False (default)
+        connection = get_connection(fail_silently=False)
+        with self.assertRaises(HTTPError) as cm:
+            connection.send_messages([msg])
+        self.assertEqual(cm.exception.code, 422)
+
+        # fail_silently = True
+        silent_connection = get_connection(fail_silently=True)
+        sent_count = silent_connection.send_messages([msg])
+        self.assertEqual(sent_count, 0)
+
+    @override_settings(
+        EMAIL_BACKEND="apps.email.backends.ResendApiEmailBackend",
+        EMAIL_HOST_PASSWORD="",
+    )
+    def test_send_messages_requires_api_key(self):
+        with self.assertRaises(ValueError):
+            get_connection().send_messages(
+                [
+                    EmailMessage(
+                        "Subject",
+                        "Body",
+                        "fullstacktemplate@example.com",
+                        ["mapper@example.com"],
                     )
-                unknown = self.client.post(
-                    "/auth/forgot-password/",
-                    {"email": "missing@example.test"},
-                    format="json",
-                )
-                self.assertEqual(known.status_code, 200)
-                self.assertEqual(known.data, unknown.data)
-                urlopen.assert_called_once()
-                for record in logs.records:
-                    self.assertIsNone(record.exc_info)
-                    for private in [
-                        "private-token",
-                        "sk-private-key",
-                        "recipient@example.test",
-                        "fixture@example.test",
-                        "user_id",
-                        "private-body",
-                    ]:
-                        self.assertNotIn(private, record.getMessage())
+                ]
+            )

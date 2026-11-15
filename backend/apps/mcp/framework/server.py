@@ -9,7 +9,6 @@ from mcp.server import MCPServer
 from mcp.server.auth.provider import AccessToken, TokenVerifier
 from mcp.server.auth.settings import AuthSettings
 from mcp.server.transport_security import TransportSecuritySettings
-from mcp.types import ToolAnnotations
 
 from .oauth import resolve_token
 
@@ -65,29 +64,3 @@ def http_application(server):
             allowed_origins=origins,
         ),
     )
-
-
-def sample_server():
-    server = create_server(
-        instructions="This sample checks the authenticated connection only. It has no application data tools."
-    )
-
-    @server.tool(
-        annotations=ToolAnnotations(
-            readOnlyHint=True,
-            destructiveHint=False,
-            idempotentHint=True,
-            openWorldHint=False,
-        ),
-        structured_output=True,
-        meta={
-            "securitySchemes": [
-                {"type": "oauth2", "scopes": settings.MCP_REQUIRED_SCOPES}
-            ]
-        },
-    )
-    async def connection_status() -> dict[str, bool]:
-        """Confirm this authenticated MCP connection without reading application data."""
-        return {"connected": True}
-
-    return server

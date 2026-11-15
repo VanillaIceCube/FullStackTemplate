@@ -11,6 +11,9 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Move provider email delivery into `apps/email/`; keep password-reset behavior and privacy tests with authentication and preserve existing provider semantics (#339).
+- Consolidate MCP under `apps/mcp/`: canonical `framework/`, app-owned `tools/`, and `chatgpt/` packaging share one application namespace while preserving separate SDK imports and Django labels (#339).
+- Group backend application modules under `apps/`, rename Django configuration to `config/` and the shared MCP package to `apps/mcp/framework/`, preserving database app labels and existing migrations (#339).
 - Keep Dockerfile-specific production/development ignore files beside backend and frontend Dockerfiles; use the Python constraint in pyproject.toml without a separate version file.
 - Replace Conda and environment exports with locked uv projects across local setup, CI and Docker; preserve Python 3.12 and existing server profiles (#338).
 - Remove the standalone MCP parity checker and server launcher; retain MCP tests/manifests/pins and select the production server directly in Docker.

@@ -20,11 +20,11 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("notifications.urls")),
-    path("auth/", include("authentication.urls")),
+    path("api/", include("apps.notifications.urls")),
+    path("auth/", include("apps.authentication.urls")),
 ]
 
 
-from app_mcp.routing import urlpatterns as mcp_urlpatterns  # noqa: E402
+from apps.mcp.framework.routing import urlpatterns as mcp_urlpatterns  # noqa: E402
 
 urlpatterns = mcp_urlpatterns() + urlpatterns

@@ -28,7 +28,9 @@ CHALLENGE = (
 
 class ProfileTests(SimpleTestCase):
     def test_renamed_package_preserves_django_application_identity(self):
-        self.assertEqual(apps.get_app_config("mcp_framework").name, "app_mcp")
+        self.assertEqual(
+            apps.get_app_config("mcp_framework").name, "apps.mcp.framework"
+        )
 
     def test_sdk_server_import_remains_distinct_from_application_package(self):
         from mcp.server import MCPServer
@@ -321,14 +323,25 @@ class HTTPTests(TransactionTestCase):
         self.application = make_application()
         self.token = make_token(self.user, self.application)
 
-    def test_authenticated_initialization_discovery_and_safe_sample(self):
+    def test_authenticated_initialization_discovery_and_safe_fixture(self):
         import httpx2
         from django.core.asgi import get_asgi_application
+        from mcp.types import ToolAnnotations
 
         from .asgi import create_application
-        from .server import sample_server
+        from .server import create_server
 
-        application = create_application(get_asgi_application(), sample_server())
+        server = create_server(
+            instructions="Isolated shared-framework protocol fixture."
+        )
+
+        @server.tool(
+            annotations=ToolAnnotations(readOnlyHint=True), structured_output=True
+        )
+        async def connection_status() -> dict[str, bool]:
+            return {"connected": True}
+
+        application = create_application(get_asgi_application(), server)
 
         async def exercise():
             async with application.router.lifespan_context(application):

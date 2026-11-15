@@ -5,11 +5,12 @@ permissions, notifications, and application integrations.
 
 ## 🧭 Structure
 
-- `app/`: settings and server entry points.
+- `config/`: settings and server entry points.
 - `docker/`: production/development Dockerfiles and their matching Dockerfile-specific
   ignore files; keep `backend/` as the build context.
-- `authentication/`, `notifications/`: accounts and notifications.
-- `app_mcp/`: reusable MCP transport and OAuth.
+- `apps/authentication/`, `apps/notifications/`: accounts and notifications.
+- `apps/email/`: email provider delivery and its mocked regressions.
+- `apps/mcp/`: shared `framework/`, application `tools/`, and `chatgpt/` packaging.
 
 ## 💻 Local development
 
@@ -28,7 +29,7 @@ For Docker hot reload, follow the [deployment guide](../deploy/README.md).
 
 Local runs load ignored `backend/.env`. The database defaults to
 `backend/db.sqlite3`; set `DJANGO_SQLITE_PATH` to use another local database.
-Use `app/settings.py` for current defaults.
+Use `config/settings.py` for current defaults.
 
 | Setting | Purpose |
 | --- | --- |
@@ -87,7 +88,7 @@ Local development uses Django's console email backend. The included
 Resend HTTPS backend is configured with:
 
 ```env
-DJANGO_EMAIL_BACKEND=authentication.email_backends.ResendApiEmailBackend
+DJANGO_EMAIL_BACKEND=apps.email.backends.ResendApiEmailBackend
 DJANGO_EMAIL_HOST_KEY=<resend-api-key>
 DJANGO_EMAIL_TIMEOUT=10
 DJANGO_DEFAULT_FROM_EMAIL=<sender-on-a-verified-domain>
@@ -104,7 +105,7 @@ response means acceptance, not confirmed inbox delivery.
 
 Failures preserve `fail_silently`: false re-raises, while true skips failures and
 returns the number sent. Password reset returns a generic response for known and
-unknown accounts, including delivery failures. Logger `authentication.email_backends`
+unknown accounts, including delivery failures. Logger `apps.email.backends`
 records safe category/status fields: `configuration`, `request`, `rate_limit`,
 `provider`, `timeout`, `network`, or `unexpected`. Never log provider response
 bodies, recipient details, reset tokens, message contents, or credentials.
@@ -115,14 +116,14 @@ Use mocked delivery tests; production email receipt requires separate verificati
 
 ## 🔌 MCP integration
 
-The [MCP README](app_mcp/README.md) explains shared transport,
+The [MCP README](apps/mcp/framework/README.md) explains shared transport,
 OAuth, configuration, and verification.
 
 The template is disabled by default and provides a sample connection tool;
 derived applications implement and enable their own tools.
 
 Connection manifests, artwork, and package builders live in
-[chatgpt/](app_mcp/chatgpt/README.md).
+[chatgpt/](apps/mcp/chatgpt/README.md).
 
 ## 🧪 Checks
 

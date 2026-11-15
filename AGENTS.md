@@ -250,7 +250,7 @@ issuer is not a deployment prerequisite. Advertise an app service only after its
 own registry, OAuth and readiness checks pass; framework adoption alone does not
 authorize activation, client registration, owner consent or plugin installation.
 
-Follow the [MCP framework contract](backend/app_mcp/README.md). FullStackTemplate
+Follow the [MCP framework contract](backend/apps/mcp/framework/README.md). FullStackTemplate
 owns the canonical package; derived applications own enablement and business tools.
 
 ## 🧩 Repository-specific contracts

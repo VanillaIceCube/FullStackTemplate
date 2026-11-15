@@ -5,7 +5,7 @@ WORKDIR /backend
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_PYTHON_DOWNLOADS=never \
     PATH="/opt/venv/bin:$PATH" \
-    DJANGO_SETTINGS_MODULE=app.settings \
+    DJANGO_SETTINGS_MODULE=config.settings \
     PYTHONUNBUFFERED=1
 
 RUN python -m pip install --no-cache-dir uv==0.13.8
@@ -16,4 +16,4 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
-CMD ["sh", "-c", "if [ \"${DJANGO_MCP_ENABLED:-0}\" = \"1\" ]; then exec uvicorn app.asgi:application --host 0.0.0.0 --port 8000 --workers 1 --no-proxy-headers; else exec gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers 1; fi"]
+CMD ["sh", "-c", "if [ \"${DJANGO_MCP_ENABLED:-0}\" = \"1\" ]; then exec uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --workers 1 --no-proxy-headers; else exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 1; fi"]

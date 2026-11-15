@@ -4,7 +4,10 @@ import os
 
 
 def oauth_settings(
-    base_url, scopes, required_scopes, validator="app_mcp.oauth.MCPOAuthValidator"
+    base_url,
+    scopes,
+    required_scopes,
+    validator="apps.mcp.framework.oauth.MCPOAuthValidator",
 ):
     return {
         "OAUTH2_VALIDATOR_CLASS": validator,
@@ -46,7 +49,7 @@ def optional_settings(name, namespace, *, sample=False):
         "MCP_CONSENT_SALT": f"{namespace}.mcp.consent",
         "MCP_CLIENT_ID": f"{namespace}-chatgpt",
         "MCP_SERVER_FACTORY": os.getenv("DJANGO_MCP_SERVER_FACTORY")
-        or ("app_mcp.server.sample_server" if sample else None),
+        or ("apps.mcp.tools.server.create_server" if sample else None),
         "TRUSTED_PROXY_IPS": [
             v.strip()
             for v in os.getenv("DJANGO_TRUSTED_PROXY_IPS", "").split(",")

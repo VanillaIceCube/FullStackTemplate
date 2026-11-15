@@ -11,7 +11,7 @@ The package builder refuses that unchanged example endpoint.
 2. Implement and review the application-owned tools and permissions. The sample
    `connection_status` tool reads no application data.
 3. Configure the real HTTPS origin and enable the backend/frontend MCP profiles
-   as described in the [MCP README](../README.md).
+   as described in the [MCP README](../framework/README.md).
 4. Register the public OAuth client using the exact callback supplied by the
    client. Review the application branding and package metadata before building.
 
@@ -30,14 +30,14 @@ The package builder refuses that unchanged example endpoint.
 Run the offline regression suite from the repository root:
 
 ```powershell
-python -m unittest discover -s backend/app_mcp/chatgpt -p "test_*.py" -v
+python -m unittest discover -s backend/apps/mcp/framework/chatgpt -p "test_*.py" -v
 ```
 
 To build a portable ZIP containing only `plugin.json`, `mcp.json`, and referenced
 artwork, write the output outside the source directory:
 
 ```powershell
-python backend/app_mcp/chatgpt/build_package.py --output "$env:TEMP/application-chatgpt.zip"
+python backend/apps/mcp/chatgpt/build_package.py --output "$env:TEMP/application-chatgpt.zip"
 ```
 
 The portable archive contains no account-specific `.app.json`, source code,
@@ -47,7 +47,7 @@ register, publish, or deploy the integration.
 For an existing personal listing, download that plugin's export first and run:
 
 ```powershell
-python backend/app_mcp/chatgpt/build_listing.py `
+python backend/apps/mcp/chatgpt/build_listing.py `
   --export "$env:USERPROFILE/Downloads/plugin.zip" `
   --output "$env:TEMP/application-listing.zip" `
   --version 1.0.1
