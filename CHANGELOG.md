@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Verify the backend production/development uv bootstrap against reviewed binary wheel hashes for every platform in the pinned Python base; reject altered artifacts and source distributions across all three applications.
 - Verify the CI uv bootstrap against a reviewed wheel SHA-256 before installation across all four repositories; reject unsupported runner targets and source distributions.
 - Standardize sanitized MCP reconnect challenges and distinguish expired connections from missing scopes; synchronize framework runtime and regression coverage across applications.
 - Align authentication request validation, duplicate-registration handling and exact password preservation across applications; reject malformed reset credentials with HTTP 400 and roll back failed signup onboarding.

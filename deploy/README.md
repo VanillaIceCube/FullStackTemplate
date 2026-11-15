@@ -92,7 +92,14 @@ The [MCP framework guide](../backend/apps/mcp/README.md#framework) defines opt-i
 
 ## 📦 Development dependency reproducibility
 
-Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
+Both backend Dockerfiles install uv using isolated, binary-only pip with reviewed
+SHA-256 hashes from [PyPI's uv 0.13.8 release](https://pypi.org/pypi/uv/0.13.8/json).
+The allowlist covers every platform in the pinned Python image: Linux amd64,
+arm/v7, arm64/v8, 386 and ppc64le. Unlisted artifacts, altered wheels and source
+distributions fail installation. Requirements are passed through stdin; update
+the version and all compatible wheel hashes together after artifact verification.
+
+Development images pin reviewed multi-platform Node 26 and Python 3.12
 registry digests. Frontend production and development builders use the same
 immutable Node 26 digest. Refresh matching tags/digests together after registry
 verification and a disposable build/configuration check.
