@@ -51,14 +51,14 @@ history and valid UTF-8 text when editing or merging entries.
 
 ## 💻 Local development
 
-Use manual setup; do not assume Django or Node dependencies are installed.
-Use Python 3.12 in an isolated environment and the Node version range in
+Use uv for Python environments; do not assume dependencies are installed.
+Use the locked Python 3.12 backend project and the Node version range in
 `frontend/package.json`. From the repository root:
 
 ```powershell
-python -m pip install -r backend/requirements.txt
-python backend/manage.py migrate
-python backend/manage.py runserver 8000
+uv sync --locked --project backend
+uv run --locked --project backend python backend/manage.py migrate
+uv run --locked --project backend python backend/manage.py runserver 8000
 ```
 
 In a separate shell, from the repository root:
@@ -69,8 +69,10 @@ npm ci
 npm start
 ```
 
-Frontend image definitions and Nginx configuration live in `frontend/docker/`;
-keep `frontend/` as the Docker build context.
+Backend image definitions live in `backend/docker/`; keep `backend/` as the
+Docker build context. Each Dockerfile has a matching `<Dockerfile>.dockerignore`
+beside it; exclusions remain relative to the context root. Frontend image definitions and Nginx configuration live in
+`frontend/docker/`; keep `frontend/` as the Docker build context.
 
 For local Docker hot reload and optional standalone HTTPS, follow
 [deploy/README.md](deploy/README.md). Initialize only missing local environment
@@ -111,9 +113,9 @@ build-time settings. Client-side variables must contain no secrets.
 Run checks in proportion to the change, from the repository root:
 
 ```powershell
-python backend/manage.py test backend
-ruff check backend
-ruff format backend --check
+uv run --locked --project backend python backend/manage.py test backend
+uv run --locked --project backend ruff check backend
+uv run --locked --project backend ruff format backend --check
 ```
 
 From `frontend/`:

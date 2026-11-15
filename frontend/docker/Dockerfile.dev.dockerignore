@@ -5,7 +5,7 @@ dist/
 
 # Docker configuration files
 docker/Dockerfile
-.dockerignore
+docker/*.dockerignore
 
 # Local frontend environment files
 .env

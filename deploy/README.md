@@ -42,7 +42,7 @@ deployment image path.
 if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
 if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
 ./deploy/create-local-certificate.ps1
-docker build -t ghcr.io/vanillaicecube/fullstacktemplate-backend:latest ./backend
+docker build --file backend/docker/Dockerfile -t ghcr.io/vanillaicecube/fullstacktemplate-backend:latest ./backend
 docker build --file frontend/docker/Dockerfile -t ghcr.io/vanillaicecube/fullstacktemplate-frontend:latest ./frontend
 Set-Location deploy
 docker compose up -d
@@ -97,9 +97,17 @@ registry digests. Frontend production and development builders use the same
 immutable Node 26 digest. Refresh matching tags/digests together after registry
 verification and a disposable build/configuration check.
 
-Frontend production/development Dockerfiles and Nginx configuration live in
-`frontend/docker/`. The build context remains
-`frontend/`; Compose and CI select the Dockerfile explicitly.
+Backend images use the reviewed Python 3.12 base and uv 0.13.8. The project
+lockfile supplies production dependencies; development includes the tooling group.
+The environment lives at `/opt/venv`, outside the source bind mount. Restart the
+backend after changing the lockfile so `uv run --locked` synchronizes dependencies.
+Host `.venv/` files are excluded from the image build. Conda is no longer required.
+Production startup selects Uvicorn only when `DJANGO_MCP_ENABLED=1`; otherwise it
+executes the existing single-worker Gunicorn profile directly from the Docker CMD.
+
+Backend production/development Dockerfiles live in `backend/docker/`; frontend
+Dockerfiles and Nginx configuration live in `frontend/docker/`. Build contexts
+remain `backend/` and `frontend/`; Compose and CI select each Dockerfile explicitly.
 
 The frontend starts Vite directly with `npm start`. Source hot reload and the
 persistent `frontend_node_modules` volume remain. Dependency changes require a
@@ -131,3 +139,9 @@ See [workflow checks and validation](../.github/workflows/README.md#-checks-and-
 - [Live-server releases and recovery](production/README.md).
 - [Backend configuration](../backend/README.md).
 - [Frontend development](../frontend/README.md).
+
+Both application contexts keep their Dockerfile-specific ignore files under
+`docker/`: `Dockerfile.dockerignore` and `Dockerfile.dev.dockerignore`. Docker
+selects the file matching the explicitly selected Dockerfile. Patterns remain
+relative to `backend/` or `frontend/`, and the frontend Nginx/entrypoint files
+remain included. There is no context-root `.dockerignore`.

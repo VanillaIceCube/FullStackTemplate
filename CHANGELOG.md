@@ -11,6 +11,10 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Keep Dockerfile-specific production/development ignore files beside backend and frontend Dockerfiles; use the Python constraint in pyproject.toml without a separate version file.
+- Replace Conda and environment exports with locked uv projects across local setup, CI and Docker; preserve Python 3.12 and existing server profiles (#338).
+- Remove the standalone MCP parity checker and server launcher; retain MCP tests/manifests/pins and select the production server directly in Docker.
+- Group backend Dockerfiles in `backend/docker/`; update Compose, build workflows and Docker dependency discovery while retaining the backend build context (FullStackTemplate #337).
 - Standardize README heading emojis, sentence case, reference labels and Markdown spacing while preserving substantive content, code examples and existing anchors.
 - Move frontend connection contracts into session guidance and keep related guides as a final navigation section.
 - Align frontend npm commands: production builds run strict lint first and `lint:fix` applies available lint fixes.

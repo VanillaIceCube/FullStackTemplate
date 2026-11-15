@@ -6,17 +6,19 @@ permissions, notifications, and application integrations.
 ## 🧭 Structure
 
 - `app/`: settings and server entry points.
+- `docker/`: production/development Dockerfiles and their matching Dockerfile-specific
+  ignore files; keep `backend/` as the build context.
 - `authentication/`, `notifications/`: accounts and notifications.
 - `app_mcp/`: reusable MCP transport and OAuth.
 
 ## 💻 Local development
 
-Use Python 3.12 in an isolated environment. From the repository root:
+Install uv, then synchronize the locked Python 3.12 project from the repository root:
 
 ```powershell
-python -m pip install -r backend/requirements.txt
-python backend/manage.py migrate
-python backend/manage.py runserver 8000
+uv sync --locked --project backend
+uv run --locked --project backend python backend/manage.py migrate
+uv run --locked --project backend python backend/manage.py runserver 8000
 ```
 
 Local settings can be supplied in ignored `backend/.env`.
@@ -113,11 +115,6 @@ Use mocked delivery tests; production email receipt requires separate verificati
 
 ## 🔌 MCP integration
 
-The shared-framework checker lives at `backend/check_app_mcp.py`, beside the backend
-and outside the hash-verified package. Run `python backend/check_app_mcp.py` from
-the repository root; use `--source-root <canonical-checkout>` for local offline
-verification. See the [framework guide](app_mcp/README.md) for source ownership.
-
 The [MCP README](app_mcp/README.md) explains shared transport,
 OAuth, configuration, and verification.
 
@@ -132,10 +129,10 @@ Connection manifests, artwork, and package builders live in
 From the repository root:
 
 ```powershell
-python backend/manage.py test
-ruff check backend
-ruff format backend --check
-python backend/manage.py makemigrations --check --dry-run
+uv run --locked --project backend python backend/manage.py test
+uv run --locked --project backend ruff check backend
+uv run --locked --project backend ruff format backend --check
+uv run --locked --project backend python backend/manage.py makemigrations --check --dry-run
 ```
 
 ## 🛠️ Maintenance
@@ -145,8 +142,10 @@ preserve password whitespace, and retain generic account-recovery responses.
 Notification operations remain recipient-scoped; bulk mutations are atomic.
 Preserve pending/error handling through response parsing in the frontend.
 
-Maintain the Python version in `environment.yml` and pip dependencies in
-`requirements.txt` together with CI and Docker. The test runner's fast password
+Maintain the Python 3.12 constraint in `pyproject.toml`; declare dependencies
+in `pyproject.toml` and commit `uv.lock`. Use `uv add --project backend <package>`
+or `uv lock --project backend --upgrade-package <package>` for deliberate changes,
+then `uv sync --locked --project backend`. CI and Docker consume the same lockfile. The test runner's fast password
 hasher applies only during tests; normal settings retain secure hashing.
 See [Docker dependency maintenance](../deploy/README.md#development-dependency-reproducibility).
 

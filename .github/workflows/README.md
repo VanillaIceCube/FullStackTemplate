@@ -82,13 +82,13 @@ template automatically.
 
 ### Shared MCP framework
 
-The backend test gate checks the pinned MCP framework manifest and each repository's documented ordinary/MCP-enabled profiles. Template sample fixtures do not create a production target; Notoli and MacroMapper retain their app-owned enabled protocol/domain acceptance. See [the framework guide](../../backend/app_mcp/README.md) and the application MCP guide where present.
+The backend test gate runs ChatGPT packaging tests and each repository's documented ordinary/MCP-enabled profiles. Template sample fixtures do not create a production target; Notoli and MacroMapper retain their app-owned enabled protocol/domain acceptance. See [the framework guide](../../backend/app_mcp/README.md) and the application MCP guide where present.
 
 ## 🔒 Merge and dependency controls
 
 ### Dependabot
 
-`.github/dependabot.yml` checks npm, pip, GitHub Actions, and Docker dependencies daily. Docker dependencies are checked from the `/backend` and `/frontend/docker` directories, where the repository's Dockerfiles live. Patch and minor Dependabot updates can auto-merge only after the independent gates and current-head approvals from all three reviewers succeed.
+`.github/dependabot.yml` checks npm, uv, GitHub Actions, and Docker dependencies daily. Docker dependencies are checked from the `/backend/docker` and `/frontend/docker` directories, where the repository's Dockerfiles live. Patch and minor Dependabot updates can auto-merge only after the independent gates and current-head approvals from all three reviewers succeed.
 
 The main-branch ruleset includes the orchestrator-level
 `Auto Merge` context among its required checks. CI emits that top-level context
@@ -281,8 +281,8 @@ remain unchanged. Infrastructure adopts this guard and reviewer eligibility,
 retaining weekly updates, independent Required CI and owner merge.
 
 ```sh
-python -m pip install PyYAML==6.0.3
-node --test .github/actions/check-codeql-pins/*.test.js .github/actions/dependabot-auto-merge/*.test.js
+uv sync --locked --project backend
+uv run --locked --project backend node --test .github/actions/check-codeql-pins/*.test.js .github/actions/dependabot-auto-merge/*.test.js
 ```
 
 The local actionlint 1.7.12 schema predates GitHub's documented
@@ -696,3 +696,23 @@ only with a complete immutable resolved graph, bounded feed freshness/error poli
 representative false-positive evaluation and a named maintenance owner; new services,
 credentials or spend require their own review. Infrastructure's validation-tool
 pins are distinct from application dependency scanning.
+
+### Locked Python environments
+
+`backend/pyproject.toml` declares Python 3.12 and application dependencies;
+`backend/uv.lock` pins the complete cross-platform graph. The local `setup-uv`
+action installs uv 0.13.8 and synchronizes the lockfile. Backend tests install the
+application and development tooling. Lint and parser-only policy jobs use only
+the development group, retaining pinned PyYAML without executing unrelated
+application dependency builds. Node child processes inherit the synchronized
+Python environment. Dependabot uses the `uv` ecosystem at `/backend`.
+
+Dependabot's `uv` updater reads `pyproject.toml` and `uv.lock`; a requirements
+export is unnecessary. Runtime and development dependencies retain the existing
+reviewer and independent-check policy. The source diff keeps `uv.lock` reviewable;
+only the separate dependency-usage search omits generated lockfile matches.
+The uv executable is a deliberately pinned toolchain bootstrap in `setup-uv`
+and application Dockerfiles; package dependency PRs do not change that bootstrap.
+Review and synchronize its version separately when upgrading the toolchain.
+Hosted version/security update acceptance still requires a fresh Dependabot run
+after the reviewed configuration reaches main.
