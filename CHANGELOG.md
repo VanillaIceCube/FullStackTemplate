@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Move frontend connection contracts into session guidance and keep related guides as a final navigation section.
 - Align frontend npm commands: production builds run strict lint first and `lint:fix` applies available lint fixes.
 - Document frontend API configuration through development Compose and production build arguments, and exclude local frontend env files from Docker build contexts.
 - Rename shared frontend test support to `src/test-helpers/`, retain application and feature tests beside their implementation, and preserve application-specific helper behavior.
