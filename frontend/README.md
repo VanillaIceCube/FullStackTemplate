@@ -13,7 +13,8 @@ authentication, and the application shell.
 - `src/components/`: reusable interface components.
 - `src/pages/`: application pages and routes.
 - `src/services/`: API requests and session handling.
-- `src/__tests__/`: component tests.
+- `src/test-helpers/`: shared test setup and reusable helpers.
+  App, startup and feature tests stay beside the files they exercise.
 
 ## 💻 Local development
 
