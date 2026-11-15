@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Add optional JWT-only signed-preview action approval to the canonical MCP framework and existing Connections screen, with framing protection; the handler remains unconfigured here and domain behavior is unchanged.
 - Clarify and regression-test MCP token scope resolution: omitted or blank scope continues to require the application's baseline scope, with identical framework coverage across applications.
 - Raise the complete source-diff limit for all three AI reviewers to 2 MB (2,000,000 bytes) across all four repositories; preserve fail-closed incomplete reviews and all other context, token and model settings.
 - Organize backend tests into owning `tests/` packages for authentication, notifications, production/email configuration and the canonical MCP framework, with descriptive behavior names, fixture-only helpers and preserved discovery/coverage.
