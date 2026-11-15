@@ -14,7 +14,7 @@ function shouldRedirectToLogin(path) {
   );
 }
 
-export function clearAuthSession() {
+function clearAuthSession() {
   try {
     sessionStorage.removeItem('accessToken');
     sessionStorage.removeItem('refreshToken');

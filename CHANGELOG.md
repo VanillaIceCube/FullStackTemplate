@@ -22,6 +22,7 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove the unconsumed frontend environment sample, obsolete React Router future flags, ignored legacy Django static-storage setting, unused code-font rule, redundant test encoding polyfills, and unused auth-helper export; retain their active configuration and behavior.
 - Remove the unused primary-color CSS token and its declaration-only assertion; retain all rendered theme colors.
 - Remove centralized frontend lint-configuration and theme-source suites; preserve shared support and all colocated application, component and service tests.
 - Remove the unused shared deferred-promise and loading-wait test helpers.

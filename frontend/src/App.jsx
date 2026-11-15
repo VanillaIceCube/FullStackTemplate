@@ -26,10 +26,7 @@ export default function App() {
 
   return (
     <>
-      <Router
-        basename={import.meta.env.BASE_URL}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <Router basename={import.meta.env.BASE_URL}>
         <NavigationBridge />
         <AppHeader title="Full Stack Template" setDrawerOpen={setDrawerOpen} />
         <AppNavigationDrawer open={drawerOpen} setOpen={setDrawerOpen} />
