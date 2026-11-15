@@ -1,5 +1,44 @@
 # Changelog
 
+All notable changes to this project are documented in this file.
+
+## 2026-11-14
+
+### Fixed
+
+- Reject unsafe paths, symlinks and duplicate members in exported ChatGPT ZIPs, bound archive expansion, and cover hostile exports with offline regressions.
+
+### Changed
+
+- Consolidate durable documentation into existing owning READMEs, move the active CI inventory beside workflow guidance, and repair links and architecture regressions.
+- Restore consistent changelog titles, chronological dates, ordered categories, and spacing while preserving historical entries.
+- Align shared agent instructions across the repository family while preserving application-specific contracts and Infrastructure authorization controls.
+- Move active CI helpers into `.github/tools/`, browser helpers beside `frontend/e2e/` journeys, and the MCP checker into `backend/`; update callers, path filters, regressions, and owning guides while preserving existing checks and isolation.
+
+### Removed
+
+- Remove the root `scripts/` folder, template initializer and GitHub Project helper; use manual application and Project setup.
+- Remove duplicate documentation indexes, redirects, stale narratives and historical receipts after preserving useful contracts.
+- Remove the root `tests/` directory and its CI invocations; retain backend, frontend/browser, action-local, and shared release suites.
+
+## 2026-11-13
+
+### Changed
+
+- Standardize root ignore rules across the repository family for local environments, builds, caches, test reports, databases, and certificates; keep configuration examples and dependency lockfiles visible.
+- Standardize GitHub documentation across the four repositories: setup in `.github/README.md`, workflow behavior in `.github/workflows/README.md`, and shared reviewer/action contracts in `.github/actions/README.md`.
+- Consolidate current backend, frontend, and style guidance into the existing folder READMEs; remove separate reference/style files and historical duplication.
+- Standardize ChatGPT package metadata, artwork, offline validation, portable archives, and existing-listing overlays under `backend/app_mcp/chatgpt/` (#324).
+- Rename the shared MCP Python package to `app_mcp`, consolidate source pins and hashes beside it, and retain its existing Django app label and OAuth behavior (#324).
+- Reorganize the main README as a project introduction with folder guides; consolidate setup, API/workflow references, scripts, tests, and documentation indexes with consistent emoji headings.
+- Move shared MCP documentation beside the framework, retain legacy guide links, and make application MCP and plugin guides discoverable from the backend.
+- Move the first-pull-request GitHub setup checklist into `.github/` and template initialization instructions into the scripts README.
+
+### Removed
+
+- Delete historical Batch 2/3 parity reports and hash snapshots; remove obsolete links without moving or consolidating documentation.
+- Remove obsolete third-party Conda export attribution from the license and environment helper documentation.
+
 ## 2026-11-12
 
 ### Fixed
@@ -8,20 +47,9 @@
 
 ## 2026-11-11
 
-### Removed
-
-- Remove retired Jules notebooks, persona prompts and active operating instructions after the linked PRs merged and a fresh open-PR inventory passed (#286); preserve general maintenance guidance, historical evidence and independent CI/security/release controls.
-
-## 2026-11-11
-
 ### Fixed
 
 - Handle non-JSON Connections API responses with safe HTTP status errors, preserve structured OAuth errors, and reject invalid success payloads without exposing response bodies. Reuse the existing safe parser and cover consent, listing, revocation and session recovery regressions ([shared rollout](https://github.com/VanillaIceCube/FullStackTemplate/issues/311)).
-
-## 2026-11-11
-
-### Fixed
-
 - Regenerate the workflow architecture inventory for the atomic CodeQL v4.39.3 action update and document dependency maintenance parity.
 - Keep the shared release action-upgrade fixture independent of the previous pinned action version.
 
@@ -31,19 +59,9 @@
 - Synchronize Docker login action v4.8.0 from the canonical Infrastructure release source.
 - Upgrade the template test environment to jsdom 31; the frontend suite and production build remain compatible.
 
-## 2026-11-06
+### Removed
 
-### Fixed
-
-- Restore security-alert action loading by resolving repository variables in caller workflows and passing validated explicit composite inputs.
-- Cover default, empty, explicit and invalid configuration plus empty/nonempty mocked alert pipelines and all three caller contracts.
-
-## 2026-11-06
-
-### Fixed
-
-- Transactional email failures now expose safe categories/status codes without exception payloads, tracebacks or recipient/token data; reset responses remain generic.
-- Resend requests use a finite bounded timeout, with explicit safe fallback and mocked coverage for failure policy and both fail_silently modes.
+- Remove retired Jules notebooks, persona prompts and active operating instructions after the linked PRs merged and a fresh open-PR inventory passed (#286); preserve general maintenance guidance, historical evidence and independent CI/security/release controls.
 
 ## 2026-11-06
 
@@ -51,55 +69,43 @@
 
 - Managed production-promotion impact summaries from the actual current target comparison, with bounded metadata, owned-comment updates and race/permission coverage.
 - Source-linked Mermaid CI/CD architecture and checked per-repository workflow/action inventories, preserving application and gateway trust differences.
-
-### Fixed
-
-- Architecture guidance no longer presents completed reviewer credential migration or obsolete test/runtime assumptions as future work.
-
-## 2026-11-06
-
-### Added
-
 - Bounded, attributed human discussion context and conservative App-owned reviewer follow-ups, with adversarial, stale-head, idempotency and permission regressions.
 - Safe Responses token/latency evidence, dated partial cost estimates and validated owner configuration/recovery controls; existing Luna model selection is preserved.
 
 ### Fixed
 
+- Restore security-alert action loading by resolving repository variables in caller workflows and passing validated explicit composite inputs.
+- Cover default, empty, explicit and invalid configuration plus empty/nonempty mocked alert pipelines and all three caller contracts.
+- Transactional email failures now expose safe categories/status codes without exception payloads, tracebacks or recipient/token data; reset responses remain generic.
+- Resend requests use a finite bounded timeout, with explicit safe fallback and mocked coverage for failure policy and both fail_silently modes.
+- Architecture guidance no longer presents completed reviewer credential migration or obsolete test/runtime assumptions as future work.
 - Reviewer ownership no longer falls back to persona-name matching; old-head verdicts are rejected and writer runs serialize.
 
 ## 2026-11-05
+
 ### Added
+
 - Shared isolated authentication browser tests with disposable data and local-only reset mail.
 - Repository syntax/Compose validation and mocked request/history/lint attribution coverage.
-### Fixed
-- Preserve early, failing and late CI diagnostics within bounded reviewer context and failure artifacts.
-### Changed
-- Use bulk form setup for validation/API unit cases while retaining typed happy paths and assertions.
-
-## 2026-11-05
-### Added
 - Shared development dependency lifecycle regression for fresh, unchanged, changed and failed installs.
-### Changed
-- Pin development Node/Miniforge multi-platform image digests and refresh frontend dependencies only when manifests change.
-
-## 2026-11-05
-### Added
 - Immutable workflow-policy and bounded changed-version malware regression coverage.
 - Evidence-based Python malware scanning decision and shared release upgrade regression.
+
 ### Fixed
+
+- Preserve early, failing and late CI diagnostics within bounded reviewer context and failure artifacts.
 - Missing or invalid dependency evidence now fails PR malware review visibly.
-### Changed
-- Explicit scanner/path-filter grants support read-only repository defaults; unused orchestration issue writes removed.
-- Adopt the reviewed Infrastructure release template/test contract with readable Action versions.
-
-## 2026-11-05
-
-### Fixed
 - Bound malware classification to repository source advisories instead of scanning the global catalogue.
 - Recover the exact structured concurrent-close response only after verifying saved lifecycle state and body.
 - Recover omitted alert refs deterministically and interrupted Project synchronization without duplicate issues or resetting planning.
 - Retry inconsistent exact-head Dependabot check readiness safely and route signed SHA-only Action updates to manual review.
 
+### Changed
+
+- Use bulk form setup for validation/API unit cases while retaining typed happy paths and assertions.
+- Pin development Node/Miniforge multi-platform image digests and refresh frontend dependencies only when manifests change.
+- Explicit scanner/path-filter grants support read-only repository defaults; unused orchestration issue writes removed.
+- Adopt the reviewed Infrastructure release template/test contract with readable Action versions.
 
 ## 2026-11-03
 
@@ -115,9 +121,7 @@
 ### Fixed
 
 - Hold native Dependabot auto-merge behind a required policy result for each head; validate signed single-commit group metadata, paginate all open dependency alerts and support configured reviewer bot identities.
-
 - Enforce atomic immutable CodeQL revisions with negative regression tests and guard Dependabot auto-merge with current-head approvals, live required checks, trusted default-branch execution and idempotent native activation (#240).
-
 - Resolve the transitive minimatch advisory with a scoped modern-version override and regenerated frontend lockfile; document parent API compatibility and removal checks ([FullStackTemplate #267](https://github.com/VanillaIceCube/FullStackTemplate/issues/267)).
 - Pin CodeQL init/analyze to the same immutable v4.39.1 revision as all three downstream repositories.
 
@@ -131,7 +135,6 @@
 
 - Synchronize canonical release-contract regressions for app-owned MacroMapper MCP, preserving this application’s existing runtime, framework and OAuth policy.
 - Use GPT-6 Luna for all OpenAI PR reviewers and security-alert grouping while preserving existing review gates, isolated credentials and token budgets.
-
 - Document main-first release lineage across the four repositories, prompt
   reconciliation of exceptional deployment fixes, and intentional release holds.
   Treat the template's absent production branch as not applicable to deployment.
@@ -152,7 +155,6 @@
 ### Fixed
 
 - Adopt the same reviewed Infrastructure release fixture pin `ee9c0d40421a8b3f4886340b188a21e86c6429cf` across all consumers, including exact app-mode topology and metadata content-type checks.
-
 - Synchronize the shared release fixtures for required backend settings and
   reviewed MCP gateway/readiness profiles from Infrastructure PR #77.
 
@@ -161,9 +163,7 @@
 ### Fixed
 
 - Record the previously undocumented Resend fix from [PR #122](https://github.com/VanillaIceCube/FullStackTemplate/pull/122): catch HTTP errors with decoded API response bodies and map reply-to, HTML-only and multipart plain-text/HTML messages correctly (merged 2026-09-19).
-
 - Preserve custom request headers through token-refresh retries, attach session tokens when omitted, and trim or remove stale profile values.
-
 - Enforce registration password validators against the prospective user, preserve reset-password whitespace, normalize login email, and reject malformed reset user IDs.
 - Disable authentication controls while submitting and display nested or field-level API validation errors.
 - Add notification load retries and keep item/bulk actions disabled through response parsing, with inline action errors and guarded navigation.
@@ -171,41 +171,27 @@
 
 ## 2026-10-20
 
+### Added
+
+- Add a read-only reviewer-gate audit and matching Notoli regressions for exact check names, trusted human/Dependabot eligibility, missing/skipped/cancelled results and verdict recovery.
+- Add the reusable, hash-pinned MCP/OAuth framework and isolated consent, token lifecycle and transport tests.
+
 ### Fixed
 
 - Fail closed on incomplete dependency reviews and retain sanitized structured evidence with a bounded RoboCop report.
 - Preserve alert history and Project metadata before auto-close; verify concurrent closure without suppressing unrelated API errors and use the current Work type field.
-
-
-## 2026-10-20
-
-### Added
-
-- Add a read-only reviewer-gate audit and matching Notoli regressions for exact check names, trusted human/Dependabot eligibility, missing/skipped/cancelled results and verdict recovery.
-
-### Fixed
-
 - Fail each AI reviewer job after publishing a native `REQUEST_CHANGES`, including unchanged/repeated verdicts, while preserving successful approval/comment reviews and all existing failure gates.
 - Reject missing or invalid verdict events as unavailable instead of passing a fallback comment.
-
-## 2026-10-20
-
-### Added
-
-- Add the reusable, hash-pinned MCP/OAuth framework and isolated consent, token lifecycle and transport tests.
 
 ### Changed
 
 - Provide opt-in ASGI startup and optional consent/Connected Apps pages; retain ordinary REST/Gunicorn behavior with MCP disabled by default.
-
 
 ## 2026-10-19
 
 ### Changed
 
 - Separate Obi-Wan, Lint Eastwood, and RoboCop OpenAI secrets, including RoboCop alert aggregation; pass only each reviewer's own credentials, stage `OPENAI_REVIEWERS_PROJECT_ID` independently, and document the deferred per-repository key migration.
-
-All notable changes to this project are documented in this file.
 
 ## 2026-10-18
 
@@ -215,18 +201,6 @@ All notable changes to this project are documented in this file.
   private immutable bundles, recovery tests, and explicit onboarding guidance.
 - Verify generated apps preserve canonical shared-source metadata and hashes.
 
-### Changed
-
-- Separated local HTTPS/proxy fixtures from production ownership and stopped
-  trusting forwarded Host in favor of the gateway's canonical Host.
-
-### Removed
-
-- Removed production certificate uploads, shared-proxy lifecycle, mutable-image
-  activation, and host-wide Docker pruning from the template deploy workflow.
-
-## 2026-10-18
-
 ### Fixed
 
 - Preserve complete production hosts and theme-test renames when retained
@@ -234,18 +208,6 @@ All notable changes to this project are documented in this file.
 - Keep generated frontend npm lockfile payloads out of AI source prompts while
   disclosing exclusions and preserving independent dependency/security gates,
   source byte limits, inline line numbers, and visible incomplete-review failures.
-
-### Changed
-
-- Replaced Create React App with the shared Vite/React-plugin build baseline,
-  Vitest/jsdom tests, and supported ESLint 10 plugins; updated Docker, API-base
-  configuration, CI build coverage, and template initialization together.
-- Documented cross-app Vite conventions and the upgrade path for derived apps.
-
-## 2026-10-18
-
-### Fixed
-
 - Upgraded Material UI and icons together, migrated removed layout system props
   to `sx`, and exercised real menu context, keyboard focus, dismissal, and logout.
 - Aligned React and React DOM on the 19.3 release line to prevent mismatched
@@ -255,10 +217,23 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Separated local HTTPS/proxy fixtures from production ownership and stopped
+  trusting forwarded Host in favor of the gateway's canonical Host.
+- Replaced Create React App with the shared Vite/React-plugin build baseline,
+  Vitest/jsdom tests, and supported ESLint 10 plugins; updated Docker, API-base
+  configuration, CI build coverage, and template initialization together.
+- Documented cross-app Vite conventions and the upgrade path for derived apps.
 - Updated Nora and Marty to v3: one open PR per agent, with repeat runs maintaining the existing PR and integrating current main.
 
-## 2026-10-17
 ### Removed
+
+- Removed production certificate uploads, shared-proxy lifecycle, mutable-image
+  activation, and host-wide Docker pruning from the template deploy workflow.
+
+## 2026-10-17
+
+### Removed
+
 - Retire the recurring Jules Kris upstream-curation role, delete its external schedule, and preserve the evidence and remaining findings through explicit tickets.
 
 ## 2026-08-22

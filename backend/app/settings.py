@@ -211,11 +211,11 @@ DEFAULT_FROM_EMAIL = (
 
 
 # Optional MCP has no routes, OAuth tables or application tools unless explicitly enabled.
-from mcp_framework.config import optional_settings  # noqa: E402
+from app_mcp.config import optional_settings  # noqa: E402
 
 MCP_SETTINGS = optional_settings("FullStackTemplate", "fullstacktemplate", sample=True)
 globals().update(MCP_SETTINGS)
-INSTALLED_APPS += ["mcp_framework"]
+INSTALLED_APPS += ["app_mcp"]
 if MCP_SETTINGS["MCP_ENABLED"]:
     INSTALLED_APPS += ["oauth2_provider"]
     SECURE_PROXY_SSL_HEADER = None

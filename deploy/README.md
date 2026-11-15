@@ -1,4 +1,4 @@
-# Local Docker and production ownership
+# 🐳 FullStackTemplate deployment
 
 Production uses the shared Infrastructure gateway and the app-only release
 standard. The sole production/recovery procedure is
@@ -6,9 +6,11 @@ standard. The sole production/recovery procedure is
 `nginx-proxy.conf` below are local-only, standalone HTTPS fixtures. Never upload
 them over shared host ingress or use them as production rollback scripts.
 
-## Local Docker with `[application].localhost`
-The template itself uses `fullstacktemplate.localhost`. A generated repository
-uses the slug passed to `initialize-template.ps1`.
+<a id="local-docker-with-applicationlocalhost"></a>
+
+## 💻 Local Docker with `[application].localhost`
+The template itself uses `fullstacktemplate.localhost`. When creating an application,
+update its branding, Compose identifiers, and local hostnames manually.
 
 For fast source iteration, start the development Compose workflow over HTTP
 (no certificate required):
@@ -52,7 +54,9 @@ application already owns ports 80/443, override this application's proxy,
 backend, and frontend host ports in `deploy/.env` and use that application's
 direct host ports instead.
 
-## Routing and persistence
+<a id="routing-and-persistence"></a>
+
+## 🧭 Routing and persistence
 Nginx routes:
 
 - `/` and SPA deep links to the frontend;
@@ -63,19 +67,23 @@ SQLite persists at `deploy/db.sqlite3` locally and at the approved application d
 larger applications, replace SQLite with a managed database before scaling to
 multiple backend replicas.
 
-## Vite build interface
+<a id="vite-build-interface"></a>
+
+## ⚙️ Vite build interface
 
 The frontend Docker build accepts `VITE_API_BASE_URL` and copies `dist/` into
 Nginx. The development Compose file uses the same variable and explicit Vite
 polling. Blank production API origins retain same-origin routing. See
-[frontend alignment](../docs/FRONTEND-ALIGNMENT.md).
+[frontend alignment](../frontend/README.md).
 
 
 ## 🔌 Shared MCP framework
 
-The [MCP framework guide](../docs/MCP-FRAMEWORK.md) defines opt-in ASGI/proxy/readiness requirements. Local development can call the backend directly; do not treat a local/legacy proxy as production MCP onboarding.
+The [MCP framework guide](../backend/app_mcp/README.md) defines opt-in ASGI/proxy/readiness requirements. Local development can call the backend directly; do not treat a local/legacy proxy as production MCP onboarding.
 
-## Development dependency reproducibility
+<a id="development-dependency-reproducibility"></a>
+
+## 📦 Development dependency reproducibility
 
 Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
 registry digests. Production Dockerfiles and the independent release engine are
@@ -87,29 +95,18 @@ The frontend development entrypoint hashes both `package.json` and
 install with `npm ci`; unchanged restarts reuse dependencies; changing either
 manifest reinstalls. Missing manifests or a failed installation stop startup and
 retry on the next invocation. Use one volume per checkout and restart after edits.
-Run `node --test tests/dev-dependencies.test.cjs` from the repository root for the
-credential-free mocked lifecycle/exit-status regression. Compose configuration
+Compose configuration
 checks do not deploy or touch application data.
 
-## Non-deploying repository validation
+<a id="non-deploying-repository-validation"></a>
 
-CI runs `python scripts/validate_repository.py` from the repository root with
-Actionlint, pinned PyYAML 6.0.3, Git Bash/Bash, PowerShell 7 and Docker Compose
-installed. `scripts/install_actionlint.sh` installs the checksum-verified Linux
-validator; other platforms can install the same Actionlint 1.7.12 release.
-The validator parses maintained scripts, checks workflow/composite syntax and
-renders development/local/production Compose using temporary synthetic env files.
-It starts no containers and reads no private `.env`, database or certificate.
-Actionlint's only compatibility exception is its unrecognized GitHub
-`vulnerability-alerts` permission; other findings fail normally.
+## 🧪 Repository validation
 
-Browser checks use separate loopback ports and disposable settings, not the
-production release path. The Infrastructure-owned release source pin and parity
-enforcement stay authoritative; see docs/BATCH2-PARITY.md. Documentation/workflow
-changes alone do not justify restarting the application or shared gateway.
+See [workflow checks and validation](../.github/workflows/README.md#-checks-and-diagnostics).
 
 
-Production-promotion PRs receive a managed impact summary derived from their
-current env-prod comparison. It informs review; release authorization, migration
-guards and data-safe recovery still follow the [production guide](production/README.md).
-See [CI/CD architecture](../docs/CI-CD-ARCHITECTURE.md).
+## 📚 Further reading
+
+- [Live-server releases and recovery](production/README.md).
+- [Backend configuration](../backend/README.md).
+- [Frontend development](../frontend/README.md).

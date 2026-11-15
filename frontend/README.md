@@ -1,31 +1,41 @@
-# FullStackTemplate frontend
+# 🎨 FullStackTemplate frontend
 
-React 19 and Material UI 9 use Vite 8 with the React plugin. Tests run in Vitest
-and jsdom with Testing Library; standalone ESLint 10 uses `eslint.config.mjs`.
-Create React App, its Jest runtime, and the React Router export workaround have
-been removed. The app shell, authentication routes, notifications, theme, and
-real menu keyboard coverage are preserved.
+The React application uses Vite and Material UI for pages, navigation,
+authentication, and the application shell.
 
-## Development and checks
+## 🧭 Structure
 
-Use Node.js 24.15 or newer (the same minimum as MacroMapper):
+- `src/components/`: reusable interface components.
+- `src/pages/`: application pages and routes.
+- `src/services/`: API requests and session handling.
+- `src/__tests__/`, `e2e/`: component and isolated browser tests.
+
+## 💻 Local development
+
+Use Node.js 24.15+ within 24.x or Node.js 26.x, matching `package.json`.
+From the repository root:
 
 ```powershell
+Set-Location frontend
 npm ci
 npm start
-npm test
-npm run test:watch
-npm run lint:strict
-npm run format:check
-npm run build
 ```
 
-Vite listens on localhost:3000 and accepts `fullstacktemplate.localhost`.
-Docker sets `HOST=0.0.0.0`; published development ports stay on loopback.
-`CHOKIDAR_USEPOLLING=true` enables Docker source watching. The build is written
-to `dist/`, which the frontend image copies into Nginx's static directory.
+Open `http://fullstacktemplate.localhost:3000`. For Docker hot reload, follow the
+[deployment guide](../deploy/README.md).
 
-## Routes and API settings
+## ⚙️ Configuration
+
+`VITE_API_BASE_URL` controls the API origin. Leave it blank for production same-origin
+requests; client-side settings must contain no secrets. The build output is
+`dist/`.
+
+An unset API origin defaults to localhost:8000 during development. Configure an
+explicit origin in the shell or ignored `.env.local`; leave it blank in production.
+Vite's `import.meta.env.BASE_URL` supplies the router/asset base. Development uses
+port 3000; production Nginx serves the static build and preserves SPA deep links.
+
+## 🗺️ Routes and behavior
 
 Public routes are `/login`, `/register`, `/forgot-password`, and
 `/reset-password?uid=...&token=...`. `/` is the protected starter page. Unknown
@@ -33,37 +43,95 @@ routes resolve to that protected page. Tokens live in sessionStorage; a failed
 JWT refresh clears the session and redirects to login. Notifications remain
 recipient-scoped.
 
-Set `VITE_API_BASE_URL=http://localhost:8000` in the shell or an untracked
-frontend `.env.local` for an explicit API origin. An unset development value
-defaults to localhost:8000. Leave it unset or blank for production same-origin
-requests. Vite exposes this value to the browser: never put secrets in `VITE_*`.
-`import.meta.env.BASE_URL` provides the router/asset base; subdomain-root `/`
-remains the default. `REACT_APP_*` and `PUBLIC_URL` are legacy CRA settings and
-are not read by this template. See [the alignment and upgrade guide](../docs/FRONTEND-ALIGNMENT.md).
+## 🔐 Sessions and connections
 
-Keep React/React DOM on matching versions and Material UI/icons on compatible
-v9 versions. Use `sx` for layout and `slotProps` for component slots. Supported
-build targets are Chrome 117, Edge 121, Firefox 121, and Safari 17 or newer.
+Authentication forms disable submission while pending. Tokens and profile data
+live in `sessionStorage`; new sessions trim profile fields and clear absent values.
+Protected requests use the stored JWT when the caller omits Authorization.
+Public authentication forms do not receive an injected access token.
 
-Production frontend releases publish no host port. The Infrastructure gateway
-serves the same-origin app domain; Vite still builds `dist/` with a blank API
-base. Follow [the production guide](../deploy/production/README.md).
+The request wrapper preserves object, tuple-array, and native `Headers` values
+through one JWT refresh/retry. Invalid refresh credentials clear the session;
+temporary refresh failures retain it. Notification failures keep actions available
+for Retry, and malformed mark-read responses must not navigate away.
+Use semantic links for destinations and buttons for actions, with keyboard and
+native new-tab coverage.
 
+Optional consent and Connected Apps use `VITE_MCP_ENABLED=1`. Preserve JWT-only
+consent and validated return paths. See the [backend MCP guide](../backend/README.md#-mcp-integration).
 
-## 🔌 Shared MCP framework
+## 🎨 Style guide
 
-See [the MCP framework guide](../docs/MCP-FRAMEWORK.md). Optional consent and Connected Apps routes require `VITE_MCP_ENABLED=1` in the template/MacroMapper; Notoli keeps its existing enabled UI. Preserve JWT-only consent and validated connection return paths.
+### Foundations
+- Use Material UI components and responsive `sx` values before adding custom
+  layout primitives.
+- Keep colors in the CSS custom properties declared in `src/App.css`.
+- Preserve Notoli's theme tokens: dark `#1a1a1a` backgrounds, pale-yellow
+  `#f5e79e` surfaces, amber `#ffc107` accents, gray `#555555` controls and
+  surface text, and white `#ffffff` text on dark backgrounds.
+- Use the FullStackTemplate secondary color for focused Material UI text
+  fields.
+- Keep authenticated and public routes visually consistent with the shared
+  application shell.
 
-## Shared request and session handling
+### Authentication
+- Build public authentication pages with `AuthPageShell`.
+- Give every form a visible heading, native submit behavior, and browser
+  autocomplete metadata.
+- Show API outcomes through the shared application snackbar.
+- Avoid exposing whether an email address belongs to an account in
+  forgot-password responses.
 
-`apiFetch` preserves plain-object, tuple-array, and native `Headers` entries
-through token refresh. Protected requests use the stored access token when the
-caller omits authorization; explicit authorization is preserved until a refresh
-requires replacement. Authentication-form requests do not receive an injected
-access token. Session profile values are trimmed, and missing or blank username
-and email fields clear stale values.
+### Application shell
+- Keep `Full Stack Template` as the placeholder app-header title until a
+  generated application replaces it.
+- Preserve the generic drawer, notification, profile, and logout entry points
+  when adding application routes.
+- Replace the placeholder Paper with application content instead of expanding
+  the template into another sample domain.
+- Add future product routes behind `AuthenticatedRoute` unless they are
+  intentionally public.
 
-## 🔒 Transitive dependency maintenance
+## 🧪 Checks
+
+From `frontend/`:
+
+```powershell
+npm test
+npm run lint:strict
+npm run format:check
+npm run build
+```
+
+## 🌐 Browser tests
+
+`frontend/e2e/` owns the browser journeys and their helpers: `run_e2e.cjs` creates
+and cleans up disposable state, `e2e_backend.py` starts the isolated loopback
+backend, `e2e_settings.py` suppresses developer dotenv loading and selects temporary
+SQLite/file mail, and `collect_browser_artifacts.py` collects bounded failure
+evidence. `npm run test:e2e` invokes the runner from `frontend/`; CI collects reports
+with `python e2e/collect_browser_artifacts.py` from the same directory.
+
+Install backend requirements in an activated Python environment. From `frontend/`:
+
+```powershell
+npx playwright install chromium
+npm run test:e2e
+```
+
+Ports 8001 and 3001 must be free. The wrapper starts Django and Vite with fresh,
+marked temporary state and stops both before deleting that state. It uses synthetic
+users, temporary SQLite and file mail; it does not load developer `.env` files,
+reuse running servers, send external email, or make paid AI calls. The shared auth
+journeys cover registration, session isolation, logout, protected routing, invalid
+credentials, JWT expiry, and password reset. Product journeys belong under `e2e/`.
+
+The suite uses one Chromium worker, no retries, and a ten-minute global timeout.
+Linux CI installs Chromium with `--with-deps`. Failure artifacts are written to
+`test-results/` and `playwright-report/`; CI retains bounded evidence for seven
+days. Reports may include disposable tokens, so do not publish them in issues.
+
+## 🛠️ Maintenance
 
 The frontend temporarily overrides `minimatch@>=9 <11.0.1` to `^11.0.1` for
 [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249).
@@ -78,56 +146,29 @@ parents use the retained matching API. Validate a clean `npm ci`, `npm ls
 minimatch glob --all`, strict lint, tests and the production build whenever a
 parent or override changes. Review upstream API changes before widening the
 selector. Remove overrides once all parent ranges natively accept patched
-versions, regenerate the lockfile and repeat those checks. Canonical rollout:
-[FullStackTemplate #267](https://github.com/VanillaIceCube/FullStackTemplate/issues/267).
+versions, regenerate the lockfile and repeat those checks.
 
-## Development dependency reproducibility
+Keep Material UI and icons on compatible versions and regenerate the lockfile
+together. Prefer `sx` and `slotProps`; preserve accessible control labels. For
+jsdom CSS assertions, check computed transition/animation longhands and use real
+browser tests for responsive geometry. Follow the Node range in `package.json`,
+and verify clean installs, strict lint, formatting, tests and production builds.
+See [Docker dependency maintenance](../deploy/README.md#development-dependency-reproducibility).
 
-Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
-registry digests. Production Dockerfiles and the independent release engine are
-unchanged by this development-image policy. Refresh tags/digests together after
-registry verification and a disposable build/configuration check.
+## 📚 Related guides
 
-The frontend development entrypoint hashes both `package.json` and
-`package-lock.json` inside its persistent `node_modules` volume. Fresh volumes
-install with `npm ci`; unchanged restarts reuse dependencies; changing either
-manifest reinstalls. Missing manifests or a failed installation stop startup and
-retry on the next invocation. Use one volume per checkout and restart after edits.
-Run `node --test tests/dev-dependencies.test.cjs` from the repository root for the
-credential-free mocked lifecycle/exit-status regression. Compose configuration
-checks do not deploy or touch application data.
+- [Backend and MCP integration](../backend/README.md).
+- [Local Docker and production releases](../deploy/README.md).
 
-Supported test/build runtimes are Node24.15+ within24.x or Node26.x. jsdom31 explicitly excludes the end-of-life Node25 line; do not treat >=24 as universal support. Use the same supported runtime for before/after timings.
+### Connections response contract
 
-## Optional isolated browser tests
-
-Install the backend requirements in an activated Python environment, then from
-`frontend` run the following with Node 24.15+ within 24.x or Node 26.x:
-
-```powershell
-npm ci
-npx playwright install chromium
-npm run test:e2e
-```
-
-Linux CI uses `npx playwright install --with-deps chromium`. The wrapper creates
-a marked temporary directory, starts fresh Django/SQLite on 127.0.0.1:8001 and
-Vite on 127.0.0.1:3001, and removes only its generated state after both servers
-stop. Those ports must be free; existing servers are never reused. The backend
-does not load developer `.env` files, uses synthetic users, disables MCP, and
-writes reset messages to the temporary mail directory. No SMTP or model calls
-are made. Registration, reload/session isolation, logout/protected routing, bad
-credentials, expired access and valid/invalid password-reset tokens are covered.
-
-There is one Chromium worker, no retries, and a ten-minute global timeout. Local
-runs of the three shared journeys take roughly one minute after installation;
-CI also pays Python/npm/browser installation cost. Failure traces/screenshots
-and the HTML report are local in `test-results/` and `playwright-report/`. CI
-retains at most 20 MiB/file and 50 MiB/run for seven days, listing omitted files
-in `browser-evidence/INDEX.txt`; full text remains in the job log. Reports may
-contain disposable test tokens and should not be copied into public issues.
-
-Add product journeys under `e2e/` using these isolated users and existing APIs.
-Keep authentication journeys shared; domain fixtures belong to their app. Do not
-add real customer accounts, external email or paid-model requests. Infrastructure
-has no browser application and retains its ingress/Docker protocol suites.
+Successful consent, decision, list and revoke responses must be JSON objects.
+Unreadable, empty, null, scalar or array successes reject with `Request failed.`;
+a protocol failure must not follow a callback or claim revocation succeeded.
+HTTP failures use the first nonblank string in `error_description`, `detail`, then
+`error`, otherwise `HTTP <status>`. Never expose raw HTML/plaintext, parser errors,
+nested objects or unrelated JSON fields as fallback messages. Backend public error
+fields must be safe to display. Preserve JWT-only headers, omitted cookies, form
+encoding, signed consent tickets and validated callbacks. Invalid refresh credentials
+clear the session; transient proxy/refresh failures retain it for retry. Notoli
+retains its extra post-refresh 401 handling and legacy API-base compatibility.

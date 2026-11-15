@@ -1,30 +1,59 @@
 # AGENTS.md
 
-Shared MCP changes follow [docs/MCP-FRAMEWORK.md](docs/MCP-FRAMEWORK.md).
-Each application owns its MCP endpoint, OAuth provider and permissions behind
-the shared nginx gateway. Synchronize canonical framework hashes/pins; do not
-introduce a shared authorization service or cross-application account mapping.
-FullStackTemplate uses manual setup steps; do not assume Django or Node dependencies are installed.
+## 🧭 Ownership and shared rollout
 
-When setup, routing, environment variables, deployment, or CI/CD changes, update the relevant documentation:
+FullStackTemplate owns reusable application engineering and the canonical MCP
+Python framework. Infrastructure owns shared ingress, host operations and the
+versioned application release engine. Each application owns its domain behavior,
+credentials, OAuth issuer, consent, permissions and MCP tools; do not introduce a
+shared authorization service, cross-application account mapping or YNAB dependency.
 
-- Root overview: `README.md`
-- Backend/authentication: `backend/README.md`
-- Frontend/routing: `frontend/README.md`
-- Deployment: `deploy/README.md`
-- GitHub automation: `.github/README-WORKFLOWS.md`
-- User-visible or operational changes: `CHANGELOG.md`
+Follow the [shared rollout policy](https://github.com/VanillaIceCube/FullStackTemplate/blob/main/.github/README.md#-shared-engineering-ownership-and-rollout)
+for reusable framework, automation, test or security changes. One canonical
+FullStackTemplate parent must inventory all four repositories as required,
+not applicable, already satisfied or explicitly deferred with reasons and evidence.
+Infrastructure-owned deployment/host changes use an Infrastructure parent with
+linked downstream work; do not relocate source ownership.
+The parent is complete only after required downstream adoptions are merged and
+verified, or explicitly deferred with an owner, tracking issue and acceptance.
+Record final-head/main checks and exact PR/commit/evidence links; template-only
+success is insufficient. Preserve active PRs, issue history, production controls
+and non-triggering labels when consolidating work.
 
-## Changelog format
-Add a dated section at the top of `CHANGELOG.md` and use only the non-empty headings below, in this order:
+## 📚 Documentation ownership
 
-1. `### Added`
-2. `### Fixed`
-3. `### Changed`
-4. `### Removed`
+The main README introduces the repository. Keep setup, commands, configuration,
+and maintenance details in the owning folder README and its linked references.
+Use consistent headings: 🧭 Structure, 💻 Local development, ⚙️ Configuration,
+🧪 Checks, 🔌 MCP integration, and 📚 Reference where applicable.
+Use the owning folder READMEs linked below for setup and maintenance.
+Keep this file current when its commands or constraints change, and update the
+owning README/reference when setup, routing, environment, deployment or CI changes.
+Record user-visible or operational changes in `CHANGELOG.md`.
 
-## Local development
-Backend:
+GitHub setup belongs in [.github/README.md](.github/README.md), workflow behavior
+in [.github/workflows/README.md](.github/workflows/README.md), and the shared
+reviewer/action contract in [.github/actions/README.md](.github/actions/README.md).
+
+Application setup/API/authentication belongs in [backend/README.md](backend/README.md),
+frontend routing/configuration/style in [frontend/README.md](frontend/README.md),
+and local Docker/deployment setup in [deploy/README.md](deploy/README.md).
+
+## 📝 Changelog format
+
+Keep the single `# Changelog` title and established introduction at the top;
+never place entries above them. Use newest-first `## YYYY-MM-DD` sections,
+reusing the existing date instead of creating a duplicate. Within each date,
+use only nonempty `### Added`, `### Fixed`, `### Changed`, `### Removed` groups,
+in that order, with no duplicate categories and entries filed under the correct
+group. Use `- ` bullets and one blank line around headings. Preserve substantive
+history and valid UTF-8 text when editing or merging entries.
+
+## 💻 Local development
+
+Use manual setup; do not assume Django or Node dependencies are installed.
+Use Python 3.12 in an isolated environment and the Node version range in
+`frontend/package.json`. From the repository root:
 
 ```powershell
 python -m pip install -r backend/requirements.txt
@@ -32,13 +61,20 @@ python backend/manage.py migrate
 python backend/manage.py runserver 8000
 ```
 
-Frontend:
+In a separate shell, from the repository root:
 
 ```powershell
 Set-Location frontend
 npm ci
 npm start
 ```
+
+For local Docker hot reload and optional standalone HTTPS, follow
+[deploy/README.md](deploy/README.md). Initialize only missing local environment
+and database files; never truncate an existing SQLite file. Local Compose/proxy
+files are not production release inputs.
+
+## ⚙️ Configuration
 
 Optional backend variables:
 
@@ -63,78 +99,161 @@ Optional frontend variable:
 
 - `VITE_API_BASE_URL` (development default: `http://localhost:8000`; leave blank in same-origin production)
 
-## Checks
-Run checks in proportion to the change:
+Use [backend/README.md](backend/README.md) for configuration semantics and
+ignored local dotenv files, and [frontend/README.md](frontend/README.md) for
+build-time settings. Client-side variables must contain no secrets.
+
+## 🧪 Checks
+
+Run checks in proportion to the change, from the repository root:
 
 ```powershell
-python backend/manage.py test
+python backend/manage.py test backend
 ruff check backend
 ruff format backend --check
-Set-Location frontend
+```
+
+From `frontend/`:
+
+```powershell
 npm test
 npm run lint:strict
 npm run format:check
 npm run build
 ```
 
-## Production
+For browser checks, install backend requirements in an isolated Python environment,
+then run `npx playwright install chromium` and `npm run test:e2e` from `frontend/`.
+Ports 8001/3001 must be free. Preserve disposable SQLite/file mail, synthetic
+accounts and isolation from developer dotenv files and databases; do not use real
+accounts, external email or paid AI calls. Follow `frontend/README.md` for the
+configured test pools and browser evidence limits.
 
-Follow [main-first releases](docs/SHARED-ROLLOUT-POLICY.md#main-first-releases):
-review and merge ordinary changes into `main` before promoting an exact reviewed
-source tree to `env-prod`. Return explicitly authorized deployment experiments
-to `main` promptly through review. Preserve history and intentional release holds;
-do not deploy unready features or create an absent production branch for parity.
+For shared release changes, run `python deploy/check_parity.py` and
+`python -m unittest discover -s deploy/tests -v` with a disposable local/CI Docker
+daemon, plus all applicable consumer suites. Never test against production.
+
+## 🚀 Production
+
+Ordinary changes merge through reviewed `main` before promoting an exact reviewed
+source tree through the repository's existing `env-prod` process. Preserve all
+required CI, reviews, owner authorization and recovery gates. Explicitly
+owner-authorized deployment experiments must return promptly to `main` through
+review before the next ordinary promotion. Preserve both histories and newer main
+work; never reset or force-push to manufacture parity. Intentional release lag is
+allowed while prerequisites or acceptance remain unfinished. History reconciliation
+does not authorize deployment, and an absent production branch is not a reason
+to create one. Follow the [main-first release policy](https://github.com/VanillaIceCube/FullStackTemplate/blob/main/.github/README.md#main-first-releases).
+
+Common release code, tests, checker and workflow are owned by Infrastructure.
+Change `app-release/v1` at the source, regenerate its manifest, then synchronize
+all consumers to the same immutable source commit. Application repositories track
+that source in `deploy/shared-source.json`; never edit only a vendored copy.
+Preserve app-specific Compose, network/readiness policy, immutable image digests,
+SQLite capture/recovery and explicit rollback. Keep shared ingress/certificates
+and host operations within their separately authorized Infrastructure scope.
+
+Use the [app-only release/recovery guide](deploy/production/README.md).
+`deploy/production/app.json` owns the app's intentional network/readiness policy.
+Review Infrastructure gateway/vhosts, Cloudflare DNS/proxy/Redirect/WAF/Caching
+settings and allowlist/base-URL variables when domains or routes change.
+Retain prior release images and matched private recovery data; no host-wide Docker
+pruning. Cleanup requires the host operator to review disk usage and select unused
+app images explicitly. Releases manage only the app's backend/frontend; local
+`deploy/docker-compose.yml` and `deploy/nginx-proxy.conf` are local/legacy-only.
 
 Production is designed for `https://app.example.com` behind Cloudflare and an origin Nginx proxy.
 
-- Frontend: `/`
-- Authentication: `/auth/`
-- Django admin: `/admin/`
-- Notification and future application APIs: `/api/`
-- GitHub deployment branch: `env-prod`
-- GHCR images: `fullstacktemplate-backend` and `fullstacktemplate-frontend`
-- Suggested deployment path: `/opt/apps/fullstacktemplate`
+This template has no active `env-prod` branch. `https://app.example.com`,
+`/opt/apps/fullstacktemplate` and the template subnet are isolated examples;
+source review does not approve a third application on the existing host. Keep
+new-app onboarding/capacity and live activation separate from source review.
+Manual application setup must preserve canonical shared-source metadata and
+hash-verified files; review configuration before activation.
 
-Review Infrastructure gateway/vhosts, app release policy, Cloudflare settings,
-and allowlist/base-URL variables whenever domains or routes change. The local
-proxy/Compose files are not production release inputs.
+- Frontend: `/`; authentication: `/auth/`; admin: `/admin/`; application APIs: `/api/`.
+- Example GHCR images: `fullstacktemplate-backend`, `fullstacktemplate-frontend`.
 
-## GitHub automation
+## 🤖 GitHub automation
 
-Main requires `AI Code Review / Obi-Wan Code-nobi code review`, `AI Build Sheriff Review / Lint Eastwood build sheriff review`, and `AI Security Review / RoboCop security review`. The shared publisher must fail after publishing any `REQUEST_CHANGES`, including unchanged verdicts; valid `APPROVE`/`COMMENT` pass and unavailable/invalid output fails. Preserve all existing required checks, same-repository human/Dependabot eligibility and fork credential isolation. Run both publisher test files and Actionlint when changing this contract; use the read-only `verify-gates.js` audit for actual successful reviewer results. See `.github/README-WORKFLOWS.md`.
-The copied Notoli automation includes lint, tests, CodeQL, dependency review, npm malware review, Dependabot auto-merge, AI PR reviewers, deployment, and scheduled security-alert aggregation.
+Preserve existing required checks, scanner/lint/test gates and reviewer budgets.
+Eligible same-repository human and Dependabot PRs retain their reviewers; forks
+remain excluded from secret-bearing reviews. Keep reviewer identities and
+serialized writers separate, validated optional `AI_REVIEW_*` settings aligned,
+and Dependabot lint auto-fixes disabled. External GitHub Actions use immutable
+commit SHAs with version comments. Workflow updates do not authorize deployment.
 
-Secret-dependent workflows must fail visibly when their credentials are unavailable. Keep GitHub App permissions and the credential separation described in `.github/README-WORKFLOWS.md`.
+The shared publisher fails after every `REQUEST_CHANGES`, including repeated or
+unchanged verdicts; valid `APPROVE`/`COMMENT` pass and unavailable/invalid output
+fails. Missing credentials, incomplete required major-upgrade briefs and oversized
+diffs must fail visibly. The shared diff budget is 512 KiB. Obi-Wan's semver-major
+Dependabot brief uses complete primary-source evidence; web search remains limited
+to that review path. Run the repository's publisher regression tests and
+Actionlint when changing this contract. Where used, the read-only `verify-gates.js` audit requires actual
+successful reviewer results, including after cancelled or skipped runs.
 
-Frontend tooling uses Vite 8, Vitest 5/jsdom, and ESLint 10 flat configuration.
-Build output is `frontend/dist/`. Keep Docker, CI, `VITE_API_BASE_URL`, and
-template-initializer coverage aligned; see `docs/FRONTEND-ALIGNMENT.md`.
+Dependency review retains full JSON in the `dependency-review-evidence` artifact,
+passes it through a file rather than environment variables, and limits RoboCop's
+report to 16 KiB plus summary metadata. Disclose omitted entries; bounded reports
+must not change the independent gate's non-success verdict. Missing evidence
+fails. Preserve CodeQL scope outputs, full default-branch coverage and RoboCop
+baseline evidence; concurrent security-alert closure requires verified final state.
 
-Production release ownership follows `deploy/production/README.md`. Common
-release code/tests/checker/workflow are pinned to Infrastructure in
-`deploy/shared-source.json`; update the shared source and synchronize consumers,
-never edit only a vendored copy. Keep new-app onboarding/capacity and live
-activation separate from source review. Initializer changes must preserve
-canonical shared-source metadata and hash-verified files.
+Secret-dependent workflows fail visibly when credentials are unavailable.
+RoboCop's short-lived App token reads alerts and authors issue mutations;
+`SECURITY_ALERTS_TOKEN` is isolated to personal GitHub Project v2 synchronization.
+Keep App IDs/private keys, least-privilege permissions, trigger policy and field
+setup documented in `.github/README.md`. Security-alert variables resolve in the
+three caller workflows, not local composite metadata; pass explicit model, effort
+and token inputs. Run `.github/actions/custom-regressions/security-alert-contract.test.js`
+after changes; actual loading acceptance requires fresh controlled dispatches on
+corrected main. Preserve applicable bounded malware review and documented
+coverage decisions. Maintain CI architecture diagrams and regenerate
+`.github/workflows/ci-source-inventory.json` with `python .github/tools/ci_architecture.py` after
+workflow edits. Promotion summaries are informational.
+
+Main requires `AI Code Review / Obi-Wan Code-nobi code review`,
+`AI Build Sheriff Review / Lint Eastwood build sheriff review`, and
+`AI Security Review / RoboCop security review`. Preserve all other existing
+ruleset requirements and the documented CodeQL scope/analyzer checks. The
+standalone `CodeQL` Code Scanning results context is not emitted by documentation-only
+PRs; scope/analyzer checks preserve the failure gate. Keep same-repository
+Dependabot auto-merge within its existing policy and independent checks. Run
+both publisher test files when changing the reviewer contract.
 
 ## 🔑 OpenAI reviewer isolation
 
 Use `OBI_WAN_OPENAI_API_KEY`, `LINT_EASTWOOD_OPENAI_API_KEY`, and
 `ROBOCOP_OPENAI_API_KEY` for their respective reviewers; RoboCop also owns
-all security-alert model calls. `OPENAI_REVIEWERS_PROJECT_ID` identifies this repository's
-reviewer project. Keep credentials separate across repositories and application
-environments, preserve visible missing-key failures, and follow the deferred
-cutover steps in `.github/README-WORKFLOWS.md`.
+all security-alert model calls. `OPENAI_REVIEWERS_PROJECT_ID` identifies this
+repository's reviewer project. Keep credentials separate across repositories
+and application environments, preserve visible missing-key failures, and follow
+the credential ownership and cutover verification in `.github/README.md`.
+Store the three reviewer OpenAI keys and three reviewer App private keys in both
+Actions and Dependabot. Keep production, application, SSH and Project-token
+secrets outside Dependabot. A human PR smoke test does not prove Dependabot access.
 
+Use `gpt-6-luna` for OpenAI code, build and security reviewers and security-alert
+grouping. Preserve each reviewer's key/project isolation, budgets and blocking
+gates. Application AI model selection remains app-owned.
 
-## 🔌 Shared MCP framework
+## 🔌 MCP integration
 
-MCP framework changes follow [docs/MCP-FRAMEWORK.md](docs/MCP-FRAMEWORK.md). FullStackTemplate owns the canonical Python package; keep all consumer hashes/pins aligned. MacroMapper stays disabled without business tools. Preserve Notoli credentials, scopes, tool permissions and exact proxy trust.
+Shared MCP framework changes originate in FullStackTemplate's canonical Python
+package; synchronize consumer hashes and pins. Derived applications own enablement,
+registries, scopes and business tools. Infrastructure supplies ordinary gateway
+routing and its optional MCP contract. Preserve existing Notoli credentials,
+scopes, tool permissions, connection and exact proxy trust. The retired central
+issuer is not a deployment prerequisite. Advertise an app service only after its
+own registry, OAuth and readiness checks pass; framework adoption alone does not
+authorize activation, client registration, owner consent or plugin installation.
 
-## Shared application ownership and downstream rollout
+Follow the [MCP framework contract](backend/app_mcp/README.md). FullStackTemplate
+owns the canonical package; derived applications own enablement and business tools.
 
-For any reusable framework, GitHub automation, test or security change, follow [docs/SHARED-ROLLOUT-POLICY.md](docs/SHARED-ROLLOUT-POLICY.md): one FullStackTemplate canonical issue must track applicability, implementation and verification in MacroMapper, Notoli and Infrastructure. The parent is not done when only the template merges. Infrastructure remains the source owner for the shared gateway/release engine and host operations; application domain work stays in each app. Preserve live PRs, production controls, issue history and non-triggering labels during consolidation.
+## 🧩 Repository-specific contracts
 
-## 🤖 Reviewer model policy
-
-Use `gpt-6-luna` for OpenAI code, build and security reviewers and security-alert grouping. Preserve each reviewer’s existing key/project isolation, budgets and blocking gates. Application AI model selection remains app-owned.
+Frontend tooling uses Vite 8, Vitest 5/jsdom and ESLint 10 flat configuration.
+Build output is `frontend/dist/`. Keep Docker, CI and `VITE_API_BASE_URL`
+aligned; see
+[frontend guide](frontend/README.md).
