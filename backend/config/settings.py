@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+    "anymail",
     # My apps
     "apps.authentication",
     "apps.notifications",
@@ -199,12 +200,25 @@ EMAIL_BACKEND = (
     os.getenv("DJANGO_EMAIL_BACKEND")
     or "django.core.mail.backends.console.EmailBackend"
 )
+# Keep approved historical Resend selectors working without retaining a wrapper.
+if EMAIL_BACKEND in {
+    "authentication.email_backends.ResendApiEmailBackend",
+    "apps.authentication.email_backends.ResendApiEmailBackend",
+    "apps.email.backends.ResendApiEmailBackend",
+}:
+    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
 EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST") or "smtp.resend.com"
 EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT") or "587")
 EMAIL_USE_TLS = os.getenv("DJANGO_EMAIL_USE_TLS", "1") == "1"
 EMAIL_HOST_USER = os.getenv("DJANGO_EMAIL_HOST_USER") or "resend"
 EMAIL_HOST_PASSWORD = os.getenv("DJANGO_EMAIL_HOST_KEY", "")
 EMAIL_TIMEOUT = int(os.getenv("DJANGO_EMAIL_TIMEOUT") or "10")
+ANYMAIL = {
+    "REQUESTS_TIMEOUT": EMAIL_TIMEOUT if 0 < EMAIL_TIMEOUT <= 30 else 10,
+    "DEBUG_API_REQUESTS": False,
+}
+if EMAIL_HOST_PASSWORD.strip():
+    ANYMAIL["RESEND_API_KEY"] = EMAIL_HOST_PASSWORD
 DEFAULT_FROM_EMAIL = (
     os.getenv("DJANGO_DEFAULT_FROM_EMAIL") or "fullstacktemplate@example.com"
 )

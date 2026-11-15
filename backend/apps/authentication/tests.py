@@ -1,5 +1,4 @@
 from unittest.mock import patch
-from urllib.error import HTTPError, URLError
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -254,8 +253,12 @@ PRIVATE = "recipient@example.test reset?token=private-token sk-private-key priva
 
 
 @override_settings(
-    EMAIL_BACKEND="apps.email.backends.ResendApiEmailBackend",
-    EMAIL_HOST_PASSWORD="sk-private-key",
+    EMAIL_BACKEND="anymail.backends.resend.EmailBackend",
+    ANYMAIL={
+        "RESEND_API_KEY": "fixture-key",
+        "REQUESTS_TIMEOUT": 7,
+        "DEBUG_API_REQUESTS": False,
+    },
 )
 class PasswordResetFailurePrivacyTests(APITestCase):
     def setUp(self):
@@ -265,19 +268,30 @@ class PasswordResetFailurePrivacyTests(APITestCase):
             password="fixture-password-123",
         )
 
-    @patch("apps.email.backends.request.urlopen")
+    @patch("requests.sessions.Session.request")
     def test_real_reset_caller_keeps_failure_and_unknown_account_responses_equal(
-        self, urlopen
+        self, request
     ):
-        for exc in [
-            HTTPError("https://api.resend.com/emails", 429, PRIVATE, {}, None),
-            TimeoutError(PRIVATE),
-            URLError(PRIVATE),
-        ]:
-            with self.subTest(error=type(exc).__name__):
-                urlopen.reset_mock()
-                urlopen.side_effect = exc
-                with self.assertLogs("apps", level="ERROR") as logs:
+        from requests import Response
+        from requests.exceptions import ConnectionError, Timeout
+
+        private = "private-body recipient@example.test private-token fixture-key"
+        failures = [Timeout(private), ConnectionError(private)]
+        for status_code in (422, 429, 503):
+            response = Response()
+            response.status_code = status_code
+            response._content = private.encode()
+            failures.append(response)
+        for failure in failures:
+            with self.subTest(failure=type(failure).__name__):
+                request.reset_mock()
+                request.side_effect = (
+                    failure if isinstance(failure, Exception) else None
+                )
+                request.return_value = (
+                    failure if not isinstance(failure, Exception) else None
+                )
+                with self.assertLogs("apps.authentication", level="ERROR") as logs:
                     known = self.client.post(
                         "/auth/forgot-password/",
                         {"email": "fixture@example.test"},
@@ -290,15 +304,32 @@ class PasswordResetFailurePrivacyTests(APITestCase):
                 )
                 self.assertEqual(known.status_code, 200)
                 self.assertEqual(known.data, unknown.data)
-                urlopen.assert_called_once()
+                request.assert_called_once()
                 for record in logs.records:
                     self.assertIsNone(record.exc_info)
-                    for private in [
+                    for value in [
+                        private,
                         "private-token",
-                        "sk-private-key",
-                        "recipient@example.test",
+                        "fixture-key",
                         "fixture@example.test",
                         "user_id",
-                        "private-body",
                     ]:
-                        self.assertNotIn(private, record.getMessage())
+                        self.assertNotIn(value, record.getMessage())
+
+    @patch("requests.sessions.Session.request")
+    @override_settings(ANYMAIL={"REQUESTS_TIMEOUT": 10, "DEBUG_API_REQUESTS": False})
+    def test_missing_provider_key_keeps_public_response_generic_without_http(
+        self, request
+    ):
+        with self.assertLogs("apps.authentication", level="ERROR"):
+            known = self.client.post(
+                "/auth/forgot-password/",
+                {"email": "fixture@example.test"},
+                format="json",
+            )
+        unknown = self.client.post(
+            "/auth/forgot-password/", {"email": "missing@example.test"}, format="json"
+        )
+        self.assertEqual(known.status_code, 200)
+        self.assertEqual(known.data, unknown.data)
+        request.assert_not_called()

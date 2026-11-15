@@ -9,7 +9,6 @@ permissions, notifications, and application integrations.
 - `docker/`: production/development Dockerfiles and their matching Dockerfile-specific
   ignore files; keep `backend/` as the build context.
 - `apps/authentication/`, `apps/notifications/`: accounts and notifications.
-- `apps/email/`: email provider delivery and its mocked regressions.
 - `apps/mcp/`: shared `framework/`, application `tools/`, and `chatgpt/` packaging.
 
 ## 💻 Local development
@@ -84,35 +83,38 @@ without depending on a template-owned domain model.
 
 ## ✉️ Email
 
-Local development uses Django's console email backend. The included
-Resend HTTPS backend is configured with:
+Local development keeps Django's console backend. Resend API delivery uses the
+maintained `django-anymail==15.2` backend:
 
 ```env
-DJANGO_EMAIL_BACKEND=apps.email.backends.ResendApiEmailBackend
+DJANGO_EMAIL_BACKEND=anymail.backends.resend.EmailBackend
 DJANGO_EMAIL_HOST_KEY=<resend-api-key>
 DJANGO_EMAIL_TIMEOUT=10
 DJANGO_DEFAULT_FROM_EMAIL=<sender-on-a-verified-domain>
 ```
 
-Keep `.localhost` senders with console delivery. Live delivery uses an approved
-sender domain and private credentials configured through the production guide.
-Plain text, HTML, multipart alternatives, `cc`, `bcc`, and `reply_to` are supported.
+The existing key becomes `ANYMAIL["RESEND_API_KEY"]` only when nonblank. Existing
+SMTP/custom backend selectors remain configurable; known historical Resend class
+paths map to the maintained backend without retaining an application wrapper.
+Only outbound sending is configured: no webhook routes or optional `svix` package.
 
-The socket-operation timeout defaults to 10 seconds and supports `0 < seconds <= 30`.
-The environment value is parsed as an integer. Invalid runtime timeout values fall
-back safely; malformed startup configuration fails visibly. A successful provider
-response means acceptance, not confirmed inbox delivery.
+The startup integer timeout maps to `ANYMAIL["REQUESTS_TIMEOUT"]`: values in
+`0 < seconds <= 30` are honored; out-of-range values use the safe 10-second default.
+Malformed integers still fail startup visibly. API debug output is explicitly off,
+and the requests session adds no automatic retries. A timeout may occur after
+provider acceptance, so retries need a separately designed idempotency policy.
 
-Failures preserve `fail_silently`: false re-raises, while true skips failures and
-returns the number sent. Password reset returns a generic response for known and
-unknown accounts, including delivery failures. Logger `apps.email.backends`
-records safe category/status fields: `configuration`, `request`, `rate_limit`,
-`provider`, `timeout`, `network`, or `unexpected`. Never log provider response
-bodies, recipient details, reset tokens, message contents, or credentials.
+Operational failures retain `fail_silently` and successful-message counts.
+Anymail deliberately raises configuration errors (including a missing API key)
+even in silent mode, before HTTP. Password reset catches failures and keeps the
+same generic response for known and unknown accounts. Its log message contains
+no exception text/traceback, provider body, recipients, credentials or reset tokens.
+Anymail exceptions can carry provider data: do not log exception representations
+or enable `DEBUG_API_REQUESTS`. Provider acceptance does not prove inbox delivery.
 
-Diagnose failures using those categories and the existing provider dashboard.
-There is no automatic retry or resend: a timeout may occur after acceptance.
-Use mocked delivery tests; production email receipt requires separate verification.
+Project-owned configuration and mocked provider-boundary tests live in
+`config/test_email.py`; authentication retains real reset-call privacy regressions.
+Plain text, HTML, reply-to, cc and bcc use Anymail's maintained serialization.
 
 ## 🔌 MCP integration
 

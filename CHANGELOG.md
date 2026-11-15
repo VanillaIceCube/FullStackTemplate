@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Replace the custom Resend backend with pinned django-anymail, retain the existing credential/timeout environment variables, and cover masked reset failures at the maintained provider boundary (#340).
 - Move provider email delivery into `apps/email/`; keep password-reset behavior and privacy tests with authentication and preserve existing provider semantics (#339).
 - Consolidate MCP under `apps/mcp/`: canonical `framework/`, app-owned `tools/`, and `chatgpt/` packaging share one application namespace while preserving separate SDK imports and Django labels (#339).
 - Group backend application modules under `apps/`, rename Django configuration to `config/` and the shared MCP package to `apps/mcp/framework/`, preserving database app labels and existing migrations (#339).
