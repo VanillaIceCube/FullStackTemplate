@@ -103,7 +103,7 @@ Credential-handling GitHub Actions are pinned the same way. When a complete
   pull-request source diff exceeds an AI reviewer's configured budget, that reviewer's
 GitHub App posts an explicit incomplete-review comment under its own identity
 and then fails the check without publishing a verdict.
-All three reviewers inherit the same 512 KiB source-diff budget from
+All three reviewers inherit the same 2 MB (2,000,000-byte) source-diff budget from
 `.github/actions/get-pr-diff/action.yml`; reviewer workflows do not override it.
 Only the regular generated `frontend/package-lock.json` payload is excluded
 from the source diff and Obi-Wan's changed-file contents. This exact path is
@@ -713,6 +713,7 @@ reviewer and independent-check policy. The source diff keeps `uv.lock` reviewabl
 only the separate dependency-usage search omits generated lockfile matches.
 The uv executable is a deliberately pinned toolchain bootstrap in `setup-uv`
 and application Dockerfiles; package dependency PRs do not change that bootstrap.
-Review and synchronize its version separately when upgrading the toolchain.
+Review and synchronize its version and CI wheel hash separately when upgrading
+the toolchain; see the [verified bootstrap contract](../actions/README.md#-python-toolchain-bootstrap).
 Hosted version/security update acceptance still requires a fresh Dependabot run
 after the reviewed configuration reaches main.
