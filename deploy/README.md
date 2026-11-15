@@ -12,6 +12,11 @@ them over shared host ingress or use them as production rollback scripts.
 The template itself uses `fullstacktemplate.localhost`. When creating an application,
 update its branding, Compose identifiers, and local hostnames manually.
 
+The development Compose `environment` sets the frontend API origin. Production
+uses the Docker build argument, which is compiled into the static assets; a blank
+value selects same-origin requests. Backend settings remain in `deploy/.env`,
+created from the committed `deploy/backend.env` example below.
+
 For fast source iteration, start the development Compose workflow over HTTP
 (no certificate required):
 
@@ -86,9 +91,9 @@ The [MCP framework guide](../backend/app_mcp/README.md) defines opt-in ASGI/prox
 ## 📦 Development dependency reproducibility
 
 Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
-registry digests. Production Dockerfiles and the independent release engine are
-unchanged by this development-image policy. Refresh tags/digests together after
-registry verification and a disposable build/configuration check.
+registry digests. Frontend production and development builders use the same
+immutable Node 26 digest. Refresh matching tags/digests together after registry
+verification and a disposable build/configuration check.
 
 Frontend production/development Dockerfiles and Nginx configuration live in
 `frontend/docker/`. The build context remains
