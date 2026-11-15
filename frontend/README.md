@@ -72,7 +72,7 @@ consent and validated return paths. See the [backend MCP guide](../backend/READM
   layout primitives.
 - Keep colors in the CSS custom properties declared in `src/index.css`.
 - Preserve Notoli's theme tokens: dark `#1a1a1a` backgrounds, pale-yellow
-  `#f5e79e` surfaces, amber `#ffc107` accents, gray `#555555` controls and
+  `#f5e79e` surfaces, gray `#555555` controls and
   surface text, and white `#ffffff` text on dark backgrounds.
 - Use the FullStackTemplate secondary color for focused Material UI text
   fields.

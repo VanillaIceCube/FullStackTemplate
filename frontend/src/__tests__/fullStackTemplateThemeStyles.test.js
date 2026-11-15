@@ -10,7 +10,6 @@ describe('FullStackTemplate theme styles', () => {
   test('keeps the exact Notoli yellow and gray theme tokens', () => {
     expect(globalCss).toContain('--background-color: #1a1a1a');
     expect(globalCss).toContain('--secondary-background-color: #f5e79e');
-    expect(globalCss).toContain('--primary-color: #ffc107');
     expect(globalCss).toContain('--secondary-color: #555555');
     expect(globalCss).toContain('--text-color: #ffffff');
   });

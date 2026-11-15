@@ -20,6 +20,7 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove the unused primary-color CSS token and its declaration-only assertion; retain all rendered theme colors.
 - Remove the custom frontend development entrypoint and automatic dependency reinstall; start Vite directly and install changed dependencies manually in the development container.
 - Remove frontend end-to-end suites, Playwright configuration and dependencies, browser-test helpers and CI jobs; retain component, backend, action-local and shared release checks.
 - Remove the root `scripts/` folder, template initializer and GitHub Project helper; use manual application and Project setup.
