@@ -205,7 +205,9 @@ workflow does not consume `CLOUDFLARE_ORIGIN_CERT_PEM` or
 credentials, preserve the canonical shared source pin when initializing, and
 protect `env-prod`. Main merges and source review do not authorize activation.
 
-### 🔑 Separate reviewer keys
+<a id="-separate-reviewer-keys"></a>
+
+### Separate reviewer keys
 
 Use the [exact key names and deferred migration steps](README.md#-credential-ownership). Each generated repository needs its own reviewer project and credentials; never copy this template's secrets.
 
@@ -323,7 +325,9 @@ trusted same-repository branch before merging it.
 
 Do not require branches to be up to date before merging.
 
-### 🔒 Per-head Dependabot policy activation
+<a id="-per-head-dependabot-policy-activation"></a>
+
+### Per-head Dependabot policy activation
 
 After the protected auto-merge source is on main, add `Dependabot Policy` from
 GitHub Actions (integration 15368) to the active main ruleset. Preserve all other
@@ -379,7 +383,9 @@ gh api "repos/VanillaIceCube/FullStackTemplate/commits/<HEAD_SHA>/check-runs?per
 node .github/actions/publish-ai-review/verify-gates.js ruleset.json head-check-runs.json
 ```
 
-## 🧪 Verification
+<a id="-verification"></a>
+
+## 🧪 Checks
 
 Repository CI helpers live in `.github/tools/`: `bounded_log.py` retains bounded
 reviewer diagnostics; `install_actionlint.sh` installs the pinned, checksum-verified
@@ -396,7 +402,9 @@ alert-workflow side effects before fresh manual dispatches. A successful human P
 does not prove access to the separate Dependabot secret store. Source review does
 not authorize merging, branch promotion, production deployment, or key rotation.
 
-## 📚 Related guides
+<a id="-related-guides"></a>
+
+## 📚 Reference
 
 - [Workflow behavior and maintenance](workflows/README.md).
 - [Shared action and reviewer contracts](actions/README.md).
