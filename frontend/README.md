@@ -8,6 +8,8 @@ authentication, and the application shell.
 - `docker/`: production/development Dockerfiles and Nginx configuration.
   Docker builds keep `frontend/` as their context; `.dockerignore` stays at the
   frontend root.
+- `src/index.css`: the single global stylesheet, loaded by `src/index.jsx`; keep
+  theme tokens, document defaults, shared controls and app-specific rules here.
 - `src/components/`: reusable interface components.
 - `src/pages/`: application pages and routes.
 - `src/services/`: API requests and session handling.
@@ -68,7 +70,7 @@ consent and validated return paths. See the [backend MCP guide](../backend/READM
 ### Foundations
 - Use Material UI components and responsive `sx` values before adding custom
   layout primitives.
-- Keep colors in the CSS custom properties declared in `src/App.css`.
+- Keep colors in the CSS custom properties declared in `src/index.css`.
 - Preserve Notoli's theme tokens: dark `#1a1a1a` backgrounds, pale-yellow
   `#f5e79e` surfaces, amber `#ffc107` accents, gray `#555555` controls and
   surface text, and white `#ffffff` text on dark backgrounds.

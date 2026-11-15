@@ -3,24 +3,26 @@ import path from 'node:path';
 const sourceDirectory = path.resolve('src');
 
 describe('FullStackTemplate theme styles', () => {
-  const appCss = fs.readFileSync(path.join(sourceDirectory, 'App.css'), 'utf8');
+  const globalCss = fs.readFileSync(path.join(sourceDirectory, 'index.css'), 'utf8');
   const readSource = (relativePath) =>
     fs.readFileSync(path.join(sourceDirectory, relativePath), 'utf8');
 
   test('keeps the exact Notoli yellow and gray theme tokens', () => {
-    expect(appCss).toContain('--background-color: #1a1a1a');
-    expect(appCss).toContain('--secondary-background-color: #f5e79e');
-    expect(appCss).toContain('--primary-color: #ffc107');
-    expect(appCss).toContain('--secondary-color: #555555');
-    expect(appCss).toContain('--text-color: #ffffff');
+    expect(globalCss).toContain('--background-color: #1a1a1a');
+    expect(globalCss).toContain('--secondary-background-color: #f5e79e');
+    expect(globalCss).toContain('--primary-color: #ffc107');
+    expect(globalCss).toContain('--secondary-color: #555555');
+    expect(globalCss).toContain('--text-color: #ffffff');
   });
 
   test('keeps MUI text field focus states gray instead of default blue', () => {
-    expect(appCss).toContain('.MuiInputLabel-root.Mui-focused');
-    expect(appCss).toContain('.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline');
-    expect(appCss).toContain('color: var(--secondary-color) !important');
-    expect(appCss).toContain('border-color: var(--secondary-color) !important');
-    expect(appCss).toContain('border-bottom-color: var(--secondary-color) !important');
+    expect(globalCss).toContain('.MuiInputLabel-root.Mui-focused');
+    expect(globalCss).toContain(
+      '.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline',
+    );
+    expect(globalCss).toContain('color: var(--secondary-color) !important');
+    expect(globalCss).toContain('border-color: var(--secondary-color) !important');
+    expect(globalCss).toContain('border-bottom-color: var(--secondary-color) !important');
   });
 
   test.each([
