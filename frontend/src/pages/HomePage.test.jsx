@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import HomePage from './HomePage';
-import { renderWithProviders } from '../tests/utils';
+import { renderWithProviders } from '../test-helpers/utils';
 
 describe('HomePage', () => {
   test('renders the placeholder paper', () => {
