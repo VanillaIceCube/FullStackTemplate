@@ -86,9 +86,9 @@ The [MCP framework guide](../backend/app_mcp/README.md) defines opt-in ASGI/prox
 ## 📦 Development dependency reproducibility
 
 Development images pin reviewed multi-platform Node 26 and Miniforge 26.9.4-0
-registry digests. Production Dockerfiles and the independent release engine are
-unchanged by this development-image policy. Refresh tags/digests together after
-registry verification and a disposable build/configuration check.
+registry digests. Frontend production and development builders use the same
+immutable Node 26 digest. Refresh matching tags/digests together after registry
+verification and a disposable build/configuration check.
 
 Frontend production/development Dockerfiles and Nginx configuration live in
 `frontend/docker/`. The build context remains
