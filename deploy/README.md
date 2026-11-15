@@ -12,6 +12,11 @@ them over shared host ingress or use them as production rollback scripts.
 The template itself uses `fullstacktemplate.localhost`. When creating an application,
 update its branding, Compose identifiers, and local hostnames manually.
 
+The development Compose `environment` sets the frontend API origin. Production
+uses the Docker build argument, which is compiled into the static assets; a blank
+value selects same-origin requests. Backend settings remain in `deploy/.env`,
+created from the committed `deploy/backend.env` example below.
+
 For fast source iteration, start the development Compose workflow over HTTP
 (no certificate required):
 

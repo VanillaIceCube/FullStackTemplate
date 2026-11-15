@@ -11,6 +11,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Align frontend npm commands: production builds run strict lint first and `lint:fix` applies available lint fixes.
+- Document frontend API configuration through development Compose and production build arguments, and exclude local frontend env files from Docker build contexts.
 - Rename shared frontend test support to `src/test-helpers/`, retain application and feature tests beside their implementation, and preserve application-specific helper behavior.
 - Consolidate shared frontend test setup, helpers and suites under `src/tests/`, update imports and discovery paths, and retain App, startup and feature tests beside their implementation.
 - Replace mocked frontend startup wiring checks with real React entry-point integration coverage for the signed-out login route, isolated state and blocked network access.
@@ -23,6 +25,7 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove the frontend env example; retain `deploy/backend.env` for backend configuration.
 - Remove centralized frontend lint-configuration and theme-source suites; preserve shared support and all colocated application, component and service tests.
 - Remove the unused shared deferred-promise and loading-wait test helpers.
 - Remove the custom frontend development entrypoint and automatic dependency reinstall; start Vite directly and install changed dependencies manually in the development container.

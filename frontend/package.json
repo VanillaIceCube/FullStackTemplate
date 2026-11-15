@@ -33,7 +33,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "npm run lint:strict && vite build",
     "test": "vitest run",
     "lint": "eslint \"src/**/*.{js,jsx}\"",
     "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix",
