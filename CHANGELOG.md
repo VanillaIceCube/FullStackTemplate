@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Return a newly signed action ticket after approval so the existing Cancel control works immediately without reloading; preserve the original action expiry and reject stale tickets.
 - Verify the backend production/development uv bootstrap against reviewed binary wheel hashes for every platform in the pinned Python base; reject altered artifacts and source distributions across all three applications.
 - Verify the CI uv bootstrap against a reviewed wheel SHA-256 before installation across all four repositories; reject unsupported runner targets and source distributions.
 - Standardize sanitized MCP reconnect challenges and distinguish expired connections from missing scopes; synchronize framework runtime and regression coverage across applications.
