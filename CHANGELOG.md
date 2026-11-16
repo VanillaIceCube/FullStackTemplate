@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-11-15
+
+### Fixed
+
+- Return a newly signed action ticket after approval so the existing Cancel control works immediately without reloading; preserve the original action expiry and reject stale tickets.
+- Verify the backend production/development uv bootstrap against reviewed binary wheel hashes for every platform in the pinned Python base; reject altered artifacts and source distributions across all three applications.
+- Verify the CI uv bootstrap against a reviewed wheel SHA-256 before installation across all four repositories; reject unsupported runner targets and source distributions.
+- Standardize sanitized MCP reconnect challenges and distinguish expired connections from missing scopes; synchronize framework runtime and regression coverage across applications.
+- Align authentication request validation, duplicate-registration handling and exact password preservation across applications; reject malformed reset credentials with HTTP 400 and roll back failed signup onboarding.
+- Require a nonblank production signing key consistently.
+
+### Changed
+
+- Add optional JWT-only signed-preview action approval to the canonical MCP framework and existing Connections screen, with framing protection; the handler remains unconfigured here and domain behavior is unchanged.
+- Clarify and regression-test MCP token scope resolution: omitted or blank scope continues to require the application's baseline scope, with identical framework coverage across applications.
+- Raise the complete source-diff limit for all three AI reviewers to 2 MB (2,000,000 bytes) across all four repositories; preserve fail-closed incomplete reviews and all other context, token and model settings.
+- Organize backend tests into owning `tests/` packages for authentication, notifications, production/email configuration and the canonical MCP framework, with descriptive behavior names, fixture-only helpers and preserved discovery/coverage.
+- Use Django OAuth Toolkit's built-in MCP client registration, remove custom management commands and document explicit public-client onboarding and validation behavior (#341).
+
+### Removed
+
+- Remove the obsolete static-file storage selector while preserving current storage behavior.
+
 ## 2026-11-14
 
 ### Fixed
@@ -11,6 +34,16 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Consolidate MCP framework, tools and ChatGPT guidance into one `apps/mcp/README.md`, preserving permissions, tool catalogs and connection instructions.
+- Give FullStackTemplate its own layered-code SVG mark for ChatGPT connector branding.
+- Replace the custom Resend backend with pinned django-anymail, retain the existing credential/timeout environment variables, and cover masked reset failures at the maintained provider boundary (#340).
+- Move provider email delivery into `apps/email/`; keep password-reset behavior and privacy tests with authentication and preserve existing provider semantics (#339).
+- Consolidate MCP under `apps/mcp/`: canonical `framework/`, app-owned `tools/`, and `chatgpt/` packaging share one application namespace while preserving separate SDK imports and Django labels (#339).
+- Group backend application modules under `apps/`, rename Django configuration to `config/` and the shared MCP package to `apps/mcp/framework/`, preserving database app labels and existing migrations (#339).
+- Keep Dockerfile-specific production/development ignore files beside backend and frontend Dockerfiles; use the Python constraint in pyproject.toml without a separate version file.
+- Replace Conda and environment exports with locked uv projects across local setup, CI and Docker; preserve Python 3.12 and existing server profiles (#338).
+- Remove the standalone MCP parity checker and server launcher; retain MCP tests/manifests/pins and select the production server directly in Docker.
+- Group backend Dockerfiles in `backend/docker/`; update Compose, build workflows and Docker dependency discovery while retaining the backend build context (FullStackTemplate #337).
 - Standardize README heading emojis, sentence case, reference labels and Markdown spacing while preserving substantive content, code examples and existing anchors.
 - Move frontend connection contracts into session guidance and keep related guides as a final navigation section.
 - Align frontend npm commands: production builds run strict lint first and `lint:fix` applies available lint fixes.
@@ -27,6 +60,8 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove unused MCP framework source-pin and hash-manifest metadata; retain coordinated source review and runtime tests.
+- Remove the local ChatGPT package/listing builders and their test modules; retain source manifests/artwork and ordinary/MCP runtime checks.
 - Remove the frontend env example; retain `deploy/backend.env` for backend configuration.
 - Remove centralized frontend lint-configuration and theme-source suites; preserve shared support and all colocated application, component and service tests.
 - Remove the unused shared deferred-promise and loading-wait test helpers.
