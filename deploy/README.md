@@ -1,30 +1,30 @@
 # 🐳 FullStackTemplate deployment
 
-Production uses the shared Infrastructure gateway and the app-only release
-standard. The sole production/recovery procedure is
-[deploy/production/README.md](production/README.md). `docker-compose.yml` and
-`nginx-proxy.conf` below are local-only, standalone HTTPS fixtures. Never upload
-them over shared host ingress or use them as production rollback scripts.
+Production uses the shared Infrastructure gateway and the
+[app-only release/recovery procedure](production/README.md). Root Compose and
+Nginx files operate local development stacks only.
+
+## 🧭 Structure
+
+| File or folder | Purpose |
+| --- | --- |
+| `backend.env` | Committed local example; copy to ignored `.env` |
+| `docker-compose.dev.yml` | Source mounts, Uvicorn/Vite reload and direct HTTP |
+| `docker-compose.yml` | Standalone local HTTPS using checkout-built images |
+| `nginx-proxy.conf` | Proxy template expanded by official Nginx startup |
+| `production/` | Pinned shared release engine and app-owned production policy |
+| `tests/` | Release, configuration and recovery checks |
 
 Shared release verification runs through
-`python deploy/production/build_bundle.py --check-parity`; its immutable
+`python deploy/production/build_bundle.py --check-parity`; the immutable
 Infrastructure source pin is `shared_source` in `production/app.json`.
 See the [production guide](production/README.md) for source synchronization.
 
 <a id="local-docker-with-applicationlocalhost"></a>
 
-## 💻 Local Docker with `[application].localhost`
+## 💻 Local Docker with `fullstacktemplate.localhost`
 
-The template itself uses `fullstacktemplate.localhost`. When creating an application,
-update its branding, Compose identifiers, and local hostnames manually.
-
-The development Compose `environment` sets the frontend API origin. Production
-uses the Docker build argument, which is compiled into the static assets; a blank
-value selects same-origin requests. Backend settings remain in `deploy/.env`,
-created from the committed `deploy/backend.env` example below.
-
-For fast source iteration, start the development Compose workflow over HTTP
-(no certificate required):
+From the repository root, initialize only missing local files:
 
 ```powershell
 if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
@@ -33,67 +33,120 @@ docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml up --buil
 docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml exec -T backend python manage.py migrate
 ```
 
-This mounts both source trees, runs React's hot-reload server and Django's
-autoreloading `runserver`, and uses direct HTTP ports 3000 and 8000 bound to
-localhost only. Set `FULLSTACKTEMPLATE_DEV_FRONTEND_PORT` or
-`FULLSTACKTEMPLATE_DEV_BACKEND_PORT` in `deploy/.env` to override the host
-ports. It does not require a certificate, Nginx proxy, or shared local
-ingress. Open `http://fullstacktemplate.localhost:3000`.
+Open `http://fullstacktemplate.localhost:3000`; the backend is
+`http://fullstacktemplate.localhost:8000`. Both ports bind to localhost. Override them
+with `FULLSTACKTEMPLATE_DEV_FRONTEND_PORT` and `FULLSTACKTEMPLATE_DEV_BACKEND_PORT`
+in `deploy/.env`. The frontend API URL, CSRF/CORS origins and MCP origin follow
+those ports. Vite listens on its container interface with `HOST=0.0.0.0`.
 
-Use the standalone local HTTPS commands below when testing HTTPS, Nginx, or the
-deployment image path. Install `mkcert` first; the commands create local
-certificates in ignored `certs/`.
+This profile mounts both source trees, runs Uvicorn/Vite autoreload, forces debug
+mode and trusts no forwarded proxy headers. It supplies a stable development-only
+signing-key fallback when the local key is blank. Production requires its own key.
+No certificate, Nginx or shared local ingress is needed.
+
+<a id="standalone-https-and-image-checks"></a>
+
+## 🔐 Standalone HTTPS and image checks
+
+Use this profile only on your workstation. Prepare the same local `.env`/database
+and set a nonblank private `DJANGO_SECRET_KEY` in `.env` for stable sessions.
+Install `mkcert`; reuse existing certificates or create the first local pair:
 
 ```powershell
-if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
-if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
 New-Item -ItemType Directory -Path certs -Force | Out-Null
 mkcert -cert-file certs/origin.pem -key-file certs/origin.key "fullstacktemplate.localhost" localhost 127.0.0.1 ::1
-docker build --file backend/docker/Dockerfile -t ghcr.io/vanillaicecube/fullstacktemplate-backend:latest ./backend
-docker build --file frontend/docker/Dockerfile -t ghcr.io/vanillaicecube/fullstacktemplate-frontend:latest ./frontend
-Set-Location deploy
-docker compose up -d
-docker compose exec -T backend python manage.py migrate
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up --build -d
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml exec -T backend python manage.py migrate
 ```
 
-Open `https://fullstacktemplate.localhost`.
+Open `https://fullstacktemplate.localhost`. Install your local mkcert CA if the browser
+does not trust the certificate. Certificates stay in ignored `certs/`.
+Compose builds the existing production Dockerfiles from this checkout using
+local `:latest` image names. The frontend API build argument is blank for
+same-origin requests. Production selects immutable image digests independently.
 
-The Compose project is named `fullstacktemplate`. Defaults are ports
-80/443/8000/3000. FullStackTemplate owns its own proxy and can be run
-independently of other application repositories.
+Only the proxy publishes HTTP 80 and HTTPS 443, both on localhost. Backend and
+frontend publish no host ports; direct HTTP access belongs to the development
+profile. The frontend shares a network with the proxy. The backend uses an
+internal private proxy network and separate outbound network, trusting only the
+proxy's exact address `172.30.90.2`. Bind mounts require existing files/directories
+and never auto-create a SQLite directory, certificate directory or proxy file.
 
-Open `https://fullstacktemplate.localhost` after starting the stack. If another
-application already owns ports 80/443, override this application's proxy,
-backend, and frontend host ports in `deploy/.env` and use that application's
-direct host ports instead.
+For a second local stack, set these app-specific values in `deploy/.env`:
+
+```env
+FULLSTACKTEMPLATE_HTTP_PORT=8080
+FULLSTACKTEMPLATE_HTTPS_PORT=8443
+FULLSTACKTEMPLATE_HTTPS_ORIGIN=https://fullstacktemplate.localhost:8443
+```
+
+Update `HTTPS_ORIGIN` whenever changing the HTTPS port. This origin drives HTTP
+redirects, password-reset links, OAuth/MCP metadata and trusted CSRF/CORS origins.
+Nginx preserves the browser's Host port and relative slash redirects.
+`FULLSTACKTEMPLATE_CERTS_DIR` selects another existing certificate directory; relative
+paths resolve from `deploy/`. Private subnets differ per app so all three stacks
+can coexist. If another local network conflicts, review this app's subnet,
+proxy/backend addresses and exact proxy trust together in Compose.
 
 <a id="routing-and-persistence"></a>
 
-## 🧭 Routing and persistence
+## ⚙️ Configuration and routing
 
-Nginx routes:
+The env example uses localhost origins and console email. Reset messages stay in
+local logs unless you explicitly configure a real backend. Keep real credentials
+in ignored `.env`; never add them to `backend.env`.
 
-- `/` and SPA deep links to the frontend;
-- `/auth/*`, `/api/*`, and `/admin/*` to Django;
-- Django static files to the backend.
+Both profiles override their own URL, database and proxy settings. Direct HTTP
+trusts no proxy; HTTPS trusts the exact private Nginx address. Nginx replaces
+client-supplied forwarded metadata with its actual TLS scheme/client address and
+clears forwarded-host headers. Routes are consistent across apps:
 
-SQLite persists at `deploy/db.sqlite3` locally and at the approved application database path on the server. Back up that file before destructive server maintenance. For
-larger applications, replace SQLite with a managed database before scaling to
-multiple backend replicas.
+- `/mcp` and `/.well-known/*` reach the backend; MCP streaming is unbuffered.
+- `/api/*`, `/auth/*`, `/admin/*` and Django admin/DRF static files reach the backend.
+- Frontend pages and deep links reach the frontend image.
+
+API, auth, admin, MCP and discovery responses carry `Cache-Control: no-store`.
+The upstream read timeout is 120 seconds. WebSocket upgrade headers are sent only
+for actual upgrade requests. Official Nginx startup expands only
+`LOCAL_SERVER_NAME` and `LOCAL_HTTPS_ORIGIN`; Nginx request variables remain intact.
+Production ingress, Cloudflare, certificates and trust remain Infrastructure-owned.
+
+<a id="local-persistence-and-troubleshooting"></a>
+
+## 🛟 Local persistence and troubleshooting
+
+Both profiles persist SQLite at `deploy/db.sqlite3`. Never replace existing data
+with an empty file. If Docker previously created a directory there, stop the
+stack and inspect/back up its contents before correcting the bind. Production
+uses the approved application database path and private recovery procedure;
+review managed-database adoption before adding backend replicas.
+
+```powershell
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml ps
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml logs --tail 100 backend frontend
+docker compose --env-file deploy/.env -f deploy/docker-compose.dev.yml down
+```
+
+Stop the other profile before switching; both mount the same SQLite file. Use
+the matching Compose filename for every command. Recreate containers after env
+changes with `up -d --force-recreate`; a restart does not reload env files.
+If needed, add `127.0.0.1 fullstacktemplate.localhost` to your local hosts file.
 
 <a id="vite-build-interface"></a>
 
-## ⚙️ Vite build interface
+## 🔌 MCP integration
 
-The frontend Docker build accepts `VITE_API_BASE_URL` and copies `dist/` into
-Nginx. The development Compose file uses the same variable and explicit Vite
-polling. Blank production API origins retain same-origin routing. See
-[frontend alignment](../frontend/README.md).
+The app-owned connector is opt-in locally. Set `DJANGO_MCP_ENABLED=1` in
+`deploy/.env` and recreate development containers or rebuild the HTTPS stack.
+Compose applies the same flag to `VITE_MCP_ENABLED`, so the UI and backend agree.
+Template supplies sample tools; MacroMapper supplies domain tools.
 
-
-## 🔌 Shared MCP framework
-
-The [MCP framework guide](../backend/apps/mcp/README.md#framework) defines opt-in ASGI/proxy/readiness requirements. Local development can call the backend directly; do not treat a local/legacy proxy as production MCP onboarding.
+Both profiles supply matching MCP/backend origins. Direct development serves
+ASGI with no trusted proxy. ChatGPT connection testing requires a reachable HTTPS
+origin or secure tunnel with consistent issuer, allowed host and CSRF origin;
+`.localhost` itself is workstation-only. Keep local test databases and client
+registrations separate from production. See the
+[MCP framework and app guide](../backend/apps/mcp/README.md).
 
 <a id="development-dependency-reproducibility"></a>
 
@@ -116,8 +169,9 @@ lockfile supplies production dependencies; development includes the tooling grou
 The environment lives at `/opt/venv`, outside the source bind mount. Restart the
 backend after changing the lockfile so `uv run --locked` synchronizes dependencies.
 Host `.venv/` files are excluded from the image build. Conda is no longer required.
-Production startup selects Uvicorn only when `DJANGO_MCP_ENABLED=1`; otherwise it
-executes the existing single-worker Gunicorn profile directly from the Docker CMD.
+Template and MacroMapper production startup selects Uvicorn when
+`DJANGO_MCP_ENABLED=1` and otherwise retains its app-owned Gunicorn profile.
+Notoli always uses Uvicorn. Local development uses Uvicorn in all three apps.
 
 Backend production/development Dockerfiles live in `backend/docker/`; frontend
 Dockerfiles and Nginx configuration live in `frontend/docker/`. Build contexts
@@ -143,6 +197,10 @@ checks do not deploy or touch application data.
 
 ## 🧪 Checks
 
+The existing validator renders all profiles with synthetic env values and rejects
+public local bindings, backend exposure, automatic SQLite bind-path creation,
+mismatched exact proxy trust and inconsistent HTTPS origins. It never starts
+application containers or reads private local env/database/certificate contents.
 See [workflow checks and validation](../.github/workflows/README.md#-checks-and-diagnostics).
 
 
