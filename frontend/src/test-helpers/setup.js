@@ -1,8 +1,4 @@
 import '@testing-library/jest-dom/vitest';
-import { TextDecoder, TextEncoder } from 'node:util';
-
-global.TextDecoder = global.TextDecoder || TextDecoder;
-global.TextEncoder = global.TextEncoder || TextEncoder;
 
 vi.mock('@mui/material', async () => {
   const React = await import('react');

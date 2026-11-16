@@ -1,10 +1,72 @@
-import { getResponseErrorMessage, persistAuthSession, readOkJson } from './authSession';
+import {
+  getResponseErrorMessage,
+  persistAuthSession,
+  readOkJson,
+  safeReadJson,
+} from './authSession';
 
 function makeResponse({ ok, status = 200, json }) {
   return { ok, status, json };
 }
 
 describe('authSession', () => {
+  describe('safeReadJson', () => {
+    test('returns parsed json on success', async () => {
+      const response = makeResponse({ ok: true, json: async () => ({ foo: 'bar' }) });
+      await expect(safeReadJson(response)).resolves.toEqual({ foo: 'bar' });
+    });
+
+    test('returns null when json parsing fails', async () => {
+      const response = makeResponse({
+        ok: false,
+        json: async () => {
+          throw new Error('bad json');
+        },
+      });
+      await expect(safeReadJson(response)).resolves.toBeNull();
+    });
+  });
+
+  test('when response json is an array of error strings, it extracts the first string', async () => {
+    const response = makeResponse({
+      ok: false,
+      status: 400,
+      json: async () => ['Accepted proposals cannot be deleted.'],
+    });
+
+    await expect(getResponseErrorMessage(response, 'fallback')).resolves.toBe(
+      'Accepted proposals cannot be deleted.',
+    );
+  });
+
+  test('cleans missing and whitespace-only profile fields after a new login', () => {
+    sessionStorage.setItem('username', 'old-user');
+    sessionStorage.setItem('email', 'old@example.com');
+    persistAuthSession({
+      access: 'new-access',
+      refresh: 'new-refresh',
+      username: '   ',
+      email: null,
+    });
+    expect(sessionStorage.getItem('username')).toBeNull();
+    expect(sessionStorage.getItem('email')).toBeNull();
+    persistAuthSession({
+      access: 'new-access',
+      refresh: 'new-refresh',
+      username: ' mapper ',
+      email: ' mapper@example.com ',
+    });
+    expect(sessionStorage.getItem('username')).toBe('mapper');
+    expect(sessionStorage.getItem('email')).toBe('mapper@example.com');
+  });
+
+  test('extracts nested password validation errors without stringifying arrays', async () => {
+    const response = { json: async () => ({ password: ['This password is too common.'] }) };
+    await expect(getResponseErrorMessage(response, 'fallback')).resolves.toBe(
+      'This password is too common.',
+    );
+  });
+
   beforeEach(() => {
     sessionStorage.clear();
     vi.restoreAllMocks();

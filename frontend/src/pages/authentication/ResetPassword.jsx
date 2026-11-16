@@ -1,6 +1,6 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router';
 import AuthPageShell from '../../components/AuthPageShell';
 import { resetPassword } from '../../services/authApiClient';
 import { readOkJson } from '../../services/authSession';
@@ -58,7 +58,6 @@ export default function ResetPassword({ showSnackbar }) {
         <TextField
           fullWidth
           disabled={isSubmitting}
-          sx={{ background: 'white' }}
           label="New Password"
           type="password"
           autoComplete="new-password"
@@ -68,29 +67,17 @@ export default function ResetPassword({ showSnackbar }) {
         <TextField
           fullWidth
           disabled={isSubmitting}
-          sx={{ background: 'white' }}
           label="Confirm Password"
           type="password"
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
         />
-        <Button
-          fullWidth
-          disabled={isSubmitting}
-          sx={{ backgroundColor: 'var(--secondary-color)' }}
-          type="submit"
-          variant="contained"
-        >
+        <Button fullWidth disabled={isSubmitting} type="submit" variant="contained">
           {isSubmitting ? 'Resetting...' : 'Reset Password'}
         </Button>
         <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
-          <Box
-            component="button"
-            type="button"
-            className="auth-link"
-            onClick={() => navigate('/login')}
-          >
+          <Box component={RouterLink} className="auth-link" to="/login">
             Back to Login
           </Box>
         </Typography>

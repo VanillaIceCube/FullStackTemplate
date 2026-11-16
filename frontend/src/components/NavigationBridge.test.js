@@ -1,11 +1,12 @@
+import { createElement } from 'react';
 import { renderWithProviders } from '../test-helpers/utils';
 import NavigationBridge from './NavigationBridge';
 import { navigate } from '../services/navigationService';
 
 const { mockNavigate } = vi.hoisted(() => ({ mockNavigate: vi.fn() }));
 
-vi.mock('react-router-dom', async () => ({
-  ...(await vi.importActual('react-router-dom')),
+vi.mock('react-router', async () => ({
+  ...(await vi.importActual('react-router')),
   useNavigate: () => mockNavigate,
 }));
 
@@ -15,14 +16,14 @@ describe('NavigationBridge', () => {
   });
 
   test('registers the router navigate function while mounted', () => {
-    renderWithProviders(<NavigationBridge />);
+    renderWithProviders(createElement(NavigationBridge));
 
     expect(navigate('/', { replace: true })).toBe(true);
     expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
   });
 
   test('clears the router navigate function when unmounted', () => {
-    const { unmount } = renderWithProviders(<NavigationBridge />);
+    const { unmount } = renderWithProviders(createElement(NavigationBridge));
 
     unmount();
 

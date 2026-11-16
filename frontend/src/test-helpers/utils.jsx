@@ -1,9 +1,11 @@
+import { CssBaseline } from '@mui/material';
+import fullStackTheme from '../theme';
 import { render } from '@testing-library/react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 
-// Shared test setup: disable MUI ripples (act warnings) and silence router v7 warnings.
-const testTheme = createTheme({
+// Shared test setup: disable MUI ripples (act warnings).
+const testTheme = createTheme(fullStackTheme, {
   components: {
     MuiButtonBase: {
       defaultProps: {
@@ -13,14 +15,11 @@ const testTheme = createTheme({
   },
 });
 
-const routerFuture = { v7_startTransition: true, v7_relativeSplatPath: true };
-
 export function renderWithProviders(ui, { routeEntries = ['/'], ...renderOptions } = {}) {
   return render(
     <ThemeProvider theme={testTheme}>
-      <MemoryRouter future={routerFuture} initialEntries={routeEntries}>
-        {ui}
-      </MemoryRouter>
+      <CssBaseline />
+      <MemoryRouter initialEntries={routeEntries}>{ui}</MemoryRouter>
     </ThemeProvider>,
     renderOptions,
   );
