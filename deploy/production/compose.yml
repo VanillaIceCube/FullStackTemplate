@@ -1,4 +1,7 @@
+# App-only release: the shared gateway reaches both services without host ports.
+# The bundle builder and release controller require reviewed immutable image digests.
 name: fullstacktemplate
+
 services:
   backend:
     image: ${BACKEND_IMAGE:?Set the reviewed backend digest}
@@ -6,32 +9,48 @@ services:
     restart: always
     env_file:
       - path: .backend.env
+        # Preserve literal dollar signs, hashes and quotes in private settings.
         format: raw
     volumes:
       - type: bind
         source: ${APP_DB_PATH:?Set the absolute existing SQLite file}
         target: /backend/db.sqlite3
         bind:
+          # Require the existing SQLite file; never create a directory in its place.
           create_host_path: false
     networks:
       ingress:
-        aliases: [fullstacktemplate-backend]
+        aliases:
+          - fullstacktemplate-backend
       default:
-        aliases: [backend]
+        aliases:
+          - backend
     logging:
       driver: json-file
-      options: {max-size: "10m", max-file: "3"}
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   frontend:
     image: ${FRONTEND_IMAGE:?Set the reviewed frontend digest}
     container_name: fullstacktemplate-frontend
     restart: always
     networks:
       ingress:
-        aliases: [fullstacktemplate-frontend]
+        aliases:
+          - fullstacktemplate-frontend
       default:
     logging:
       driver: json-file
-      options: {max-size: "10m", max-file: "3"}
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Infrastructure owns network creation and gateway membership; app.json owns policy.
 networks:
-  ingress: {external: true, name: fullstacktemplate-ingress}
-  default: {external: true, name: fullstacktemplate_default}
+  ingress:
+    external: true
+    name: fullstacktemplate-ingress
+  default:
+    external: true
+    name: fullstacktemplate_default
