@@ -5,18 +5,20 @@ permissions, notifications, and application integrations.
 
 ## 🧭 Structure
 
-- `app/`: settings and server entry points.
-- `authentication/`, `notifications/`: accounts and notifications.
-- `app_mcp/`: reusable MCP transport and OAuth.
+- `config/`: settings and server entry points.
+- `docker/`: production/development Dockerfiles and their matching Dockerfile-specific
+  ignore files; keep `backend/` as the build context.
+- `apps/authentication/`, `apps/notifications/`: accounts and notifications.
+- `apps/mcp/`: shared `framework/`, application `tools/`, and `chatgpt/` packaging.
 
 ## 💻 Local development
 
-Use Python 3.12 in an isolated environment. From the repository root:
+Install uv, then synchronize the locked Python 3.12 project from the repository root:
 
 ```powershell
-python -m pip install -r backend/requirements.txt
-python backend/manage.py migrate
-python backend/manage.py runserver 8000
+uv sync --locked --project backend
+uv run --locked --project backend python backend/manage.py migrate
+uv run --locked --project backend python backend/manage.py runserver 8000
 ```
 
 Local settings can be supplied in ignored `backend/.env`.
@@ -24,9 +26,12 @@ For Docker hot reload, follow the [deployment guide](../deploy/README.md).
 
 ## ⚙️ Configuration
 
+Production (`DJANGO_DEBUG=0`) requires an explicit nonblank `DJANGO_SECRET_KEY`.
+Static files use Django's default storage and the retained WhiteNoise middleware.
+
 Local runs load ignored `backend/.env`. The database defaults to
 `backend/db.sqlite3`; set `DJANGO_SQLITE_PATH` to use another local database.
-Use `app/settings.py` for current defaults.
+Use `config/settings.py` for current defaults.
 
 | Setting | Purpose |
 | --- | --- |
@@ -42,6 +47,13 @@ For Docker hot reload and dependency volumes, use the
 [deployment README](../deploy/README.md).
 
 ## 🔐 Authentication API
+
+Registration, login and reset preserve passwords exactly, including leading and
+trailing spaces. Request serializers reject malformed credential/link types with
+HTTP 400; email addresses are trimmed and normalized. Registration returns an
+explicit client error for duplicate identities and rolls back account creation,
+required onboarding and session creation together if any step fails. Recovery
+responses remain generic for valid email-shaped input.
 
 - `POST /auth/register/`
   - Body: `email`, `password`, and optional `username`
@@ -81,61 +93,74 @@ without depending on a template-owned domain model.
 
 ## ✉️ Email
 
-Local development uses Django's console email backend. The included
-Resend HTTPS backend is configured with:
+Local development keeps Django's console backend. Resend API delivery uses the
+maintained `django-anymail==15.2` backend:
 
 ```env
-DJANGO_EMAIL_BACKEND=authentication.email_backends.ResendApiEmailBackend
+DJANGO_EMAIL_BACKEND=anymail.backends.resend.EmailBackend
 DJANGO_EMAIL_HOST_KEY=<resend-api-key>
 DJANGO_EMAIL_TIMEOUT=10
 DJANGO_DEFAULT_FROM_EMAIL=<sender-on-a-verified-domain>
 ```
 
-Keep `.localhost` senders with console delivery. Live delivery uses an approved
-sender domain and private credentials configured through the production guide.
-Plain text, HTML, multipart alternatives, `cc`, `bcc`, and `reply_to` are supported.
+The existing key becomes `ANYMAIL["RESEND_API_KEY"]` only when nonblank. Existing
+SMTP/custom backend selectors remain configurable; known historical Resend class
+paths map to the maintained backend without retaining an application wrapper.
+Only outbound sending is configured: no webhook routes or optional `svix` package.
 
-The socket-operation timeout defaults to 10 seconds and supports `0 < seconds <= 30`.
-The environment value is parsed as an integer. Invalid runtime timeout values fall
-back safely; malformed startup configuration fails visibly. A successful provider
-response means acceptance, not confirmed inbox delivery.
+The startup integer timeout maps to `ANYMAIL["REQUESTS_TIMEOUT"]`: values in
+`0 < seconds <= 30` are honored; out-of-range values use the safe 10-second default.
+Malformed integers still fail startup visibly. API debug output is explicitly off,
+and the requests session adds no automatic retries. A timeout may occur after
+provider acceptance, so retries need a separately designed idempotency policy.
 
-Failures preserve `fail_silently`: false re-raises, while true skips failures and
-returns the number sent. Password reset returns a generic response for known and
-unknown accounts, including delivery failures. Logger `authentication.email_backends`
-records safe category/status fields: `configuration`, `request`, `rate_limit`,
-`provider`, `timeout`, `network`, or `unexpected`. Never log provider response
-bodies, recipient details, reset tokens, message contents, or credentials.
+Operational failures retain `fail_silently` and successful-message counts.
+Anymail deliberately raises configuration errors (including a missing API key)
+even in silent mode, before HTTP. Password reset catches failures and keeps the
+same generic response for known and unknown accounts. Its log message contains
+no exception text/traceback, provider body, recipients, credentials or reset tokens.
+Anymail exceptions can carry provider data: do not log exception representations
+or enable `DEBUG_API_REQUESTS`. Provider acceptance does not prove inbox delivery.
 
-Diagnose failures using those categories and the existing provider dashboard.
-There is no automatic retry or resend: a timeout may occur after acceptance.
-Use mocked delivery tests; production email receipt requires separate verification.
+Project-owned configuration and mocked provider-boundary tests live in
+`config/tests/`; authentication retains real reset-call privacy regressions.
+Plain text, HTML, reply-to, cc and bcc use Anymail's maintained serialization.
 
 ## 🔌 MCP integration
 
-The shared-framework checker lives at `backend/check_app_mcp.py`, beside the backend
-and outside the hash-verified package. Run `python backend/check_app_mcp.py` from
-the repository root; use `--source-root <canonical-checkout>` for local offline
-verification. See the [framework guide](app_mcp/README.md) for source ownership.
-
-The [MCP README](app_mcp/README.md) explains shared transport,
+The [MCP README](apps/mcp/README.md#framework) explains shared transport,
 OAuth, configuration, and verification.
 
 The template is disabled by default and provides a sample connection tool;
 derived applications implement and enable their own tools.
 
-Connection manifests, artwork, and package builders live in
-[chatgpt/](app_mcp/chatgpt/README.md).
+Connection manifests and artwork live in
+[chatgpt/](apps/mcp/README.md#chatgpt).
 
 ## 🧪 Checks
+
+Backend tests live in an owning `tests/` package beside each app or configuration
+module. Use descriptive `test_*.py` filenames and behavior-based test class names,
+keep `__init__.py` empty, and put shared setup/builders in fixture-only modules
+such as `helpers.py`. Helpers must not define test cases or import test modules.
+Split independent behavior groups when that makes failures easier to locate;
+keep related end-to-end scenarios together.
+
+Authentication packages share registration, login, password recovery/reset and
+recovery-privacy groups. Configuration owns production settings and email
+configuration/delivery. The canonical MCP framework has identical profile, OAuth
+and transport test modules in all three applications; app tools remain app-owned.
+
+Notification API tests remain in `apps/notifications/tests/`. The default profile
+keeps MCP disabled; run the enabled profile described in the MCP guide as well.
 
 From the repository root:
 
 ```powershell
-python backend/manage.py test
-ruff check backend
-ruff format backend --check
-python backend/manage.py makemigrations --check --dry-run
+uv run --locked --project backend python backend/manage.py test backend
+uv run --locked --project backend ruff check backend
+uv run --locked --project backend ruff format backend --check
+uv run --locked --project backend python backend/manage.py makemigrations --check --dry-run
 ```
 
 ## 🛠️ Maintenance
@@ -145,9 +170,11 @@ preserve password whitespace, and retain generic account-recovery responses.
 Notification operations remain recipient-scoped; bulk mutations are atomic.
 Preserve pending/error handling through response parsing in the frontend.
 
-Maintain the Python version in `environment.yml` and pip dependencies in
-`requirements.txt` together with CI and Docker. The test runner's fast password
-hasher applies only during tests; normal settings retain secure hashing.
+Maintain the Python 3.12 constraint in `pyproject.toml`; declare dependencies
+in `pyproject.toml` and commit `uv.lock`. Use `uv add --project backend <package>`
+or `uv lock --project backend --upgrade-package <package>` for deliberate changes,
+then `uv sync --locked --project backend`. CI and Docker consume the same lockfile. Django uses its default test runner and secure password hashing; focused tests may
+override hashing within their own test scope.
 See [Docker dependency maintenance](../deploy/README.md#development-dependency-reproducibility).
 
 ## 🚀 Production

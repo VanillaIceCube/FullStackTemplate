@@ -51,14 +51,14 @@ history and valid UTF-8 text when editing or merging entries.
 
 ## 💻 Local development
 
-Use manual setup; do not assume Django or Node dependencies are installed.
-Use Python 3.12 in an isolated environment and the Node version range in
+Use uv for Python environments; do not assume dependencies are installed.
+Use the locked Python 3.12 backend project and the Node version range in
 `frontend/package.json`. From the repository root:
 
 ```powershell
-python -m pip install -r backend/requirements.txt
-python backend/manage.py migrate
-python backend/manage.py runserver 8000
+uv sync --locked --project backend
+uv run --locked --project backend python backend/manage.py migrate
+uv run --locked --project backend python backend/manage.py runserver 8000
 ```
 
 In a separate shell, from the repository root:
@@ -69,8 +69,10 @@ npm ci
 npm start
 ```
 
-Frontend image definitions and Nginx configuration live in `frontend/docker/`;
-keep `frontend/` as the Docker build context.
+Backend image definitions live in `backend/docker/`; keep `backend/` as the
+Docker build context. Each Dockerfile has a matching `<Dockerfile>.dockerignore`
+beside it; exclusions remain relative to the context root. Frontend image definitions and Nginx configuration live in
+`frontend/docker/`; keep `frontend/` as the Docker build context.
 
 For local Docker hot reload and optional standalone HTTPS, follow
 [deploy/README.md](deploy/README.md). Initialize only missing local environment
@@ -89,7 +91,7 @@ Optional backend variables:
 - `DJANGO_CSRF_TRUSTED_ORIGINS`
 - `DJANGO_FORCE_SCRIPT_NAME` (leave blank for subdomain-root routing)
 - `DJANGO_FRONTEND_BASE_URL` (default: `http://localhost:3000`)
-- `DJANGO_EMAIL_BACKEND`
+- `DJANGO_EMAIL_BACKEND` (console/SMTP or `anymail.backends.resend.EmailBackend`)
 - `DJANGO_EMAIL_HOST`
 - `DJANGO_EMAIL_PORT`
 - `DJANGO_EMAIL_USE_TLS`
@@ -108,12 +110,18 @@ build-time settings. Client-side variables must contain no secrets.
 
 ## 🧪 Checks
 
+Keep backend tests in owning `tests/` packages with descriptive behavior-based
+`test_*.py` modules and empty `__init__.py` files. Shared fixture helpers must not
+define discoverable test cases or import test modules. Group modules and classes
+by behavior, preserve test discovery and assertions when splitting, and keep the
+canonical MCP framework tests aligned across applications.
+
 Run checks in proportion to the change, from the repository root:
 
 ```powershell
-python backend/manage.py test backend
-ruff check backend
-ruff format backend --check
+uv run --locked --project backend python backend/manage.py test backend
+uv run --locked --project backend ruff check backend
+uv run --locked --project backend ruff format backend --check
 ```
 
 From `frontend/`:
@@ -186,7 +194,7 @@ commit SHAs with version comments. Workflow updates do not authorize deployment.
 The shared publisher fails after every `REQUEST_CHANGES`, including repeated or
 unchanged verdicts; valid `APPROVE`/`COMMENT` pass and unavailable/invalid output
 fails. Missing credentials, incomplete required major-upgrade briefs and oversized
-diffs must fail visibly. The shared diff budget is 512 KiB. Obi-Wan's semver-major
+diffs must fail visibly. The shared diff budget is 2 MB (2,000,000 bytes). Obi-Wan's semver-major
 Dependabot brief uses complete primary-source evidence; web search remains limited
 to that review path. Run the repository's publisher regression tests and
 Actionlint when changing this contract. Where used, the read-only `verify-gates.js` audit requires actual
@@ -240,7 +248,8 @@ gates. Application AI model selection remains app-owned.
 ## 🔌 MCP integration
 
 Shared MCP framework changes originate in FullStackTemplate's canonical Python
-package; synchronize consumer hashes and pins. Derived applications own enablement,
+package; synchronize reviewed runtime changes across consumers and record source
+commits in the coordinated tracking issue. Derived applications own enablement,
 registries, scopes and business tools. Infrastructure supplies ordinary gateway
 routing and its optional MCP contract. Preserve existing Notoli credentials,
 scopes, tool permissions, connection and exact proxy trust. The retired central
@@ -248,7 +257,7 @@ issuer is not a deployment prerequisite. Advertise an app service only after its
 own registry, OAuth and readiness checks pass; framework adoption alone does not
 authorize activation, client registration, owner consent or plugin installation.
 
-Follow the [MCP framework contract](backend/app_mcp/README.md). FullStackTemplate
+Follow the [MCP framework contract](backend/apps/mcp/README.md#framework). FullStackTemplate
 owns the canonical package; derived applications own enablement and business tools.
 
 ## 🧩 Repository-specific contracts

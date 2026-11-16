@@ -2,11 +2,13 @@
 
 import json
 import os
-from pathlib import Path
 import subprocess
 import tempfile
 import textwrap
 import unittest
+from pathlib import Path
+
+import yaml
 
 ACTION = Path(__file__).with_name("action.yml")
 
@@ -40,7 +42,13 @@ class ReviewDiffTests(unittest.TestCase):
         self.git("commit", "-qm", "fixture")
         return self.git("rev-parse", "HEAD")
 
-    def action(self, head, budget=524288, base=None, check=True):
+    def action(self, head, budget=None, base=None, check=True):
+        if budget is None:
+            budget = int(
+                yaml.safe_load(ACTION.read_text(encoding="utf-8"))["inputs"][
+                    "max_bytes"
+                ]["default"]
+            )
         # Execute the action's Bash body, rather than duplicating its filtering.
         script = textwrap.dedent(
             ACTION.read_text(encoding="utf-8").split("      run: |\n", 1)[1]
@@ -56,6 +64,7 @@ class ReviewDiffTests(unittest.TestCase):
         summary = self.root / "summary"
         result = subprocess.run(
             ["bash", "-c", script],
+            check=False,
             cwd=self.root,
             env={
                 **os.environ,
@@ -74,7 +83,8 @@ class ReviewDiffTests(unittest.TestCase):
         self.write("frontend/package-lock.json", json.dumps({"padding": "x" * 700000}))
         self.write("frontend/package.json", '{"name":"updated"}\n')
         self.write("src/example.js", "first\nnew\nthird\n")
-        _, outputs = self.action(self.commit())
+        # Keep a deliberately smaller fixture budget to isolate lockfile filtering.
+        _, outputs = self.action(self.commit(), budget=524288)
         self.assertEqual(outputs["truncated"], "false")
         self.assertGreater(int(outputs["full_diff_bytes"]), 524288)
         self.assertLess(int(outputs["diff_bytes"]), 524288)
@@ -108,6 +118,7 @@ class ReviewDiffTests(unittest.TestCase):
         context = self.root / "context.txt"
         result = subprocess.run(
             ["bash", "-c", script],
+            check=False,
             cwd=self.root,
             env={
                 **os.environ,
@@ -168,7 +179,7 @@ class ReviewDiffTests(unittest.TestCase):
 
     def test_rename_from_lockfile_to_source_retains_new_source(self):
         self.git("mv", "frontend/package-lock.json", "src/former-lock.js")
-        _, outputs = self.action(self.commit())
+        self.action(self.commit())
         self.assertIn("src/former-lock.js", (self.root / "pr.diff").read_text())
         self.assertIn(
             'A1: {"lockfileVersion":3}', (self.root / "pr_lines.diff").read_text()
