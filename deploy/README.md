@@ -6,6 +6,11 @@ standard. The sole production/recovery procedure is
 `nginx-proxy.conf` below are local-only, standalone HTTPS fixtures. Never upload
 them over shared host ingress or use them as production rollback scripts.
 
+Shared release verification runs through
+`python deploy/production/build_bundle.py --check-parity`; its immutable
+Infrastructure source pin is `shared_source` in `production/app.json`.
+See the [production guide](production/README.md) for source synchronization.
+
 <a id="local-docker-with-applicationlocalhost"></a>
 
 ## 💻 Local Docker with `[application].localhost`
@@ -36,12 +41,14 @@ ports. It does not require a certificate, Nginx proxy, or shared local
 ingress. Open `http://fullstacktemplate.localhost:3000`.
 
 Use the standalone local HTTPS commands below when testing HTTPS, Nginx, or the
-deployment image path.
+deployment image path. Install `mkcert` first; the commands create local
+certificates in ignored `certs/`.
 
 ```powershell
 if (-not (Test-Path deploy/.env)) { Copy-Item deploy/backend.env deploy/.env }
 if (-not (Test-Path deploy/db.sqlite3)) { New-Item -ItemType File -Path deploy/db.sqlite3 }
-./deploy/create-local-certificate.ps1
+New-Item -ItemType Directory -Path certs -Force | Out-Null
+mkcert -cert-file certs/origin.pem -key-file certs/origin.key "fullstacktemplate.localhost" localhost 127.0.0.1 ::1
 docker build --file backend/docker/Dockerfile -t ghcr.io/vanillaicecube/fullstacktemplate-backend:latest ./backend
 docker build --file frontend/docker/Dockerfile -t ghcr.io/vanillaicecube/fullstacktemplate-frontend:latest ./frontend
 Set-Location deploy

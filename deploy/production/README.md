@@ -4,8 +4,8 @@ For local development, use the [deployment README](../README.md).
 
 FullStackTemplate adopts the versioned release standard from
 [JudeAndrewAlabaInfrastructure](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/main/app-release/README.md).
-The exact source commit is in `deploy/shared-source.json`; common runtime, tests,
-checker, and workflow are hash-checked. Do not edit a vendored common file.
+The exact source commit is recorded under `shared_source` in `deploy/production/app.json`; common runtime, tests,
+verification, and workflow are hash-checked. Do not edit a vendored common file.
 Change the shared source, regenerate its manifest, and synchronize every consumer.
 
 <a id="ownership-and-onboarding-gate"></a>
@@ -107,7 +107,7 @@ the untouched gateway/companions before recording acceptance or releasing holds.
 ## 🧪 Checks
 
 ```powershell
-python deploy/check_parity.py
+python deploy/production/build_bundle.py --check-parity
 python -m unittest discover -s deploy/tests -v
 node --test .github/actions/*/*.test.js
 ```
