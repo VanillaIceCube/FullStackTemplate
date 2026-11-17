@@ -402,7 +402,7 @@ coverage; never rerun an old failed revision as proof of the new source.
 
 Docker login v4.8.0 uses the immutable action revision supplied by the canonical
 Infrastructure release template. Change shared deployment actions upstream, update
-`deploy/shared-source.json`, run `python deploy/check_parity.py --sync`, then
+`shared_source` in `deploy/production/app.json`, run `python deploy/production/build_bundle.py --check-parity --sync`, then
 regenerate `python .github/tools/ci_architecture.py`. Both parity checks must pass before
 merging; this source update does not provision or activate a template deployment.
 
@@ -499,7 +499,7 @@ with `python .github/tools/ci_architecture.py` and verify it with
 `python .github/tools/ci_architecture.py --check`; action-only changes alter the stored
 workflow hash even when the workflow diagram stays the same. Deployment action
 changes must originate in Infrastructure’s shared release template and propagate
-through `deploy/shared-source.json` and `deploy/check_parity.py --sync`.
+through `shared_source` in `deploy/production/app.json` and `python deploy/production/build_bundle.py --check-parity --sync`.
 
 Validate syntax and relevant behavioral tests after automation changes. Preserve
 original check failures and bounded/redacted diagnostics. Update the existing

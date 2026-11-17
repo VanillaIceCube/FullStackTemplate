@@ -1,27 +1,110 @@
 # 🚀 Production releases and recovery
 
-For local development, use the [deployment README](../README.md).
+This guide covers FullStackTemplate's app-only release and explicit recovery process.
+For local development, use the [deployment README](../README.md). Infrastructure
+owns the shared release engine and host ingress; each app owns its configuration,
+credentials and operational acceptance.
 
-FullStackTemplate adopts the versioned release standard from
-[JudeAndrewAlabaInfrastructure](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/main/app-release/README.md).
-The exact source commit is in `deploy/shared-source.json`; common runtime, tests,
-checker, and workflow are hash-checked. Do not edit a vendored common file.
-Change the shared source, regenerate its manifest, and synchronize every consumer.
+<a id="-ownership-and-onboarding-gate"></a>
 
 <a id="ownership-and-onboarding-gate"></a>
 
-## 🧭 Ownership and onboarding gate
+## 🧭 Ownership and promotion
 
-Follow the [main-first release policy](../../.github/README.md#main-first-releases).
-Ordinary changes merge through reviewed main before promotion; exceptional
-owner-authorized deployment experiments return to main promptly through review.
-Intentional release lag is allowed until features are ready. This template has
-no active `env-prod` branch; branch parity does not authorize provisioning one.
+Follow the [main-first release policy](https://github.com/VanillaIceCube/FullStackTemplate/blob/main/.github/README.md#main-first-releases).
+Develop and review ordinary changes through PRs targeting `main`, then promote
+only the exact reviewed source tree through the existing protected `env-prod`
+process. A promotion merge may have a different commit ID, but its source tree
+must match the reviewed main commit. Preserve required CI, reviews and explicit
+owner/operator authorization. The workflow accepts `env-prod` pushes and manual
+dispatch selecting that branch; its branch check does not enforce main ancestry.
+Merging main does not deploy, and source review does not authorize host operations.
+
+An explicitly owner-authorized deployment experiment must return promptly to
+main through review before the next ordinary promotion. Preserve both histories
+and newer main work; never reset or force-push to manufacture parity. Intentional
+release lag is allowed while prerequisites or acceptance remain unfinished.
+History reconciliation does not authorize deployment or require matching live
+and main trees. An absent production branch is not a reason to create one.
+Use the owner-designated operator and its scoped plan; an explicitly authorized
+mission may cover both source and promotion stages.
+
+This template has no active `env-prod` branch and no live target. Framework or
+release-source adoption does not provision a template instance or authorize a
+third app on the existing host.
+
+<a id="-production-settings"></a>
+
+<a id="production-settings"></a>
+
+## ⚙️ Configuration
+
+[app.json](app.json) owns the app's services, container names, domain,
+environment, networks, database and readiness policy; [compose.yml](compose.yml)
+defines its two services. Common release and bundle code has no app-name branches.
+Infrastructure owns `app-release/v1`, its manifest, tests and workflow template.
+`shared_source` in `app.json` pins that source to immutable commit
+`9c1102c4ac866c4925fa13260dbdc27eec1199b1` across all three consumers. CI verifies
+the common files and generated workflow, failing on drift or unavailable source.
+Change the Infrastructure source, regenerate its manifest, then synchronize all
+consumers; never edit only a vendored common file. See the
+[release standard](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/9c1102c4ac866c4925fa13260dbdc27eec1199b1/app-release/README.md)
+for the parity matrix and coordinated update procedure.
+
+Required Actions access variables: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`,
+`DEPLOY_HOST_FINGERPRINT` (independently verified SSH host key fingerprint).
+Optional `DEPLOY_PORT` defaults to 22. Required access secret: `DEPLOY_SSH_KEY`.
+Required app secrets: `DJANGO_SECRET_KEY`, `DJANGO_EMAIL_HOST_KEY`.
+Required app variables: `DJANGO_EMAIL_BACKEND`, `DJANGO_DEFAULT_FROM_EMAIL`.
+Use `anymail.backends.resend.EmailBackend` or
+`django.core.mail.backends.smtp.EmailBackend`. The builder normalizes known
+legacy Resend class paths to the current Anymail backend for new bundles only.
+Optional mail settings: `DJANGO_EMAIL_HOST`, `DJANGO_EMAIL_PORT`,
+`DJANGO_EMAIL_USE_TLS`, `DJANGO_EMAIL_HOST_USER`, `DJANGO_EMAIL_TIMEOUT`.
+Defaults are `smtp.resend.com`, port 587, TLS enabled, user `resend`, timeout 10
+seconds. Host/port/TLS/user settings apply to SMTP; the timeout also bounds
+Resend API calls.
+
+The bundle builder applies required, default and fixed settings from `app.json`;
+incompatible explicit overrides of fixed production settings fail. Debug is off,
+hosts/origins are explicit and the database target is `/backend/db.sqlite3`.
+The frontend build uses blank `VITE_API_BASE_URL` for same-origin requests.
+Both apps and the template use domain-root routes, without a configurable Django
+path prefix: frontend `/`, authentication `/auth/`, admin `/admin/`, APIs `/api/`.
+Environment values use single-line raw env files, preserving literal dollar
+signs, hashes and quotes. Keep credentials out of Git, public artifacts, Vite
+variables and logs. Release bundles and captured recovery evidence stay private.
+
+Template domain: `app.example.com`; Compose services: `backend` / `frontend`;
+container/image names: `fullstacktemplate-backend` / `fullstacktemplate-frontend`.
+Its example networks are `fullstacktemplate-ingress` and
+`fullstacktemplate_default`. Review real domain, networks and exact proxy trust
+before activation. The disabled production policy does not set an MCP issuer or
+trusted-peer override. The gateway must overwrite forwarded scheme/client data
+and pass the canonical Host within a reviewed restricted backend boundary;
+Django ignores forwarded host metadata.
+
+## 🧱 Host preparation and activation
 
 Infrastructure owns shared Nginx, TLS certificates, ports 80/443, route-network
-lifecycle, and host capacity. This repository owns only its backend, frontend,
-database, immutable images, and private release/recovery records. The template
-does not provision networks or gateway routes and does not upload certificates.
+lifecycle and host capacity. Application releases own only their backend,
+frontend, database, immutable images and private release/recovery records.
+The gateway must already own ingress and pass its cutover acceptance before
+activation. App Compose references existing networks externally. The controller
+rejects unexpected route-network members, required app/gateway absence,
+app-policy trust/address drift and DB-mount drift. A missing companion app is
+allowed so its outage does not prevent this app's release or recovery; gateway
+cutover acceptance still requires both apps.
+
+Releases never create/delete networks, publish a backend port, upload TLS/vhosts,
+reload the gateway, run whole-project `down`/`remove-orphans` or prune host images.
+Local `deploy/docker-compose.yml` and `deploy/nginx-proxy.conf` are local/legacy
+inputs, never production release inputs.
+
+The release controller verifies running frontend bindings against the accepted
+app policy, then checks rendered Compose and Docker against the candidate policy.
+Change both Compose and app.json when changing a publication. The current
+candidate policies publish no frontend or backend host ports.
 
 `app.example.com`, `/opt/apps/fullstacktemplate`, and subnet `172.31.240.0/24` are
 isolated examples. They do not approve a third app on the existing shared host.
@@ -33,114 +116,255 @@ apps. Replace the example `gateway` policy with the reviewed complete topology;
 the preflight intentionally rejects a different active gateway network set.
 See [Infrastructure coordination #4](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/issues/4).
 
-Configure `deploy/production/app.json`, Compose, and the application workflow
-manually while preserving canonical shared-source ownership and vendored bytes.
-Review the configuration before adoption. The database must already be a
-nonempty, valid SQLite file created through a separately approved bootstrap;
-the release engine never silently creates or truncates an existing database.
+Configure `app.json` and Compose for the derived application manually, preserving
+canonical shared-source ownership and vendored bytes. Render its workflow from
+the shared template through the reviewed synchronization process. Review the
+configuration before adoption. The database must already be a nonempty, valid
+SQLite file created through a separately approved bootstrap.
 
+### Private host preparation
 
-The release controller verifies running frontend bindings against the accepted
-app policy and checks rendered Compose and Docker against the candidate policy.
-Change both Compose and app.json when changing a publication.
+The approved operator provisions the app root and its `incoming`, `releases`
+and `recovery` children before activation, owned by the deployment identity with
+mode 0700. `/opt/apps/fullstacktemplate` is an isolated example; the existing nonempty, valid SQLite file
+must remain at `db.sqlite3`. Staging and releases must share the app filesystem.
+The release engine performs no first-install or empty-database bootstrap and
+never silently creates or truncates the database.
 
-<a id="production-settings"></a>
+The host needs working GHCR pull credentials, Docker Engine/Compose with raw
+env-file support (the recorded audit used Compose 2.40.3), Python 3 and POSIX
+flock support. CI installs no host packages. Shared maintenance and per-app lock
+files live outside replaceable releases under `/var/lib/jude-deploy-locks`.
+Provision that directory privately and existing regular mode-0600
+`maintenance.lock` and `fullstacktemplate.lock` files with reviewed ownership. Existing
+Notoli and MacroMapper releases also retain their respective app locks. Locks
+must be protected stable inodes; never replace them, and reject symlinks.
 
-## ⚙️ Production settings
-
-Actions secrets: `DEPLOY_SSH_KEY`, `DJANGO_SECRET_KEY`, `DJANGO_EMAIL_HOST_KEY`.
-Actions variables: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`,
-`DEPLOY_HOST_FINGERPRINT`, optional `DEPLOY_PORT`, `DJANGO_EMAIL_BACKEND`,
-`DJANGO_DEFAULT_FROM_EMAIL`, and optional SMTP settings from `app.json`.
-Use ResendApiEmailBackend or Django's SMTP backend. Keep backend credentials out
-of Git, public artifacts, Vite variables, and logs. GHCR pull access must already
-be configured for private packages. Review read-versions/Docker runtimes too.
-
-Application host, CORS/CSRF origins, frontend URL, database target, and debug mode
-come from app policy. The frontend build uses blank `VITE_API_BASE_URL` for
-same-origin requests. The gateway must overwrite forwarded scheme/client data
-and pass the canonical Host. Django ignores forwarded host and trusts forwarded
-HTTPS only behind the reviewed, restricted backend network boundary.
+Existing production paths require operator-reviewed access; do not infer that
+a non-root uploader works or change database/key ownership blindly. Review
+permission changes in the production plan. Initially serialize different-app
+releases operationally until peak/concurrent capacity is verified.
 
 <a id="release-sequence"></a>
 
 ## 🚀 Release sequence
 
-Only explicitly approved promotion to protected `env-prod` may activate a release.
-The workflow also refuses manual dispatch from any other branch. Merging to main
-does not deploy, and this PR is not approval to promote or run host commands.
-
 1. CI verifies parity before destination credentials or image publication, builds
-   SHA-tagged images, and records their actual immutable digests.
-2. CI creates a private bundle named by source SHA, run, and attempt. It contains
-   only app Compose/configuration, the runtime script, environment, release data,
-   and checksums; it never contains ingress files or certificates.
-3. The operator-provisioned private app root contains `incoming/`, `releases/`,
-   and the existing database. Shared maintenance and per-app lock files live
-   outside replaceable releases under `/var/lib/jude-deploy-locks`, with reviewed
-   ownership and modes. Uploads reserve a unique incoming directory.
-4. The common transaction takes the host maintenance lock before the app lock,
-   checks topology/capacity/runtime, captures matched recovery data, stops only
-   this app's writers, and verifies SQLite backup/restore before migration.
-5. It promotes only app-owned configuration, migrates, starts only the two app
-   services, and checks direct API 401 plus public HTML 200 / JSON API 401 with
-   bounded retries. It records success only after acceptance.
+   full-SHA-tagged backend/frontend images and records their actual immutable
+   digests. Every pull, migration and startup uses those digests, never `latest`.
+2. CI builds a private bundle identified by `<source-sha>-<run-id>-<attempt>`.
+   It contains only app Compose, `app.json`, `release.py`, environment,
+   release identity and checksums; never ingress files or certificates.
+3. CI reserves a fresh `incoming/<release-id>` directory and uploads only that
+   bundle. It never overwrites active files before locking or reuses an attempt.
+4. The common transaction validates the candidate, captures matched recovery
+   data and verifies backup/restore before migrating. It starts only the two app
+   services and records success only after bounded readiness checks.
 
-No host-wide pruning, shared proxy restart, network deletion, or automatic
-database rollback occurs. Retain prior images, private environment/configuration,
-and recovery sets until operator-reviewed retention cleanup.
+The staged bundle checksums `app.json`. Release and rollback run offline without
+an Infrastructure checkout or code downloads. One transaction file keeps failure
+ordering and crash barriers reviewable; app policy is separate from that state
+machine.
+
+### Transaction and data capture
+
+`release.py deploy` acquires shared maintenance then exclusive app lock,
+rejecting conflicts rather than waiting indefinitely. The host operator uses
+the maintenance lock exclusively for cutover. Initially serialize different-app
+releases operationally until peak/concurrent capacity is verified.
+
+Before stopping writers the script checks the payload manifest, immutable app
+image identities, topology, fixed trust, existing DB bind, 512 MiB available
+memory and 20% disk headroom after allowance for recovery copies. These floors
+do not certify representative peak capacity. It resolves/pulls images, captures
+private runtime state and produces an **app-only recovery Compose model** pinned
+to cached previous image IDs. Original legacy files are retained as private
+evidence; they are never executed as rollback scripts.
+
+The backend and any surviving app-labelled management containers stop before
+SQLite backup. Private `data-state.json` records the exact writer ID or a unique
+generation label plus a checksummed complete checkpoint. Capture never guesses by container
+start time. It discovers all backend/management writers by labels, including
+temporary Compose names, stops them, and copies the selected generation's
+DB plus WAL/rollback journal from the stopped container into a private isolated
+directory, and recovers that copy. This matters because only the main DB file is
+bind-mounted; sidecars can be in the container filesystem. A backup and isolated
+restore copy must both pass integrity checks before production checks/migrations. SQLite
+copy/restore operations have a 60-second progress deadline. Management
+containers carry app/release identity labels and unique names. They are stopped
+and verified after Docker CLI timeout; rollback quiesces surviving labelled
+containers too. Stopped containers are retained because their journals can be
+recovery evidence. Cleanup needs explicit operator review, like image retention.
+Management containers join only the app's backend egress network; they do not
+contend with reserved backend addresses. Before migration and again before app
+startup, verified data is consolidated into the main host DB with its original owner/mode. Before an inode swap, the
+complete checkpoint and consumed writer IDs are persisted; their old journals
+are retired from future selection. A missing/unstarted replacement uses that
+checkpoint, while a started temporary-name container is captured by its generation.
+Unknown or multiple current writers fail closed. Copies use DELETE journal
+mode; this does not enable WAL or relocate storage. Migration/startup use the
+selected digest, no pull at startup.
+
+Readiness includes direct Django `/api/notifications/` returning 401, HTTPS HTML
+root returning 200 and public JSON API returning 401. Enabled app policies add
+issuer/resource discovery and an unauthenticated MCP challenge; see
+[MCP integration](#-mcp-integration) for each app's exact contract. Public probes
+use `JudeAppRelease/1.0` and request uncached responses; Cloudflare protections
+and policy response checks remain enabled. Attempts use a 90-second retry window
+plus at most one in-flight round of bounded requests. Docker exec times out at
+10 seconds and HTTP at 5 seconds; ordinary Docker commands default to 300 seconds
+with shorter explicit stop/management limits. These readiness checks do not
+establish full functional or operator acceptance.
+
+### Authorized deploy command
+
+Set `app_root=/opt/apps/fullstacktemplate` and resolve `release_id` from the exact reviewed private
+release/recovery record. Use a retained, reviewed copy of this release tool,
+never a legacy proxy-owning deploy script.
+
+CI invokes the equivalent of:
+
+```bash
+python3 "$app_root/incoming/$release_id/release.py" deploy \
+  --root "$app_root" --bundle "$app_root/incoming/$release_id"
+```
 
 <a id="failure-and-explicit-recovery"></a>
 
 ## 🛟 Failure and explicit recovery
 
-Keep the failed attempt and `FAILED.json`; automatic retry cannot choose whether
-to lose later database writes. Under a separately approved recovery decision, use
-the retained bundle's `release.py rollback` with the selected app root, release
-identity, and explicit restore/keep decision shown by `--help`. Restore requires
-the matched image/configuration/database set. Use the retained offline script;
-do not run a legacy proxy-owning deploy script as recovery. Verify this app and
-the untouched gateway/companions before recording acceptance or releasing holds.
+`FAILED.json` is written **before stopping writers**, so process death also
+blocks the next deploy. The success record `current.json` is replaced only
+after readiness. On migration/startup/readiness failure the backend is stopped,
+recovery is preserved, and the operator must select recovery explicitly.
+No automatic DB restore can silently discard later writes.
+A SIGKILL/host crash still requires the operator to inspect containers and stop
+writers before recovery; the persistent marker does not itself stop a process.
+
+The private recovery set contains captured effective runtime (including Env),
+app-only Compose, raw old environment, immutable old local image IDs, original
+config/script/env evidence, previous release files/record, and verified DB backup.
+Retain these plus cached images. The tool never prunes them. Keep recovery files
+private and out of logs/tickets. Retained management containers also contain raw
+environment and possible DB journals; treat them as private recovery evidence.
+Command errors intentionally withhold captured output; diagnose privately using the saved configuration.
+
+### Authorized recovery commands
+
+Use the same `app_root` and selected `release_id` from the private record.
+The examples use the retained release directory. If failure occurred before that
+directory existed, select the verified retained incoming controller or a reviewed
+compatible controller; do not assume `releases/$release_id` exists. Preserve its
+app policy and readiness contract. MacroMapper's first-enable exception is
+covered in its [MCP recovery guidance](https://github.com/VanillaIceCube/MacroMapper/blob/main/deploy/production/README.md#-first-enable-recovery).
+
+For an approved rollback that can lose post-snapshot writes:
+
+```bash
+python3 "$app_root/releases/$release_id/release.py" rollback \
+  --root "$app_root" --recovery "$release_id" --restore-database
+```
+
+Recovery verifies cached images before stopping the backend, saves the current
+DB/journals from the stopped writer too, restores the selected DB with its
+original ownership/mode, and recreates **only app services**, no pull. It runs
+the same readiness gates and records success only afterward. Failed rollback
+stops backend writers and leaves the failure marker/recovery data intact.
+
+If backup/check failed **before migration started**, the operator may instead
+restart the captured previous app configuration with all current data (no older
+snapshot selection). Current journals are consolidated before container recreation:
+
+```bash
+python3 "$app_root/releases/$release_id/release.py" rollback \
+  --root "$app_root" --recovery "$release_id" --keep-database
+```
+
+That mode is rejected after the recorded migration-started stage. Its safe-data
+flag persists through rollback failure, allowing a retry after transient readiness
+failure without editing markers or choosing an unnecessary old snapshot. If a crash
+occurred before the marker/recovery set was complete, inspect privately and use
+a specifically approved recovery plan; do not fabricate a success record.
+Rollback is not a substitute for off-host backups and a full functional restore
+drill. Both remain deployment acceptance gates.
+
+<a id="-shared-mcp-framework"></a>
+
+## 🔌 MCP integration
+
+FullStackTemplate owns the canonical
+[MCP framework](../../backend/apps/mcp/README.md#framework); derived apps own
+registries, scopes, OAuth issuers, consent and tools. The template production
+policy fixes `DJANGO_MCP_ENABLED=0`, and its frontend build defaults
+`VITE_MCP_ENABLED=0`. Local examples also default off. The template has no live
+connector, business-tool activation or MCP readiness probes.
+
+Before activating a derived app, review its registry, OAuth, exact proxy trust,
+frontend profile and matching readiness policy. Infrastructure supplies ordinary
+gateway routing and an optional MCP contract; shared framework adoption alone
+does not authorize activation, client registration, owner consent or plugin
+installation. MacroMapper and Notoli retain their app-owned enabled production
+policies and readiness contracts; consult their release evidence for live state.
+
+## 🛠️ Application maintenance
+
+Derived apps define bootstrap, credentials, OAuth registration, data maintenance
+and retention in their separately reviewed onboarding and operational plans.
+Retain prior images, private environment/configuration, recovery sets and stopped
+management containers until the host operator reviews disk use and explicitly
+selects unused app resources. Never use host-wide Docker pruning.
 
 <a id="verification"></a>
 
 ## 🧪 Checks
 
+Run from the repository root:
+
 ```powershell
-python deploy/check_parity.py
+python deploy/production/build_bundle.py --check-parity
 python -m unittest discover -s deploy/tests -v
-node --test .github/actions/*/*.test.js
 ```
 
-The full common suite needs Linux and a disposable Docker daemon. It creates
-unique temporary resources and fake credentials, never the production host.
-Fixtures derive synthetic values for additional required backend settings from
-`app.json`; production bundling still requires explicit operator credentials.
-Contract checks cover the existing gateway networks and application-owned MCP
-readiness. Application-owned MCP profiles are defined by each app's current
-policy; the template does not activate a production instance.
-For local source development only, `--source-root <infrastructure-checkout>`
-checks the same common hashes offline. CI always verifies the immutable pin.
+Parity checks the immutable Infrastructure pin, common runtime/tests and generated
+workflow. For local source development only, add
+`--source-root <infrastructure-checkout>` to `--check-parity` to verify local
+common hashes offline; that does not verify the remote pin. Use `--sync` only
+after reviewing a coordinated source/pin update across all three consumers.
+Successful synchronization also removes the retired `deploy/check_parity.py`.
+Check-only and failed validation runs preserve it; unsafe cleanup paths are
+rejected before writes.
+CI always checks the immutable pin.
 
+The full release suite needs Linux and a disposable local/CI Docker daemon,
+never production. Windows skips POSIX transaction tests. Fixtures use synthetic
+credentials and derive additional required backend values from `app.json`;
+production bundling still requires explicit credentials.
 
-## 🔌 Shared MCP framework
+Tests use synthetic credentials, real Compose/container env parsing, real SQLite
+backup/restore, and Linux locks with injected migration/backup/readiness failures.
+Real Docker recovery rehearsals recreate captured image IDs, commands, raw
+environment and DB binds without changing another container; stop a real writer
+after a short CLI timeout and a simulated interrupted invocation; and recover a
+committed WAL-only row after an unclean exit with the actual single-file bind.
+A real recovery retry then replaces the host inode, fails before new startup,
+removes the canonical backend, fails during a temporary-name replacement, and
+retries successfully without replaying a retired journal or touching a companion.
+Shared vhost routing and proxy endpoint reversal are tested in Infrastructure.
 
-Follow the [MCP framework contract](../../backend/apps/mcp/README.md#framework) before activating an optional app. Notoli and MacroMapper retain their app-owned production MCP profiles and readiness contracts; consult each app's policy and release evidence for the accepted state. Use this guide for immutable app releases and explicit recovery; framework adoption does not provision a new template instance.
+<a id="-production-verification"></a>
 
 <a id="production-verification"></a>
 
-## 🧪 Production verification
-
-Use the [verification checklist](README.md#-independent-production-verification) before recording production-hardening acceptance. Capture current backend checks and authenticated edge/origin observations for each app.
+<a id="verification-checklist"></a>
 
 ## 🔎 Independent production verification
+
+FullStackTemplate is an onboarding example with no production target. Apply
+this checklist only after separately approved provisioning and activation.
 
 Use this checklist for each application. Record source revision, deployed image
 identity, observation time and result. A local production-settings check verifies
 the selected settings; it cannot establish the settings of a running container.
-FullStackTemplate is an onboarding example with no production target.
-
-### Verification checklist
 
 1. In the accepted backend container, run `python manage.py check --deploy`.
    Record check IDs and assess each warning. Verify DEBUG is false, the allowed
@@ -173,3 +397,23 @@ FullStackTemplate is an onboarding example with no production target.
 7. Mark each capability passed, failed or blocked, with the evidence type.
    Link independent app receipts. Keep the parent open while required runtime
    checks remain unverified.
+
+After an authorized release, compare the gateway and companion app's container
+IDs, start times, images and network IDs before/after; verify both sites and a
+repeat app release. Full sign-in, password-reset delivery, the derived app's domain/OAuth actions,
+persistence, reboot, off-host restores, monitoring and resource evidence remain
+operator acceptance work. Keep implementation issues open until the required
+evidence exists. Local tests and source review cannot establish current
+production status.
+
+## 📚 Reference
+
+- [Local Docker and deployment guide](../README.md)
+- [Backend configuration and behavior](../../backend/README.md)
+- [Frontend build and routing](../../frontend/README.md)
+- [MCP framework and app contract](../../backend/apps/mcp/README.md#framework)
+- [GitHub setup and release policy](../../.github/README.md)
+- [Workflow guide](../../.github/workflows/README.md)
+- [App policy](app.json), [Compose](compose.yml), [bundle builder](build_bundle.py),
+  [release controller](release.py) and [deployment workflow](../../.github/workflows/ci-deploy.yml)
+- [Infrastructure release standard](https://github.com/VanillaIceCube/JudeAndrewAlabaInfrastructure/blob/9c1102c4ac866c4925fa13260dbdc27eec1199b1/app-release/README.md)

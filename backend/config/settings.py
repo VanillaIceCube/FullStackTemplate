@@ -42,12 +42,6 @@ if extra_hosts:
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = False
 
-FORCE_SCRIPT_NAME = os.getenv("DJANGO_FORCE_SCRIPT_NAME")
-if FORCE_SCRIPT_NAME:
-    if not FORCE_SCRIPT_NAME.startswith("/"):
-        FORCE_SCRIPT_NAME = f"/{FORCE_SCRIPT_NAME}"
-    FORCE_SCRIPT_NAME = FORCE_SCRIPT_NAME.rstrip("/")
-
 FRONTEND_BASE_URL = os.getenv(
     "DJANGO_FRONTEND_BASE_URL", "http://fullstacktemplate.localhost:3000"
 ).rstrip("/")
@@ -183,10 +177,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-if FORCE_SCRIPT_NAME:
-    STATIC_URL = f"{FORCE_SCRIPT_NAME}/static/"
-else:
-    STATIC_URL = "static/"
+STATIC_URL = "static/"
 
 # Where collectstatic will put all static files in prod
 STATIC_ROOT = BASE_DIR / "staticfiles"

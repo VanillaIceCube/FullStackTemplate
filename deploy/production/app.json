@@ -1,31 +1,8 @@
 {
   "contract_version": 1,
-  "database": {
-    "filename": "db.sqlite3",
-    "target": "/backend/db.sqlite3"
-  },
-  "backend_addresses": {},
-  "backend_required_env": [],
-  "frontend_port_bindings": [
-    []
-  ],
-  "readiness": {
-    "direct_url": "http://127.0.0.1:8000/api/notifications/",
-    "direct_status": 401,
-    "public": [
-      {
-        "path": "/",
-        "status": 200,
-        "body_contains": "<html",
-        "ignore_case": true
-      },
-      {
-        "path": "/api/notifications/",
-        "status": 401,
-        "content_type": "application/json",
-        "body_contains": "detail"
-      }
-    ]
+  "shared_source": {
+    "repository": "VanillaIceCube/JudeAndrewAlabaInfrastructure",
+    "commit": "9c1102c4ac866c4925fa13260dbdc27eec1199b1"
   },
   "app": "fullstacktemplate",
   "domain": "app.example.com",
@@ -38,6 +15,10 @@
     "backend": "fullstacktemplate-backend",
     "frontend": "fullstacktemplate-frontend"
   },
+  "database": {
+    "filename": "db.sqlite3",
+    "target": "/backend/db.sqlite3"
+  },
   "egress": "fullstacktemplate_default",
   "backend_networks": [
     "fullstacktemplate-ingress",
@@ -46,6 +27,11 @@
   "frontend_networks": [
     "fullstacktemplate-ingress",
     "fullstacktemplate_default"
+  ],
+  "backend_addresses": {},
+  "backend_required_env": [],
+  "frontend_port_bindings": [
+    []
   ],
   "gateway": {
     "container": "host-ingress-proxy",
@@ -89,9 +75,26 @@
       "DJANGO_ALLOWED_HOSTS": "app.example.com",
       "DJANGO_CORS_ALLOWED_ORIGINS": "https://app.example.com",
       "DJANGO_CSRF_TRUSTED_ORIGINS": "https://app.example.com",
-      "DJANGO_FRONTEND_BASE_URL": "https://app.example.com",
-      "DJANGO_FORCE_SCRIPT_NAME": ""
+      "DJANGO_FRONTEND_BASE_URL": "https://app.example.com"
     }
+  },
+  "readiness": {
+    "direct_url": "http://127.0.0.1:8000/api/notifications/",
+    "direct_status": 401,
+    "public": [
+      {
+        "path": "/",
+        "status": 200,
+        "body_contains": "<html",
+        "ignore_case": true
+      },
+      {
+        "path": "/api/notifications/",
+        "status": 401,
+        "content_type": "application/json",
+        "body_contains": "detail"
+      }
+    ]
   },
   "workflow": {
     "frontend_build_arg": "VITE_API_BASE_URL",
