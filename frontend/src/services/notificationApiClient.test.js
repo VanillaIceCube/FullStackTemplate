@@ -16,29 +16,18 @@ describe('notificationApiClient', () => {
     vi.clearAllMocks();
   });
 
-  test('lists notifications with authentication', () => {
-    fetchNotifications('TOKEN');
-
-    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
-      headers: { Authorization: 'Bearer TOKEN' },
-    });
-  });
-
-  test('handles missing token without injecting malformed header', () => {
+  test('lists notifications through the request client', () => {
     fetchNotifications();
 
-    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/', {
-      headers: {},
-    });
+    expect(apiFetch).toHaveBeenCalledWith('/api/notifications/');
   });
 
   test('marks one notification read', () => {
-    markNotificationRead(42, 'TOKEN');
+    markNotificationRead(42);
 
     expect(apiFetch).toHaveBeenCalledWith('/api/notifications/42/', {
       method: 'PATCH',
       headers: {
-        Authorization: 'Bearer TOKEN',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ is_read: true }),
@@ -46,32 +35,29 @@ describe('notificationApiClient', () => {
   });
 
   test('clears one or all notifications', () => {
-    clearNotification(42, 'TOKEN');
-    clearAllNotifications('TOKEN');
+    clearNotification(42);
+    clearAllNotifications();
 
     expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/notifications/42/', {
       method: 'DELETE',
       headers: {
-        Authorization: 'Bearer TOKEN',
         'Content-Type': 'application/json',
       },
     });
     expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/notifications/clear-all/', {
       method: 'DELETE',
       headers: {
-        Authorization: 'Bearer TOKEN',
         'Content-Type': 'application/json',
       },
     });
   });
 
   test('marks all notifications read', () => {
-    markAllNotificationsRead('TOKEN');
+    markAllNotificationsRead();
 
     expect(apiFetch).toHaveBeenCalledWith('/api/notifications/mark-all-read/', {
       method: 'PATCH',
       headers: {
-        Authorization: 'Bearer TOKEN',
         'Content-Type': 'application/json',
       },
     });

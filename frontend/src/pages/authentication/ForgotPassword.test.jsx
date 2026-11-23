@@ -12,10 +12,7 @@ vi.mock('../../services/authApiClient', () => ({
 describe('ForgotPassword', () => {
   test('requests a password reset', async () => {
     const showSnackbar = vi.fn();
-    forgotPassword.mockResolvedValue({
-      ok: true,
-      json: async () => ({ message: 'Password reset link has been sent!' }),
-    });
+    forgotPassword.mockResolvedValue({ message: 'Password reset link has been sent!' });
     renderWithProviders(<ForgotPassword showSnackbar={showSnackbar} />, {
       routeEntries: ['/forgot-password'],
     });
@@ -50,10 +47,7 @@ describe('ForgotPassword', () => {
       expect(screen.getByRole('button', { name: 'Sending...' })).toBeDisabled();
     });
 
-    resolveForgot({
-      ok: true,
-      json: async () => ({ message: 'Password reset link has been sent!' }),
-    });
+    resolveForgot({ message: 'Password reset link has been sent!' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Send Reset Link' })).not.toBeDisabled();

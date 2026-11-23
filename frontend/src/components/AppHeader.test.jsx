@@ -84,7 +84,7 @@ describe('AppHeader', () => {
     expect(screen.getByLabelText('notifications')).toBeInTheDocument();
     expect(screen.getByLabelText('user profile')).toBeInTheDocument();
     expect(screen.getByLabelText('menu')).toBeInTheDocument();
-    await waitFor(() => expect(fetchNotifications).toHaveBeenCalledWith('access'));
+    await waitFor(() => expect(fetchNotifications).toHaveBeenCalledWith());
   });
 
   test('opens the navigation drawer', async () => {
@@ -149,7 +149,7 @@ describe('AppHeader', () => {
     expect(screen.getByText('Template ready')).toBeInTheDocument();
     expect(screen.getByText('Your shell is ready.')).toBeInTheDocument();
     await user.click(screen.getByText('Mark all read'));
-    expect(markAllNotificationsRead).toHaveBeenCalledWith('access');
+    expect(markAllNotificationsRead).toHaveBeenCalledWith();
   });
 
   test('handles notification loading error and retry', async () => {

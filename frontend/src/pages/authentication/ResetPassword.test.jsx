@@ -12,10 +12,7 @@ vi.mock('../../services/authApiClient', () => ({
 describe('ResetPassword', () => {
   test('submits a valid reset link and matching passwords', async () => {
     const showSnackbar = vi.fn();
-    resetPassword.mockResolvedValue({
-      ok: true,
-      json: async () => ({ message: 'Password reset successful.' }),
-    });
+    resetPassword.mockResolvedValue({ message: 'Password reset successful.' });
     renderWithProviders(<ResetPassword showSnackbar={showSnackbar} />, {
       routeEntries: ['/reset-password?uid=user-id&token=reset-token'],
     });
@@ -74,10 +71,7 @@ describe('ResetPassword', () => {
       expect(screen.getByRole('button', { name: 'Resetting...' })).toBeDisabled();
     });
 
-    resolveReset({
-      ok: true,
-      json: async () => ({ message: 'Password reset successful.' }),
-    });
+    resolveReset({ message: 'Password reset successful.' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Reset Password' })).not.toBeDisabled();

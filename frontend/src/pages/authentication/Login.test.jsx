@@ -17,13 +17,10 @@ describe('Login', () => {
   test('logs in and stores the returned session', async () => {
     const showSnackbar = vi.fn();
     login.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        access: 'access-token',
-        refresh: 'refresh-token',
-        username: 'mapper',
-        email: 'mapper@example.com',
-      }),
+      access: 'access-token',
+      refresh: 'refresh-token',
+      username: 'mapper',
+      email: 'mapper@example.com',
     });
     renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
 
@@ -71,13 +68,10 @@ describe('Login', () => {
     });
 
     resolveLogin({
-      ok: true,
-      json: async () => ({
-        access: 'access-token',
-        refresh: 'refresh-token',
-        username: 'mapper',
-        email: 'mapper@example.com',
-      }),
+      access: 'access-token',
+      refresh: 'refresh-token',
+      username: 'mapper',
+      email: 'mapper@example.com',
     });
 
     await waitFor(() => {

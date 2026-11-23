@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router';
 import AuthPageShell from '../../components/AuthPageShell';
 import { register } from '../../services/authApiClient';
-import { persistAuthSession, readOkJson } from '../../services/authSession';
+import { persistAuthSession } from '../../services/authSession';
 
 export default function Register({ showSnackbar }) {
   const [email, setEmail] = useState('');
@@ -23,8 +23,7 @@ export default function Register({ showSnackbar }) {
 
     setIsSubmitting(true);
     try {
-      const response = await register({ email, username, password });
-      const data = await readOkJson(response, 'Registration failed.');
+      const data = await register({ email, username, password });
       persistAuthSession(data);
       showSnackbar('success', 'Account created! Welcome to FullStackTemplate!');
       navigate('/');
