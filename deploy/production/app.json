@@ -2,11 +2,10 @@
   "contract_version": 1,
   "shared_source": {
     "repository": "VanillaIceCube/JudeAndrewAlabaInfrastructure",
-    "commit": "3e3d8663e192d2c5141e22eeae3e4aa07fa390c8"
+    "commit": "4443489f730f617e6b3db9a186d9d6331e89e1b0"
   },
   "app": "fullstacktemplate",
   "domain": "app.example.com",
-  "root_hint": "/opt/apps/fullstacktemplate",
   "services": {
     "backend": "backend",
     "frontend": "frontend"
@@ -97,7 +96,6 @@
     ]
   },
   "workflow": {
-    "frontend_build_arg": "VITE_API_BASE_URL",
     "extra_env": {}
   }
 }
