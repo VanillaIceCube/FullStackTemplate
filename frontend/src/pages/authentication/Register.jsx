@@ -2,8 +2,9 @@ import { TextField } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { register } from '../../services/authApiClient';
-import { formatAuthErrorMessage } from '../../services/authSession';
+import { formatAuthErrorMessage } from '../../services/apiResponse';
 import { startSession } from '../../services/sessionState';
+import { useSessionGuard } from '../../hooks/useSession';
 import AuthForm, { AuthLink } from '../../components/app-core/AuthForm';
 
 export default function Register({ showSnackbar }) {
@@ -13,6 +14,7 @@ export default function Register({ showSnackbar }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const isCurrentSession = useSessionGuard({ trackLocation: true });
 
   const handleRegister = async () => {
     if (isSubmitting) return;
@@ -23,12 +25,17 @@ export default function Register({ showSnackbar }) {
     }
 
     setIsSubmitting(true);
+    let acceptedResponse = false;
     try {
       const data = await register({ email, username, password });
+      if (!isCurrentSession()) return;
+      acceptedResponse = true;
       startSession(data);
       showSnackbar('success', 'Account created! Welcome to FullStackTemplate!');
       navigate('/');
     } catch (error) {
+      // A session storage failure can also advance the session version.
+      if (!acceptedResponse && !isCurrentSession()) return;
       showSnackbar('error', formatAuthErrorMessage(error, 'Registration failed.'));
     } finally {
       setIsSubmitting(false);
