@@ -14,11 +14,25 @@ authentication, and the application shell.
 - `src/index.css`: platform font rendering and remaining app-specific global rules,
   loaded by `src/index.jsx`. Keep responsive page geometry in the owning component.
 - `src/components/`: reusable interface components.
+  Standard components maintained across the three apps live in [src/components/app-core/](src/components/app-core/).
 - `src/pages/`: application pages and routes.
-- `src/services/`: API requests and centralized session storage.
+- `src/services/`: API requests, response parsing in `http/apiResponse.js` and session storage in `authentication/sessionState.js`.
 - `src/hooks/`: reactive session access and shared notification lifecycle behavior.
 - `src/test-helpers/`: shared test setup and reusable helpers.
   App, startup and feature tests stay beside the files they exercise.
+
+Under `components/`, `pages/`, `hooks/` and `services/`, put every module and its
+adjacent test in exactly one purpose-named subfolder. Use lowercase names with hyphens between words.
+
+### Where to change things
+
+| To change | Start here |
+| --- | --- |
+| Routes and layout | [App](src/App.jsx) |
+| Header and notifications | [AppHeader](src/components/app-core/AppHeader.jsx), [NotificationsMenu](src/components/app-core/NotificationsMenu.jsx) |
+| Sign-in, registration, and password reset | [AuthForm](src/components/app-core/AuthForm.jsx) and [route pages](src/pages/authentication/) |
+| Shared colors, typography, and component styles | [Theme](src/theme.js) |
+| Home page | [HomePage](src/pages/home/HomePage.jsx) |
 
 ## 💻 Local development
 
@@ -88,7 +102,7 @@ contract. The local implementation rollout covers all repositories:
 This inventory records frontend implementation coverage; merge, release and
 production authorization remain governed by the shared rollout policy.
 
-`src/services/sessionState.js` is the sole owner of the compatible access/refresh
+`src/services/authentication/sessionState.js` is the sole owner of the compatible access/refresh
 and username/email storage keys. Its cached snapshots and subscriptions feed
 `useSession`; login/logout replace the account generation, while guarded refresh
 updates tokens without replacing that generation. Do not read or mutate auth
@@ -98,17 +112,16 @@ the hook for rendering, and the store operations for writes. The unrelated
 
 The application shell and protected content reset on account changes, including
 open menus, private drafts and Notoli's board drawer state. Async continuations
-use `useSessionGuard` before account-scoped navigation or global UI updates.
+use `useSessionGuard` before account-scoped navigation or global UI updates. Authentication forms also check the current URL so a late response cannot take over after navigation starts.
 Logout/expiry queue their login message before publishing the cleared session;
 root snackbar state preserves successful login/register feedback and excludes
 messages from an older generation.
 
 `useNotifications` owns loading, retries, unread state and synchronous item/bulk
-locks. Headers inject stable app-owned API adapters and keep presentation and
-target navigation local. Generation and unmount guards discard stale lists,
-mutations and errors; token rotation preserves pending work. An earlier list
-request cannot undo a newer mutation. MacroMapper retains its existing HTTP
-error-message adapter.
+locks. `NotificationsMenu` connects the hook to the app's notification API and
+handles presentation and navigation. The hook discards stale results after
+account changes or unmount. Token rotation preserves pending work, and an
+earlier list request cannot undo a newer mutation.
 
 Authentication forms disable submission while pending. Tokens and profile data
 live in `sessionStorage`; new sessions trim profile fields and clear absent values.
@@ -136,9 +149,9 @@ Approve/Cancel. It never auto-approves or puts credentials in links. Invalid/sta
 tickets clear controls and require fresh review. Framed action review is refused;
 frontend Nginx applies `frame-ancestors 'none'`, `X-Frame-Options: DENY`, no-store and
 no-referrer to the exact `/connections/authorize` page, preserving embedding policy
-elsewhere. Only MacroMapper configures the backend handler; FullStackTemplate and
-Notoli retain reusable plumbing with action approval unavailable and existing
-domain behavior unchanged.
+elsewhere. MacroMapper and Notoli configure app-owned approval handlers.
+FullStackTemplate supplies the reusable flow for applications that register a
+handler.
 
 ### Connections response contract
 
@@ -154,6 +167,11 @@ clear the session; transient proxy/refresh failures retain it for retry. All thr
 and session-lifecycle contract.
 
 ## 🎨 Style guide
+
+Use `--page-background` and `--page-text` for the document, and
+`--surface-background` and `--surface-text` for panels and controls. The app theme
+defines these colors. Keep sibling JSX sections in the order they appear on
+screen so keyboard navigation follows the layout.
 
 `src/theme.js` owns the dark document background, pale-yellow paper surfaces and
 neutral gray controls. MUI uses light control semantics on these pale surfaces;
@@ -183,7 +201,7 @@ Test helpers use the actual app theme with only ripple suppression added.
 
 ### Authentication
 
-- Build public authentication pages with `AuthPageShell`.
+- Build public authentication pages with `AuthForm`.
 - Give every form a visible heading, native submit behavior, and browser
   autocomplete metadata.
 - Show API outcomes through the shared application snackbar.
@@ -217,7 +235,7 @@ FullStackTemplate, MacroMapper and Notoli when the behavior applies. Preserve re
 React Router and Material UI keyboard/exit coverage when consolidating suites;
 app-specific domain and route expectations remain in their owning application.
 
-`AuthPageShell.test.jsx` checks the accessible heading and native keyboard form
+`AuthForm.test.jsx` checks the accessible heading and native keyboard form
 submission. Direct session-store and hook suites cover hydration, stable snapshots,
 subscriptions, blocked storage, token rotation and stale work. Request-client
 and real App suites cover refresh races, account changes, auth feedback and consent.

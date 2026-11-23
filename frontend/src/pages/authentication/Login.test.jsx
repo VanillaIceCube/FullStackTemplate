@@ -1,11 +1,11 @@
 import { Route, Routes } from 'react-router';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { login } from '../../services/authApiClient';
+import { login } from '../../services/authentication/authApiClient';
 import { renderWithProviders } from '../../test-helpers/utils';
 import Login from './Login';
 
-vi.mock('../../services/authApiClient', () => ({
+vi.mock('../../services/authentication/authApiClient', () => ({
   login: vi.fn(),
 }));
 
@@ -17,13 +17,10 @@ describe('Login', () => {
   test('logs in and stores the returned session', async () => {
     const showSnackbar = vi.fn();
     login.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        access: 'access-token',
-        refresh: 'refresh-token',
-        username: 'mapper',
-        email: 'mapper@example.com',
-      }),
+      access: 'access-token',
+      refresh: 'refresh-token',
+      username: 'mapper',
+      email: 'mapper@example.com',
     });
     renderWithProviders(<Login showSnackbar={showSnackbar} />, { routeEntries: ['/login'] });
 
@@ -71,13 +68,10 @@ describe('Login', () => {
     });
 
     resolveLogin({
-      ok: true,
-      json: async () => ({
-        access: 'access-token',
-        refresh: 'refresh-token',
-        username: 'mapper',
-        email: 'mapper@example.com',
-      }),
+      access: 'access-token',
+      refresh: 'refresh-token',
+      username: 'mapper',
+      email: 'mapper@example.com',
     });
 
     await waitFor(() => {

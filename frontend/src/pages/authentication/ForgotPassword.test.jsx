@@ -1,21 +1,18 @@
 import { Route, Routes } from 'react-router';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { forgotPassword } from '../../services/authApiClient';
+import { forgotPassword } from '../../services/authentication/authApiClient';
 import { renderWithProviders } from '../../test-helpers/utils';
 import ForgotPassword from './ForgotPassword';
 
-vi.mock('../../services/authApiClient', () => ({
+vi.mock('../../services/authentication/authApiClient', () => ({
   forgotPassword: vi.fn(),
 }));
 
 describe('ForgotPassword', () => {
   test('requests a password reset', async () => {
     const showSnackbar = vi.fn();
-    forgotPassword.mockResolvedValue({
-      ok: true,
-      json: async () => ({ message: 'Password reset link has been sent!' }),
-    });
+    forgotPassword.mockResolvedValue({ message: 'Password reset link has been sent!' });
     renderWithProviders(<ForgotPassword showSnackbar={showSnackbar} />, {
       routeEntries: ['/forgot-password'],
     });
@@ -50,10 +47,7 @@ describe('ForgotPassword', () => {
       expect(screen.getByRole('button', { name: 'Sending...' })).toBeDisabled();
     });
 
-    resolveForgot({
-      ok: true,
-      json: async () => ({ message: 'Password reset link has been sent!' }),
-    });
+    resolveForgot({ message: 'Password reset link has been sent!' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Send Reset Link' })).not.toBeDisabled();

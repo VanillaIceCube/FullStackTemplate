@@ -1,11 +1,11 @@
 import { Route, Routes } from 'react-router';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { register } from '../../services/authApiClient';
+import { register } from '../../services/authentication/authApiClient';
 import { renderWithProviders } from '../../test-helpers/utils';
 import Register from './Register';
 
-vi.mock('../../services/authApiClient', () => ({
+vi.mock('../../services/authentication/authApiClient', () => ({
   register: vi.fn(),
 }));
 
@@ -17,13 +17,10 @@ describe('Register', () => {
   test('creates an account and stores the session', async () => {
     const showSnackbar = vi.fn();
     register.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        access: 'access-token',
-        refresh: 'refresh-token',
-        username: 'mapper',
-        email: 'mapper@example.com',
-      }),
+      access: 'access-token',
+      refresh: 'refresh-token',
+      username: 'mapper',
+      email: 'mapper@example.com',
     });
     renderWithProviders(<Register showSnackbar={showSnackbar} />, {
       routeEntries: ['/register'],
@@ -59,10 +56,10 @@ describe('Register', () => {
 
   test('displays API registration error and disables controls during submit', async () => {
     const showSnackbar = vi.fn();
-    let resolveRegister;
+    let rejectRegister;
     register.mockReturnValue(
-      new Promise((resolve) => {
-        resolveRegister = resolve;
+      new Promise((_resolve, reject) => {
+        rejectRegister = reject;
       }),
     );
 
@@ -81,11 +78,7 @@ describe('Register', () => {
       expect(screen.getByRole('button', { name: 'Registering...' })).toBeDisabled();
     });
 
-    resolveRegister({
-      ok: false,
-      status: 400,
-      json: async () => ({ error: 'This password is too short.' }),
-    });
+    rejectRegister(new Error('This password is too short.'));
 
     await waitFor(() => {
       expect(showSnackbar).toHaveBeenCalledWith('error', 'This password is too short.');

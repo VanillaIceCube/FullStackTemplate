@@ -1,21 +1,18 @@
 import { Route, Routes } from 'react-router';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { resetPassword } from '../../services/authApiClient';
+import { resetPassword } from '../../services/authentication/authApiClient';
 import { renderWithProviders } from '../../test-helpers/utils';
 import ResetPassword from './ResetPassword';
 
-vi.mock('../../services/authApiClient', () => ({
+vi.mock('../../services/authentication/authApiClient', () => ({
   resetPassword: vi.fn(),
 }));
 
 describe('ResetPassword', () => {
   test('submits a valid reset link and matching passwords', async () => {
     const showSnackbar = vi.fn();
-    resetPassword.mockResolvedValue({
-      ok: true,
-      json: async () => ({ message: 'Password reset successful.' }),
-    });
+    resetPassword.mockResolvedValue({ message: 'Password reset successful.' });
     renderWithProviders(<ResetPassword showSnackbar={showSnackbar} />, {
       routeEntries: ['/reset-password?uid=user-id&token=reset-token'],
     });
@@ -74,10 +71,7 @@ describe('ResetPassword', () => {
       expect(screen.getByRole('button', { name: 'Resetting...' })).toBeDisabled();
     });
 
-    resolveReset({
-      ok: true,
-      json: async () => ({ message: 'Password reset successful.' }),
-    });
+    resolveReset({ message: 'Password reset successful.' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Reset Password' })).not.toBeDisabled();

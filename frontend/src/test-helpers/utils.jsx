@@ -1,11 +1,11 @@
 import { CssBaseline } from '@mui/material';
-import fullStackTheme from '../theme';
+import appTheme from '../theme';
 import { render } from '@testing-library/react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { MemoryRouter } from 'react-router';
 
 // Shared test setup: disable MUI ripples (act warnings).
-const testTheme = createTheme(fullStackTheme, {
+const testTheme = createTheme(appTheme, {
   components: {
     MuiButtonBase: {
       defaultProps: {
