@@ -16,13 +16,13 @@ authentication, and the application shell.
 - `src/components/`: reusable interface components.
   Standard components maintained across the three apps live in [src/components/app-core/](src/components/app-core/).
 - `src/pages/`: application pages and routes.
-- `src/services/`: API requests, response parsing in `apiResponse.js` and session storage in `sessionState.js`.
+- `src/services/`: API requests, response parsing in `http/apiResponse.js` and session storage in `authentication/sessionState.js`.
 - `src/hooks/`: reactive session access and shared notification lifecycle behavior.
 - `src/test-helpers/`: shared test setup and reusable helpers.
   App, startup and feature tests stay beside the files they exercise.
 
-Keep `components/`, `pages/`, `hooks/` and `services/` flat by default. Group modules you
-usually edit together one level down. A source file and its adjacent test count as one module.
+Under `components/`, `pages/`, `hooks/` and `services/`, put every module and its
+adjacent test in exactly one purpose-named subfolder. Use lowercase names with hyphens between words.
 
 ### Where to change things
 
@@ -32,7 +32,7 @@ usually edit together one level down. A source file and its adjacent test count 
 | Header and notifications | [AppHeader](src/components/app-core/AppHeader.jsx), [NotificationsMenu](src/components/app-core/NotificationsMenu.jsx) |
 | Sign-in, registration, and password reset | [AuthForm](src/components/app-core/AuthForm.jsx) and [route pages](src/pages/authentication/) |
 | Shared colors, typography, and component styles | [Theme](src/theme.js) |
-| Home page | [HomePage](src/pages/HomePage.jsx) |
+| Home page | [HomePage](src/pages/home/HomePage.jsx) |
 
 ## 💻 Local development
 
@@ -102,7 +102,7 @@ contract. The local implementation rollout covers all repositories:
 This inventory records frontend implementation coverage; merge, release and
 production authorization remain governed by the shared rollout policy.
 
-`src/services/sessionState.js` is the sole owner of the compatible access/refresh
+`src/services/authentication/sessionState.js` is the sole owner of the compatible access/refresh
 and username/email storage keys. Its cached snapshots and subscriptions feed
 `useSession`; login/logout replace the account generation, while guarded refresh
 updates tokens without replacing that generation. Do not read or mutate auth
