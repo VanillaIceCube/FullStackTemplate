@@ -15,6 +15,7 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
+- Remove retired Resend backend-name conversion from Django settings and the shared bundle builder; new production bundles require an explicit maintained Anymail or SMTP backend.
 - Remove the unused deployment root hint, repeated frontend build-argument selector and completed parity-checker cleanup migration.
 - Remove repeated frontend proxy headers and combine matching backend routes while retaining redirects, query strings and existing API timeouts.
 

@@ -47,7 +47,7 @@ class EmailConfigurationTests(SimpleTestCase):
                     selected,
                 )
 
-    def test_known_legacy_selectors_use_the_maintained_backend(self):
+    def test_known_legacy_selectors_are_not_rewritten(self):
         for selected in [
             "authentication.email_backends.ResendApiEmailBackend",
             "apps.authentication.email_backends.ResendApiEmailBackend",
@@ -58,7 +58,7 @@ class EmailConfigurationTests(SimpleTestCase):
                     self.configured_settings(
                         DJANGO_EMAIL_BACKEND=selected
                     ).EMAIL_BACKEND,
-                    BACKEND,
+                    selected,
                 )
 
     def test_timeout_is_bounded_with_existing_safe_fallback(self):
