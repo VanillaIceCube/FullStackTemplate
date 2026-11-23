@@ -2,7 +2,6 @@ import {
   formatAuthErrorMessage,
   getResponseErrorMessage,
   isAuthNetworkError,
-  persistAuthSession,
   readOkJson,
   safeReadJson,
 } from './authSession';
@@ -62,27 +61,6 @@ describe('authSession', () => {
     await expect(getResponseErrorMessage(response, 'fallback')).resolves.toBe(
       'Accepted proposals cannot be deleted.',
     );
-  });
-
-  test('cleans missing and whitespace-only profile fields after a new login', () => {
-    sessionStorage.setItem('username', 'old-user');
-    sessionStorage.setItem('email', 'old@example.com');
-    persistAuthSession({
-      access: 'new-access',
-      refresh: 'new-refresh',
-      username: '   ',
-      email: null,
-    });
-    expect(sessionStorage.getItem('username')).toBeNull();
-    expect(sessionStorage.getItem('email')).toBeNull();
-    persistAuthSession({
-      access: 'new-access',
-      refresh: 'new-refresh',
-      username: ' mapper ',
-      email: ' mapper@example.com ',
-    });
-    expect(sessionStorage.getItem('username')).toBe('mapper');
-    expect(sessionStorage.getItem('email')).toBe('mapper@example.com');
   });
 
   test('extracts nested password validation errors without stringifying arrays', async () => {
@@ -209,66 +187,6 @@ describe('authSession', () => {
       });
 
       await expect(readOkJson(response, 'fallbackMessage')).rejects.toThrow('fallbackMessage');
-    });
-  });
-
-  describe('persistAuthSession', () => {
-    test('when tokens are missing, it throws', () => {
-      expect(() => persistAuthSession({})).toThrow('Auth response missing tokens.');
-      expect(() => persistAuthSession({ access: 'A' })).toThrow('Auth response missing tokens.');
-      expect(() => persistAuthSession({ refresh: 'R' })).toThrow('Auth response missing tokens.');
-    });
-
-    test('when tokens are present, it stores them', () => {
-      persistAuthSession({ access: 'A', refresh: 'R' });
-
-      expect(sessionStorage.getItem('accessToken')).toBe('A');
-      expect(sessionStorage.getItem('refreshToken')).toBe('R');
-    });
-
-    test('when profile fields are present, it stores them', () => {
-      persistAuthSession({ access: 'A', refresh: 'R', username: 'u', email: 'e@example.com' });
-
-      expect(sessionStorage.getItem('username')).toBe('u');
-      expect(sessionStorage.getItem('email')).toBe('e@example.com');
-    });
-
-    test('when username/email are missing, it does not store "undefined"', () => {
-      persistAuthSession({ access: 'A', refresh: 'R', username: undefined, email: undefined });
-
-      expect(sessionStorage.getItem('username')).toBeNull();
-      expect(sessionStorage.getItem('email')).toBeNull();
-    });
-
-    test('when profile fields are missing or empty, it removes existing stale profile keys', () => {
-      sessionStorage.setItem('username', 'staleUser');
-      sessionStorage.setItem('email', 'stale@example.com');
-
-      persistAuthSession({ access: 'A', refresh: 'R', username: '', email: '   ' });
-
-      expect(sessionStorage.getItem('username')).toBeNull();
-      expect(sessionStorage.getItem('email')).toBeNull();
-    });
-
-    test('when sessionStorage throws, it surfaces a storage error', () => {
-      const originalSessionStorage = global.sessionStorage;
-      Object.defineProperty(global, 'sessionStorage', {
-        configurable: true,
-        value: {
-          setItem: () => {
-            throw new Error('blocked');
-          },
-        },
-      });
-
-      expect(() =>
-        persistAuthSession({ access: 'A', refresh: 'R', username: 'u', email: 'e@example.com' }),
-      ).toThrow('Unable to access browser session storage.');
-
-      Object.defineProperty(global, 'sessionStorage', {
-        configurable: true,
-        value: originalSessionStorage,
-      });
     });
   });
 });

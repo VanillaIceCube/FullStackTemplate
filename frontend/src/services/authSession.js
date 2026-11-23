@@ -1,5 +1,3 @@
-import { startSession } from './sessionState';
-
 export async function safeReadJson(response) {
   try {
     return await response.json();
@@ -61,8 +59,4 @@ export function formatAuthErrorMessage(error, fallbackMessage = 'An unexpected e
     return 'Network error.';
   }
   return error?.message || fallbackMessage;
-}
-
-export function persistAuthSession(data) {
-  startSession(data);
 }

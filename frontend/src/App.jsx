@@ -21,10 +21,6 @@ const OAuthConsent = lazy(() =>
   import('./pages/connections/Connections').then((module) => ({ default: module.OAuthConsent })),
 );
 
-function Protected({ children }) {
-  return <AuthenticatedRoute>{children}</AuthenticatedRoute>;
-}
-
 function ApplicationSession({ showSnackbar }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -40,17 +36,17 @@ function ApplicationSession({ showSnackbar }) {
               <Route
                 path="/connections/authorize"
                 element={
-                  <Protected>
+                  <AuthenticatedRoute>
                     <OAuthConsent />
-                  </Protected>
+                  </AuthenticatedRoute>
                 }
               />
               <Route
                 path="/connections"
                 element={
-                  <Protected>
+                  <AuthenticatedRoute>
                     <ConnectedApps />
-                  </Protected>
+                  </AuthenticatedRoute>
                 }
               />
             </>
@@ -62,9 +58,9 @@ function ApplicationSession({ showSnackbar }) {
           <Route
             path="/"
             element={
-              <Protected>
+              <AuthenticatedRoute>
                 <HomePage />
-              </Protected>
+              </AuthenticatedRoute>
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
