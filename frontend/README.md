@@ -14,6 +14,7 @@ authentication, and the application shell.
 - `src/index.css`: platform font rendering and remaining app-specific global rules,
   loaded by `src/index.jsx`. Keep responsive page geometry in the owning component.
 - `src/components/`: reusable interface components.
+  Standard components maintained across the three apps live in [src/components/app-core/](src/components/app-core/).
 - `src/pages/`: application pages and routes.
 - `src/services/`: API requests and centralized session storage.
 - `src/hooks/`: reactive session access and shared notification lifecycle behavior.
@@ -25,7 +26,7 @@ authentication, and the application shell.
 | To change | Start here |
 | --- | --- |
 | Routes and layout | [App](src/App.jsx) |
-| Header and notifications | [AppHeader](src/components/AppHeader.jsx), [NotificationsMenu](src/components/NotificationsMenu.jsx) |
+| Header and notifications | [AppHeader](src/components/app-core/AppHeader.jsx), [NotificationsMenu](src/components/app-core/NotificationsMenu.jsx) |
 | Sign-in, registration, and password reset | [AuthForm and its pages](src/pages/authentication/) |
 | Shared colors, typography, and component styles | [Theme](src/theme.js) |
 | Home page | [HomePage](src/pages/HomePage.jsx) |
