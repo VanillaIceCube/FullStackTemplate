@@ -33,7 +33,7 @@ export default function AuthForm({ title, onSubmit, isSubmitting, submitLabel, f
           width: '100%',
         }}
       >
-        <Typography component="h1" variant="h5" sx={{ mb: 2, color: 'var(--secondary-color)' }}>
+        <Typography component="h1" variant="h5" sx={{ mb: 2, color: 'var(--surface-text)' }}>
           {title}
         </Typography>
         <Box
@@ -50,10 +50,7 @@ export default function AuthForm({ title, onSubmit, isSubmitting, submitLabel, f
           <Button fullWidth type="submit" disabled={isSubmitting} variant="contained">
             {submitLabel}
           </Button>
-          <Typography
-            variant="caption"
-            sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}
-          >
+          <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--surface-text)' }}>
             {footer}
           </Typography>
         </Box>

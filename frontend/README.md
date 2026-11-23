@@ -20,6 +20,16 @@ authentication, and the application shell.
 - `src/test-helpers/`: shared test setup and reusable helpers.
   App, startup and feature tests stay beside the files they exercise.
 
+### Where to change things
+
+| To change | Start here |
+| --- | --- |
+| Routes and layout | [App](src/App.jsx) |
+| Header and notifications | [AppHeader](src/components/AppHeader.jsx), [NotificationsMenu](src/components/NotificationsMenu.jsx) |
+| Sign-in, registration, and password reset | [AuthForm and its pages](src/pages/authentication/) |
+| Shared colors, typography, and component styles | [Theme](src/theme.js) |
+| Home page | [HomePage](src/pages/HomePage.jsx) |
+
 ## 💻 Local development
 
 Use Node.js 24.15+ within 24.x or Node.js 26.x, matching `package.json`.
@@ -104,11 +114,10 @@ root snackbar state preserves successful login/register feedback and excludes
 messages from an older generation.
 
 `useNotifications` owns loading, retries, unread state and synchronous item/bulk
-locks. Headers inject stable app-owned API adapters and keep presentation and
-target navigation local. Generation and unmount guards discard stale lists,
-mutations and errors; token rotation preserves pending work. An earlier list
-request cannot undo a newer mutation. MacroMapper retains its existing HTTP
-error-message adapter.
+locks. `NotificationsMenu` connects the hook to the app's notification API and
+handles presentation and navigation. The hook discards stale results after
+account changes or unmount. Token rotation preserves pending work, and an
+earlier list request cannot undo a newer mutation.
 
 Authentication forms disable submission while pending. Tokens and profile data
 live in `sessionStorage`; new sessions trim profile fields and clear absent values.
@@ -136,9 +145,9 @@ Approve/Cancel. It never auto-approves or puts credentials in links. Invalid/sta
 tickets clear controls and require fresh review. Framed action review is refused;
 frontend Nginx applies `frame-ancestors 'none'`, `X-Frame-Options: DENY`, no-store and
 no-referrer to the exact `/connections/authorize` page, preserving embedding policy
-elsewhere. Only MacroMapper configures the backend handler; FullStackTemplate and
-Notoli retain reusable plumbing with action approval unavailable and existing
-domain behavior unchanged.
+elsewhere. MacroMapper and Notoli configure app-owned approval handlers.
+FullStackTemplate supplies the reusable flow for applications that register a
+handler.
 
 ### Connections response contract
 
@@ -154,6 +163,11 @@ clear the session; transient proxy/refresh failures retain it for retry. All thr
 and session-lifecycle contract.
 
 ## 🎨 Style guide
+
+Use `--page-background` and `--page-text` for the document, and
+`--surface-background` and `--surface-text` for panels and controls. The app theme
+defines these colors. Keep sibling JSX sections in the order they appear on
+screen so keyboard navigation follows the layout.
 
 `src/theme.js` owns the dark document background, pale-yellow paper surfaces and
 neutral gray controls. MUI uses light control semantics on these pale surfaces;

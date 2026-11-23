@@ -86,7 +86,7 @@ export default function NotificationsMenu() {
               <Button
                 size="small"
                 disabled={actionPending || pendingIds.size > 0}
-                sx={{ color: 'var(--secondary-color)', fontWeight: 'bold' }}
+                sx={{ color: 'var(--surface-text)', fontWeight: 'bold' }}
                 onClick={unreadCount > 0 ? markAllRead : clearAll}
               >
                 {unreadCount > 0 ? 'Mark all read' : 'Clear all'}
@@ -140,11 +140,11 @@ export default function NotificationsMenu() {
                         slotProps={{
                           primary: {
                             sx: {
-                              color: 'var(--secondary-color)',
+                              color: 'var(--surface-text)',
                               fontWeight: notification.is_read ? 500 : 'bold',
                             },
                           },
-                          secondary: { sx: { color: 'var(--secondary-color)' } },
+                          secondary: { sx: { color: 'var(--surface-text)' } },
                         }}
                       />
                       <Tooltip title="Clear notification">
@@ -162,7 +162,7 @@ export default function NotificationsMenu() {
                             ml: 1,
                             alignSelf: 'center',
                             flexShrink: 0,
-                            color: 'var(--secondary-color)',
+                            color: 'var(--surface-text)',
                           }}
                         >
                           <ClearIcon fontSize="small" />

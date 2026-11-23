@@ -7,11 +7,11 @@ export default function HomePage() {
         elevation={3}
         sx={{
           p: { xs: 3, sm: 5 },
-          color: 'var(--secondary-color)',
-          border: '2.5px solid var(--background-color)',
+          color: 'var(--surface-text)',
+          border: '2.5px solid var(--page-background)',
         }}
       >
-        <Typography sx={{ color: 'var(--secondary-color)' }}>
+        <Typography sx={{ color: 'var(--surface-text)' }}>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. This protected page is ready for
           your application.
         </Typography>

@@ -2,7 +2,7 @@ import { getSessionVersion } from './services/sessionState';
 import useSession from './hooks/useSession';
 import RouteContent from './components/RouteContent';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import fullStackTheme from './theme';
+import appTheme from './theme';
 import { lazy, useCallback, useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router';
 import AppHeader from './components/AppHeader';
@@ -77,7 +77,7 @@ export default function App() {
     setSnackbar({ open: true, severity, message, version: getSessionVersion() });
   }, []);
   return (
-    <ThemeProvider theme={fullStackTheme}>
+    <ThemeProvider theme={appTheme}>
       <CssBaseline />
       <Router basename={import.meta.env.BASE_URL}>
         <ApplicationSession key={version} showSnackbar={showSnackbar} />
