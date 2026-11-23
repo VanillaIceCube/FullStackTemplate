@@ -1,9 +1,9 @@
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { TextField } from '@mui/material';
 import { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router';
-import AuthPageShell from '../../components/AuthPageShell';
+import { useNavigate } from 'react-router';
 import { register } from '../../services/authApiClient';
 import { persistAuthSession } from '../../services/authSession';
+import AuthForm, { AuthLink } from './AuthForm';
 
 export default function Register({ showSnackbar }) {
   const [email, setEmail] = useState('');
@@ -40,60 +40,52 @@ export default function Register({ showSnackbar }) {
   };
 
   return (
-    <AuthPageShell title="Create account">
-      <Box
-        component="form"
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleRegister();
-        }}
-      >
-        <TextField
-          fullWidth
-          disabled={isSubmitting}
-          label="Email"
-          type="email"
-          autoComplete="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
-        <TextField
-          fullWidth
-          disabled={isSubmitting}
-          label="Username (optional)"
-          autoComplete="username"
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
-        />
-        <TextField
-          fullWidth
-          disabled={isSubmitting}
-          label="Password"
-          type="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-        <TextField
-          fullWidth
-          disabled={isSubmitting}
-          label="Confirm Password"
-          type="password"
-          autoComplete="new-password"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-        />
-        <Button fullWidth disabled={isSubmitting} type="submit" variant="contained">
-          {isSubmitting ? 'Registering...' : 'Register'}
-        </Button>
-        <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
-          Already have an account?{' '}
-          <Box component={RouterLink} className="auth-link" to="/login">
-            Sign in
-          </Box>
-        </Typography>
-      </Box>
-    </AuthPageShell>
+    <AuthForm
+      title="Create account"
+      onSubmit={handleRegister}
+      isSubmitting={isSubmitting}
+      submitLabel={isSubmitting ? 'Registering...' : 'Register'}
+      footer={
+        <>
+          Already have an account? <AuthLink to="/login">Sign in</AuthLink>
+        </>
+      }
+    >
+      <TextField
+        fullWidth
+        disabled={isSubmitting}
+        label="Email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+      />
+      <TextField
+        fullWidth
+        disabled={isSubmitting}
+        label="Username (optional)"
+        autoComplete="username"
+        value={username}
+        onChange={(event) => setUsername(event.target.value)}
+      />
+      <TextField
+        fullWidth
+        disabled={isSubmitting}
+        label="Password"
+        type="password"
+        autoComplete="new-password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+      />
+      <TextField
+        fullWidth
+        disabled={isSubmitting}
+        label="Confirm Password"
+        type="password"
+        autoComplete="new-password"
+        value={confirmPassword}
+        onChange={(event) => setConfirmPassword(event.target.value)}
+      />
+    </AuthForm>
   );
 }

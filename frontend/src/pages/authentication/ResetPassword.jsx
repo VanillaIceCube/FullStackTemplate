@@ -1,8 +1,8 @@
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { TextField } from '@mui/material';
 import { useMemo, useState } from 'react';
-import { Link as RouterLink, useLocation, useNavigate } from 'react-router';
-import AuthPageShell from '../../components/AuthPageShell';
+import { useLocation, useNavigate } from 'react-router';
 import { resetPassword } from '../../services/authApiClient';
+import AuthForm, { AuthLink } from './AuthForm';
 
 export default function ResetPassword({ showSnackbar }) {
   const [password, setPassword] = useState('');
@@ -44,42 +44,31 @@ export default function ResetPassword({ showSnackbar }) {
   };
 
   return (
-    <AuthPageShell title="Choose a new password">
-      <Box
-        component="form"
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleSubmit();
-        }}
-      >
-        <TextField
-          fullWidth
-          disabled={isSubmitting}
-          label="New Password"
-          type="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-        <TextField
-          fullWidth
-          disabled={isSubmitting}
-          label="Confirm Password"
-          type="password"
-          autoComplete="new-password"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-        />
-        <Button fullWidth disabled={isSubmitting} type="submit" variant="contained">
-          {isSubmitting ? 'Resetting...' : 'Reset Password'}
-        </Button>
-        <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--secondary-color)' }}>
-          <Box component={RouterLink} className="auth-link" to="/login">
-            Back to Login
-          </Box>
-        </Typography>
-      </Box>
-    </AuthPageShell>
+    <AuthForm
+      title="Choose a new password"
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitLabel={isSubmitting ? 'Resetting...' : 'Reset Password'}
+      footer={<AuthLink to="/login">Back to Login</AuthLink>}
+    >
+      <TextField
+        fullWidth
+        disabled={isSubmitting}
+        label="New Password"
+        type="password"
+        autoComplete="new-password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+      />
+      <TextField
+        fullWidth
+        disabled={isSubmitting}
+        label="Confirm Password"
+        type="password"
+        autoComplete="new-password"
+        value={confirmPassword}
+        onChange={(event) => setConfirmPassword(event.target.value)}
+      />
+    </AuthForm>
   );
 }

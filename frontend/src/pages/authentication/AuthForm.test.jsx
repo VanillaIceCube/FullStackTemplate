@@ -1,14 +1,14 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AuthPageShell from './AuthPageShell';
-import { renderWithProviders } from '../test-helpers/utils';
+import AuthForm, { AuthLink } from './AuthForm';
+import { renderWithProviders } from '../../test-helpers/utils';
 
-describe('AuthPageShell', () => {
+describe('AuthForm', () => {
   test('presents the page title as the main heading and renders its content', () => {
     renderWithProviders(
-      <AuthPageShell title="Recover access">
+      <AuthForm title="Recover access" submitLabel="Send reset link">
         <p>Enter your email to receive a reset link.</p>
-      </AuthPageShell>,
+      </AuthForm>,
     );
 
     expect(screen.getByRole('heading', { level: 1, name: 'Recover access' })).toBeVisible();
@@ -17,19 +17,23 @@ describe('AuthPageShell', () => {
     expect(screen.getByText('Enter your email to receive a reset link.')).toBeVisible();
   });
 
-  test('keeps its child form usable with Tab and native Enter submission', async () => {
+  test('supports native keyboard submit and links to other auth pages', async () => {
     const user = userEvent.setup();
-    const onSubmit = vi.fn((event) => event.preventDefault());
+    const onSubmit = vi.fn();
     renderWithProviders(
-      <AuthPageShell title="Recover access">
-        <form onSubmit={onSubmit}>
-          <label htmlFor="recovery-email">Email</label>
-          <input id="recovery-email" name="email" type="email" required />
-          <button type="submit">Send reset link</button>
-        </form>
-      </AuthPageShell>,
+      <AuthForm
+        title="Recover access"
+        onSubmit={onSubmit}
+        submitLabel="Send reset link"
+        footer={<AuthLink to="/login">Back to Login</AuthLink>}
+      >
+        <label htmlFor="recovery-email">Email</label>
+        <input id="recovery-email" name="email" type="email" required />
+      </AuthForm>,
     );
 
+    expect(screen.getByRole('form', { name: 'Recover access' })).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Back to Login' })).toHaveAttribute('href', '/login');
     await user.tab();
     expect(screen.getByRole('textbox', { name: 'Email' })).toHaveFocus();
     await user.keyboard('reader@example.com{Enter}');

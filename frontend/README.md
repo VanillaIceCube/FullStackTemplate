@@ -183,7 +183,7 @@ Test helpers use the actual app theme with only ripple suppression added.
 
 ### Authentication
 
-- Build public authentication pages with `AuthPageShell`.
+- Build public authentication pages with `AuthForm`.
 - Give every form a visible heading, native submit behavior, and browser
   autocomplete metadata.
 - Show API outcomes through the shared application snackbar.
@@ -217,7 +217,7 @@ FullStackTemplate, MacroMapper and Notoli when the behavior applies. Preserve re
 React Router and Material UI keyboard/exit coverage when consolidating suites;
 app-specific domain and route expectations remain in their owning application.
 
-`AuthPageShell.test.jsx` checks the accessible heading and native keyboard form
+`AuthForm.test.jsx` checks the accessible heading and native keyboard form
 submission. Direct session-store and hook suites cover hydration, stable snapshots,
 subscriptions, blocked storage, token rotation and stale work. Request-client
 and real App suites cover refresh races, account changes, auth feedback and consent.
