@@ -2,6 +2,7 @@ import { TextField } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { resetPassword } from '../../services/authApiClient';
+import { formatAuthErrorMessage } from '../../services/authSession';
 import AuthForm, { AuthLink } from './AuthForm';
 
 export default function ResetPassword({ showSnackbar }) {
@@ -32,12 +33,7 @@ export default function ResetPassword({ showSnackbar }) {
       showSnackbar('success', data?.message || 'Password reset successful.');
       navigate('/login');
     } catch (error) {
-      const isNetworkError =
-        error instanceof TypeError || error?.message?.toLowerCase().includes('network');
-      showSnackbar(
-        'error',
-        isNetworkError ? 'Network error.' : error?.message || 'Password reset failed.',
-      );
+      showSnackbar('error', formatAuthErrorMessage(error, 'Password reset failed.'));
     } finally {
       setIsSubmitting(false);
     }

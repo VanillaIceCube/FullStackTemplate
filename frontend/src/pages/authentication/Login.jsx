@@ -3,7 +3,7 @@ import { TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { login } from '../../services/authApiClient';
-import { persistAuthSession } from '../../services/authSession';
+import { formatAuthErrorMessage, persistAuthSession } from '../../services/authSession';
 import AuthForm, { AuthLink } from './AuthForm';
 
 export default function Login({ showSnackbar }) {
@@ -39,9 +39,7 @@ export default function Login({ showSnackbar }) {
           : null;
       navigate(next || '/');
     } catch (error) {
-      const isNetworkError =
-        error instanceof TypeError || error?.message?.toLowerCase().includes('network');
-      showSnackbar('error', isNetworkError ? 'Network error.' : error?.message || 'Login failed.');
+      showSnackbar('error', formatAuthErrorMessage(error, 'Login failed.'));
     } finally {
       setIsSubmitting(false);
     }

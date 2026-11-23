@@ -2,7 +2,7 @@ import { TextField } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { register } from '../../services/authApiClient';
-import { persistAuthSession } from '../../services/authSession';
+import { formatAuthErrorMessage, persistAuthSession } from '../../services/authSession';
 import AuthForm, { AuthLink } from './AuthForm';
 
 export default function Register({ showSnackbar }) {
@@ -28,12 +28,7 @@ export default function Register({ showSnackbar }) {
       showSnackbar('success', 'Account created! Welcome to FullStackTemplate!');
       navigate('/');
     } catch (error) {
-      const isNetworkError =
-        error instanceof TypeError || error?.message?.toLowerCase().includes('network');
-      showSnackbar(
-        'error',
-        isNetworkError ? 'Network error.' : error?.message || 'Registration failed.',
-      );
+      showSnackbar('error', formatAuthErrorMessage(error, 'Registration failed.'));
     } finally {
       setIsSubmitting(false);
     }

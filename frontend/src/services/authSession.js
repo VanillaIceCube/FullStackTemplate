@@ -48,6 +48,21 @@ export async function readOkJson(response, fallbackMessage) {
   return data;
 }
 
+export function isAuthNetworkError(error) {
+  const message = error?.message;
+  return (
+    error instanceof TypeError ||
+    (typeof message === 'string' && message.toLowerCase().includes('network'))
+  );
+}
+
+export function formatAuthErrorMessage(error, fallbackMessage = 'An unexpected error occurred.') {
+  if (isAuthNetworkError(error)) {
+    return 'Network error.';
+  }
+  return error?.message || fallbackMessage;
+}
+
 export function persistAuthSession(data) {
   startSession(data);
 }
