@@ -21,6 +21,9 @@ authentication, and the application shell.
 - `src/test-helpers/`: shared test setup and reusable helpers.
   App, startup and feature tests stay beside the files they exercise.
 
+Keep `components/`, `pages/`, `hooks/` and `services/` flat by default. Group modules you
+usually edit together one level down. A source file and its adjacent test count as one module.
+
 ### Where to change things
 
 | To change | Start here |
