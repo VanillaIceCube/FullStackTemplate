@@ -167,7 +167,7 @@ settings and allowlist/base-URL variables when domains or routes change.
 Retain prior release images and matched private recovery data; no host-wide Docker
 pruning. Cleanup requires the host operator to review disk usage and select unused
 app images explicitly. Releases manage only the app's backend/frontend; local
-`deploy/docker-compose.yml` and `deploy/nginx-proxy.conf` are local/legacy-only.
+`deploy/compose.yml` and `deploy/nginx.conf` are local/legacy-only.
 
 Production is designed for `https://app.example.com` behind Cloudflare and an origin Nginx proxy.
 
