@@ -16,6 +16,8 @@ from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
+from apps.mcp.framework.config import oauth_settings
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
@@ -210,12 +212,30 @@ DEFAULT_FROM_EMAIL = (
 
 
 # Optional MCP has no routes, OAuth tables or application tools unless explicitly enabled.
-from apps.mcp.framework.config import optional_settings  # noqa: E402
+MCP_ENABLED = os.getenv("DJANGO_MCP_ENABLED", "0") == "1"
+MCP_NAME = "FullStackTemplate"
+MCP_BASE_URL = os.getenv("DJANGO_MCP_BASE_URL", "http://localhost:8000").rstrip("/")
+MCP_RESOURCE_URL = f"{MCP_BASE_URL}/mcp"
+MCP_SERVER_FACTORY = (
+    os.getenv("DJANGO_MCP_SERVER_FACTORY") or "apps.mcp.tools.server.create_server"
+)
+TRUSTED_PROXY_IPS = [
+    address.strip()
+    for address in os.getenv("DJANGO_TRUSTED_PROXY_IPS", "").split(",")
+    if address.strip()
+]
+MCP_CONSENT_SALT = "fullstacktemplate.mcp.consent"
+MCP_REQUIRED_SCOPES = ["fullstacktemplate:connect"]
+OAUTH2_PROVIDER = oauth_settings(
+    base_url=MCP_BASE_URL,
+    scopes={
+        "fullstacktemplate:connect": "Check this connection; no application data access"
+    },
+    required_scopes=MCP_REQUIRED_SCOPES,
+)
 
-MCP_SETTINGS = optional_settings("FullStackTemplate", "fullstacktemplate", sample=True)
-globals().update(MCP_SETTINGS)
 INSTALLED_APPS += ["apps.mcp.framework"]
-if MCP_SETTINGS["MCP_ENABLED"]:
+if MCP_ENABLED:
     INSTALLED_APPS += ["oauth2_provider"]
     SECURE_PROXY_SSL_HEADER = None
 ASGI_APPLICATION = "config.asgi.application"
