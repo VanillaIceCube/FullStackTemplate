@@ -7,7 +7,7 @@ CI, reviews, dependency/security checks, and release behavior for FullStackTempl
 | Area | Entry points |
 | --- | --- |
 | Pull requests | [CI orchestrator](ci-orchestrator.yml), independent gates, and the three reviewer workflows. |
-| Security alerts | [CodeQL](alert-codeql.yml), [vulnerability](alert-vulnerability.yml), and [malware](alert-malware.yml) schedules/manual dispatches. |
+| Security alerts | [CodeQL](alert-codeql.yml), [vulnerability](alert-vulnerability.yml), and [malware](alert-malware.yml) aggregation after the nightly scan or on a daily schedule, with manual dispatch for every feed. |
 | Releases | [Release workflow](ci-deploy.yml). |
 
 Workflow YAML is authoritative for triggers, permissions and job dependencies.
@@ -600,7 +600,10 @@ permissions in the workflow or job that requests them.
 
 ```mermaid
 flowchart LR
-  Schedule[Daily schedules or manual dispatch] --> Feeds[CodeQL, vulnerability and malware workflows]
+  Scan[Successful scheduled CodeQL scan on main] --> CodeQLFeed[CodeQL alert workflow]
+  Schedule[Midnight Pacific] --> DependencyFeeds[Vulnerability and malware alert workflows]
+  Manual[Manual dispatch] --> CodeQLFeed & DependencyFeeds
+  CodeQLFeed & DependencyFeeds --> Feeds[Alert aggregation]
   Feeds --> Preflight[Verify Project access and fields]
   Preflight --> Source[All open source alerts and bounded malware classification]
   Source --> Robo[RoboCop grouping with validated Responses policy]
@@ -609,12 +612,27 @@ flowchart LR
   Issues --> Project[Separately credentialed Project synchronization and recovery]
 ```
 
-[CodeQL](alert-codeql.yml), [vulnerability](alert-vulnerability.yml) and
-[malware](alert-malware.yml) aggregation run daily or by dispatch. Incomplete
+The [vulnerability](alert-vulnerability.yml) and [malware](alert-malware.yml)
+alert workflows run daily at midnight Pacific (America/Los_Angeles). The
+[CodeQL alert workflow](alert-codeql.yml) follows a successful scheduled CodeQL
+scan on main. All three alert workflows support manual dispatch. Incomplete
 source/model evidence fails before lifecycle writes; verified closure and Project
-recovery preserve their independent credential boundaries. CodeQL analysis also
-runs on applicable main pushes, scoped PRs, the weekly schedule and manual dispatch. Alert maintenance
-neither merges code nor deploys.
+recovery preserve their independent credential boundaries.
+
+The CodeQL Gate analyzes scoped pull requests. The full scan
+is scheduled daily at midnight Pacific and can be dispatched manually.
+
+GitHub may delay or drop scheduled runs at the top of the hour. If a scheduled
+run is missing, check that workflow's run history and use **Run workflow** on
+`main` to recover the missed scan or feed. The CodeQL alert workflow runs automatically only after the scheduled scan
+on main succeeds. If tracking needs a separate retry, dispatch CodeQL Alert manually.
+[GitHub scheduled-event behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+
+Default-branch Code Scanning results can lag merges until the next full scan completes.
+For a fresher baseline, dispatch `CodeQL Gate` on `main`. Its scheduled and
+manual runs upload all three language results for that branch. For example,
+the [November 23 scheduled run](https://github.com/VanillaIceCube/FullStackTemplate/actions/runs/45276444186)
+published Python, JavaScript/TypeScript, and GitHub Actions analyses for `main`.
 
 ### Promotion, release and manual operations
 
