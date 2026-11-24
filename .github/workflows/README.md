@@ -603,7 +603,7 @@ must merge through review before a consumer requests it.
 
 ```mermaid
 flowchart LR
-  Schedule[Daily schedules or manual dispatch] --> Feeds[CodeQL, vulnerability and malware workflows]
+  Schedule[Midnight Pacific or manual dispatch] --> Feeds[CodeQL, vulnerability and malware workflows]
   Feeds --> Source[Authoritative source alerts and bounded classification]
   Source --> Robo[RoboCop grouping with validated Responses policy]
   Robo --> Validate[Complete source coverage and lifecycle validation]
@@ -612,12 +612,12 @@ flowchart LR
 ```
 
 [CodeQL](alert-codeql.yml), [vulnerability](alert-vulnerability.yml) and
-[malware](alert-malware.yml) aggregation run daily or by dispatch. Incomplete
+[malware](alert-malware.yml) aggregation run daily at midnight Pacific (`America/Los_Angeles`) or by dispatch. Incomplete
 source/model evidence fails before lifecycle writes; verified closure and Project
 recovery preserve their independent credential boundaries.
 
 The CodeQL Gate analyzes scoped pull requests. It also runs a full scan every
-Monday at 10:24 UTC and on manual dispatch.
+Monday at midnight Pacific and on manual dispatch.
 
 Default-branch Code Scanning results can lag merges until the next weekly run.
 For a fresher baseline, dispatch `CodeQL Gate` on `main`. Its scheduled and
