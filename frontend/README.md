@@ -7,7 +7,7 @@ authentication, and the application shell.
 
 - `docker/`: production/development Dockerfiles and Nginx configuration.
   Docker builds keep `frontend/` as their context. `Dockerfile.dockerignore` and
-  `Dockerfile.dev.dockerignore` live beside their matching Dockerfiles and keep
+  `Dockerfile.hotswap.dockerignore` live beside their matching Dockerfiles and keep
   exclusion paths relative to the frontend context.
 - `src/theme.js`: application palette, document typography, shared Material UI defaults
   and the existing CSS color variables, applied through `ThemeProvider` and `CssBaseline`.
