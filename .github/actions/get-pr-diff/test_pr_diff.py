@@ -3,6 +3,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -11,6 +12,7 @@ from pathlib import Path
 import yaml
 
 ACTION = Path(__file__).with_name("action.yml")
+BASH = "C:/Program Files/Git/bin/bash.exe" if os.name == "nt" else "bash"
 
 
 class ReviewDiffTests(unittest.TestCase):
@@ -18,6 +20,9 @@ class ReviewDiffTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory(prefix="review-diff-")
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name)
+        runner = tempfile.TemporaryDirectory(prefix="review-runner-")
+        self.addCleanup(runner.cleanup)
+        self.runner_temp = Path(runner.name)
         self.git("init", "-q")
         self.git("config", "user.email", "fixture@example.test")
         self.git("config", "user.name", "Diff fixture")
@@ -42,7 +47,7 @@ class ReviewDiffTests(unittest.TestCase):
         self.git("commit", "-qm", "fixture")
         return self.git("rev-parse", "HEAD")
 
-    def action(self, head, budget=None, base=None, check=True):
+    def action(self, head, budget=None, base=None, check=True, omit_npm=True):
         if budget is None:
             budget = int(
                 yaml.safe_load(ACTION.read_text(encoding="utf-8"))["inputs"][
@@ -53,23 +58,26 @@ class ReviewDiffTests(unittest.TestCase):
         script = textwrap.dedent(
             ACTION.read_text(encoding="utf-8").split("      run: |\n", 1)[1]
         )
-        for name, value in {
-            "base_sha": base or self.base,
-            "head_sha": head,
-            "max_bytes": str(budget),
-        }.items():
-            script = script.replace("${{ inputs." + name + " }}", value)
+        if os.name == "nt":
+            # Windows Python installations may expose only python.exe to Git Bash.
+            script = 'python3() { "$FIXTURE_PYTHON" "$@"; }\n' + script
         output = self.root / "outputs"
         output.write_text("", encoding="utf-8")
         summary = self.root / "summary"
         result = subprocess.run(
-            ["bash", "-c", script],
+            [BASH, "-c", script],
             check=False,
             cwd=self.root,
             env={
                 **os.environ,
-                "GITHUB_OUTPUT": str(output),
-                "GITHUB_STEP_SUMMARY": str(summary),
+                "RUNNER_TEMP": self.runner_temp.as_posix(),
+                "FIXTURE_PYTHON": Path(sys.executable).as_posix(),
+                "GITHUB_OUTPUT": output.as_posix(),
+                "GITHUB_STEP_SUMMARY": summary.as_posix(),
+                "BASE_SHA": base or self.base,
+                "HEAD_SHA": head,
+                "MAX_BYTES": str(budget),
+                "OMIT_FRONTEND_NPM_LOCKFILE": str(omit_npm).lower(),
             },
             capture_output=True,
             text=True,
@@ -77,22 +85,27 @@ class ReviewDiffTests(unittest.TestCase):
         if check:
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         outputs = dict(line.split("=", 1) for line in output.read_text().splitlines())
+        if check:
+            self.artifacts = Path(outputs["diff_path"]).parent
+            self.assertEqual(self.artifacts.parent, self.runner_temp)
         return result, outputs
 
     def test_large_generated_lockfile_preserves_source_and_right_side_lines(self):
         self.write("frontend/package-lock.json", json.dumps({"padding": "x" * 700000}))
         self.write("frontend/package.json", '{"name":"updated"}\n')
         self.write("src/example.js", "first\nnew\nthird\n")
+        self.write("pr.diff", "repository-owned content\n")
         # Keep a deliberately smaller fixture budget to isolate lockfile filtering.
         _, outputs = self.action(self.commit(), budget=524288)
         self.assertEqual(outputs["truncated"], "false")
         self.assertGreater(int(outputs["full_diff_bytes"]), 524288)
         self.assertLess(int(outputs["diff_bytes"]), 524288)
         self.assertEqual(outputs["excluded_files"], "frontend/package-lock.json")
-        diff = (self.root / "pr.diff").read_text()
+        diff = (self.artifacts / "pr.diff").read_text()
+        self.assertEqual((self.root / "pr.diff").read_text(), "repository-owned content\n")
         self.assertNotIn("package-lock.json", diff)
         self.assertIn("frontend/package.json", diff)
-        lined = (self.root / "pr_lines.diff").read_text()
+        lined = (self.artifacts / "pr_lines.diff").read_text()
         for expected in ("A2: new", "R1: first", "D: old", "R3: third", "DIFF LEGEND"):
             self.assertIn(expected, lined)
         self.assertIn(
@@ -117,7 +130,7 @@ class ReviewDiffTests(unittest.TestCase):
         prior.write_text("[]", encoding="utf-8")
         context = self.root / "context.txt"
         result = subprocess.run(
-            ["bash", "-c", script],
+            [BASH, "-c", script],
             check=False,
             cwd=self.root,
             env={
@@ -126,8 +139,9 @@ class ReviewDiffTests(unittest.TestCase):
                 "HEAD_SHA": self.git("rev-parse", "HEAD"),
                 "EXCLUDED_FILES": outputs["excluded_files"],
                 "CONTEXT_PATH": str(context),
+                "RUNNER_TEMP": self.runner_temp.as_posix(),
                 "PRIOR_REVIEWS_PATH": str(prior),
-                "DIFF_PATH": str(self.root / "pr_lines.diff"),
+                "DIFF_PATH": str(self.artifacts / "pr_lines.diff"),
                 "DEPENDABOT_UPDATE_TYPE": "",
             },
             capture_output=True,
@@ -146,7 +160,7 @@ class ReviewDiffTests(unittest.TestCase):
         self.assertEqual(outputs["diff_bytes"], "0")
         self.assertEqual(outputs["truncated"], "false")
         self.assertIn(
-            "No source diff remains", (self.root / "pr_lines.diff").read_text()
+            "No source diff remains", (self.artifacts / "pr_lines.diff").read_text()
         )
         self.assertIn(
             "Do not infer dependency safety", (self.root / "summary").read_text()
@@ -158,31 +172,39 @@ class ReviewDiffTests(unittest.TestCase):
         _, outputs = self.action(self.commit(), budget=512)
         self.assertEqual(outputs["excluded_files"], "")
         self.assertEqual(outputs["truncated"], "true")
-        self.assertEqual((self.root / "pr.diff").stat().st_size, 512)
-        self.assertIn("yarn.lock", (self.root / "pr_full.diff").read_text())
+        self.assertEqual((self.artifacts / "pr.diff").stat().st_size, 512)
+        self.assertIn("yarn.lock", (self.artifacts / "pr_full.diff").read_text())
+
+    def test_npm_lockfile_remains_reviewable_without_opt_in(self):
+        self.write("frontend/package-lock.json", '{"lockfileVersion":3,"packages":{}}\n')
+        _, outputs = self.action(self.commit(), omit_npm=False)
+        self.assertEqual(outputs["excluded_files"], "")
+        self.assertIn("frontend/package-lock.json", (self.artifacts / "pr.diff").read_text())
 
     def test_source_over_budget_remains_incomplete(self):
         self.write("src/example.js", "source line\n" * 1000)
         result, outputs = self.action(self.commit(), budget=1024)
         self.assertEqual(outputs["truncated"], "true")
         self.assertGreater(int(outputs["diff_bytes"]), 1024)
-        self.assertEqual((self.root / "pr.diff").stat().st_size, 1024)
+        self.assertEqual((self.artifacts / "pr.diff").stat().st_size, 1024)
         self.assertIn("Truncated to 1024 bytes", result.stdout)
 
     def test_symlink_at_generated_path_is_never_excluded(self):
-        lockfile = self.root / "frontend/package-lock.json"
-        lockfile.unlink()
-        lockfile.symlink_to("source.js")
-        _, outputs = self.action(self.commit())
+        name = "frontend/package-lock.json"
+        self.write(name, "source.js")
+        blob = self.git("hash-object", "-w", name)
+        self.git("update-index", "--cacheinfo", f"120000,{blob},{name}")
+        self.git("commit", "-qm", "symlink fixture")
+        _, outputs = self.action(self.git("rev-parse", "HEAD"))
         self.assertEqual(outputs["excluded_files"], "")
-        self.assertIn("120000", (self.root / "pr.diff").read_text())
+        self.assertIn("120000", (self.artifacts / "pr.diff").read_text())
 
     def test_rename_from_lockfile_to_source_retains_new_source(self):
         self.git("mv", "frontend/package-lock.json", "src/former-lock.js")
         self.action(self.commit())
-        self.assertIn("src/former-lock.js", (self.root / "pr.diff").read_text())
+        self.assertIn("src/former-lock.js", (self.artifacts / "pr.diff").read_text())
         self.assertIn(
-            'A1: {"lockfileVersion":3}', (self.root / "pr_lines.diff").read_text()
+            'A1: {"lockfileVersion":3}', (self.artifacts / "pr_lines.diff").read_text()
         )
 
     def test_git_failure_never_publishes_a_complete_diff(self):
