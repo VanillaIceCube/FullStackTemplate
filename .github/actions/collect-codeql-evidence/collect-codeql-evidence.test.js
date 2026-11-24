@@ -3,6 +3,79 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const { collectCodeqlEvidence } = require("./collect-codeql-evidence");
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+
+test('docs-only PRs require all three completed default-branch baselines', () => {
+  const input = {
+    upstreamResult: 'success', scopeStatus: 'success',
+    scope: { python: false, javascript: false, actions: false },
+    defaultBranchAnalyses: [baseline('/language:python', 'python'), baseline('/language:javascript-typescript', 'javascript'), baseline('/language:actions', 'actions')],
+  };
+  assert.equal(collectCodeqlEvidence(input).approval_eligible, true);
+  for (let index = 0; index < 3; index++) {
+    const partial = input.defaultBranchAnalyses.filter((_, candidate) => candidate !== index);
+    assert.equal(collectCodeqlEvidence({ ...input, defaultBranchAnalyses: partial }).approval_eligible, false);
+  }
+});
+
+test('failed out-of-scope analyses stay gaps and successful reruns use the newest check', () => {
+  const input = { upstreamResult: 'success', scopeStatus: 'success', scope: { python: false, javascript: true, actions: true },
+    defaultBranchAnalyses: [baseline('/language:python', 'python')],
+    checkRuns: [successfulCheck('Analyze JavaScript/TypeScript'), successfulCheck('Analyze GitHub Actions'), { ...successfulCheck('Analyze Python'), id: 10, conclusion: 'cancelled' }],
+  };
+  assert.equal(collectCodeqlEvidence(input).approval_eligible, false);
+  input.checkRuns.push({ ...successfulCheck('Analyze Python'), id: 11 });
+  assert.equal(collectCodeqlEvidence(input).approval_eligible, true);
+});
+
+test('workflow executes accurate PR scope and full scheduled and manual scope', () => {
+  const workflow = fs.readFileSync(path.join(__dirname, '../../workflows/gate-codeql.yml'), 'utf8').replaceAll('\r\n', '\n');
+  const match = workflow.match(/      - name: Set analysis scope[\s\S]*?        run: \|\n([\s\S]*?)\n  analyze-python:/);
+  assert.ok(match);
+  const source = match[1].split('\n').map((line) => line.replace(/^          /, '')).join('\n');
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'codeql-scope-'));
+  const bash = process.platform === 'win32' ? 'C:/Program Files/Git/bin/bash.exe' : 'bash';
+  try {
+    for (const [event, python, javascript, actions, expected] of [
+      ['pull_request', 'false', 'false', 'false', ['false', 'false', 'false']],
+      ['pull_request', 'true', 'false', 'false', ['true', 'false', 'true']],
+      ['pull_request', 'false', 'true', 'false', ['false', 'true', 'true']],
+      ['pull_request', 'false', 'false', 'true', ['false', 'false', 'true']],
+      ['schedule', '', '', '', ['true', 'true', 'true']],
+      ['workflow_dispatch', '', '', '', ['true', 'true', 'true']],
+      ['pull_request', '', '', '', null],
+    ]) {
+      const output = path.join(directory, 'output').replaceAll('\\', '/');
+      fs.writeFileSync(output, '');
+      const result = spawnSync(bash, ['-c', source], { env: { ...process.env, GITHUB_OUTPUT: output, EVENT_NAME: event, PYTHON_SCOPE: python, JAVASCRIPT_SCOPE: javascript, ACTIONS_SCOPE: actions }, encoding: 'utf8' });
+      assert.equal(result.status, expected ? 0 : 1, result.stderr);
+      const values = Object.fromEntries(fs.readFileSync(output, 'utf8').trim().split('\n').filter(Boolean).map((line) => line.split('=')));
+      if (expected) {
+        assert.equal(values.scope_status, 'success');
+        assert.deepEqual([values.python, values.javascript, values.actions], expected);
+      } else assert.equal(values.scope_status, undefined);
+    }
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
+test('scope workflow outputs are forwarded to RoboCop and evidence handling stays bounded', () => {
+  const base = path.join(__dirname, '../../workflows');
+  const gate = fs.readFileSync(path.join(base, 'gate-codeql.yml'), 'utf8');
+  const orchestrator = fs.readFileSync(path.join(base, 'ci-orchestrator.yml'), 'utf8');
+  const review = fs.readFileSync(path.join(base, 'review-security.yml'), 'utf8');
+  for (const language of ['status', 'python', 'javascript', 'actions']) {
+    assert.ok(gate.includes('      scope_' + language + ':'));
+    assert.ok(orchestrator.includes('codeql_scope_' + language + ': ${{ needs.codeql.outputs.scope_' + language + ' }}'));
+    assert.ok(review.includes('inputs.codeql_scope_' + language));
+  }
+  assert.match(review, /codeql_interpretation: codeqlInterpretation/);
+  assert.match(review, /approval_eligible is false/);
+  const evidence = collectCodeqlEvidence({ checkRuns: Array.from({ length: 100 }, (_, id) => ({ id, name: 'CodeQL', conclusion: 'neutral', output: { summary: 'x'.repeat(100000) } })) });
+  assert.ok(Buffer.byteLength(JSON.stringify(evidence)) < 16000);
+});
 
 const successfulCheck = (name) => ({
   id: name,

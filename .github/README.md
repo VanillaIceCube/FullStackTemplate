@@ -80,7 +80,7 @@ workflows can group and update their managed issues:
 | --- | --- |
 | `dependencies` | Dependabot-authored dependency update PRs |
 | `codeql` | Grouped CodeQL security alerts. |
-| `vulnerability` | Grouped non-urgent Dependabot vulnerability alerts. |
+| `vulnerability` | Grouped Dependabot vulnerability alerts of every severity. |
 | `malware` | Grouped Dependabot malware alerts. |
 | `codex` | Work generated or assisted by Codex |
 
@@ -371,11 +371,12 @@ Missing required checks remain pending; failed/cancelled checks require a clean
 rerun on the current head. GitHub accepts skipped jobs for required checks, so a
 skipped reviewer is not proof of a review. The read-only audit below rejects
 missing, skipped, cancelled, neutral and all other non-success reviewer results.
-It publishes no aggregator and changes no rules. [The dated ruleset
-snapshot](review-gating-evidence.json) records the existing requirements,
-Notoli's live verdict/failure/recovery parity reference, and PR #236's own native
-requested-changes reviews, failed required checks and blocked merge state.
-The PR's final validation tracks approval/check recovery after the completed fix.
+It publishes no aggregator and changes no rules. On October 20, 2026,
+[PR #236](https://github.com/VanillaIceCube/FullStackTemplate/pull/236) showed
+that reviews requesting changes caused [failed required checks](https://github.com/VanillaIceCube/FullStackTemplate/actions/runs/39519771086)
+and blocked the merge. See the PR for follow-up validation after the fix and
+[Notoli PR #942](https://github.com/VanillaIceCube/Notoli/pull/942) for the
+corresponding failure and recovery in Notoli.
 
 ```powershell
 gh api repos/VanillaIceCube/FullStackTemplate/rulesets/19855608 > ruleset.json
@@ -387,13 +388,10 @@ node .github/actions/publish-ai-review/verify-gates.js ruleset.json head-check-r
 
 ## 🧪 Checks
 
-Repository CI helpers live in `.github/tools/`: `bounded_log.py` retains bounded
-reviewer diagnostics; `install_actionlint.sh` installs the pinned, checksum-verified
-Linux Actionlint release; `validate_repository.py` checks workflow/script syntax
-and synthetic Compose configuration; `ci_architecture.py` validates the documented
-CI contract and regenerates `.github/workflows/ci-source-inventory.json`. Run these from the
-repository root. See the [workflow checks](workflows/README.md#-checks-and-diagnostics)
-and [CI architecture](workflows/README.md#-architecture-and-trust-boundaries) for dependencies and commands.
+The [test workflow](workflows/gate-test.yml) validates workflow and script syntax,
+checks Docker Compose configuration with test settings, and limits logs sent to
+the build reviewer. See the [workflow checks](workflows/README.md#-checks-and-diagnostics)
+for local dependencies and commands.
 
 Verify the current head's independent checks and all three native review identities.
 Distinguish synthetic local tests from actual GitHub runner/credential acceptance.

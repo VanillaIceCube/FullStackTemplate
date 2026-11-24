@@ -27,6 +27,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Create Obi-Wan Code-nobi GitHub App token
         id: app-token
@@ -101,6 +102,7 @@ jobs:
         with:
           base_sha: ${{ github.event.pull_request.base.sha }}
           head_sha: ${{ github.event.pull_request.head.sha }}
+          omit_frontend_npm_lockfile: "true"
 
       - name: Collect read-only auto-merge API evidence
         if: steps.pr-diff.outputs.truncated != 'true'
@@ -157,12 +159,12 @@ jobs:
           total_bytes=0
           max_total_bytes=180000
           max_file_bytes=30000
-          while IFS= read -r file; do
+          while IFS= read -r -d '' file; do
             if [ -n "$EXCLUDED_FILES" ] && [ "$file" = "$EXCLUDED_FILES" ]; then
               printf '\n--- %s ---\n[generated lockfile payload excluded; see AI REVIEW SCOPE]\n' "$file" >> "$CONTEXT_PATH"
               continue
             fi
-            if [ ! -f "$file" ]; then
+            if [ -L "$file" ] || [ ! -f "$file" ]; then
               continue
             fi
             if ! grep -Iq . "$file"; then
@@ -207,7 +209,7 @@ jobs:
             else
               total_bytes=$((total_bytes + file_bytes))
             fi
-          done < <(git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$HEAD_SHA")
+          done < <(git diff --name-only -z --diff-filter=ACMRT "$BASE_SHA" "$HEAD_SHA")
 
           if [ "$total_bytes" -gt "$max_total_bytes" ]; then
             echo "Changed-file context exceeded budget: $total_bytes > $max_total_bytes" >&2
@@ -380,7 +382,7 @@ jobs:
               "summary": "**Review incomplete; check failed.** The full diff extends beyond my review horizon, and a partial reading cannot guide a safe verdict. The path remains closed until every changed line is brought into view.",
               "unchanged": false,
               "findings": [],
-              "evidence": ["The AI source diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is ${{ steps.pr-diff.outputs.max_bytes }} bytes."],
+              "evidence": ["The reviewable source diff is ${{ steps.pr-diff.outputs.diff_bytes }} bytes; my review budget is ${{ steps.pr-diff.outputs.max_bytes }} bytes."],
               "actions": ["Split the change into smaller pull requests or intentionally raise my reviewed diff budget, then call for my review again."],
               "comments": []
             }
