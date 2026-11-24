@@ -13,6 +13,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Review GitHub Actions write permissions in workflow PRs and remove the separate approval file.
 - Give each of the four authentication forms an accessible name.
 
 ## 2026-11-22
