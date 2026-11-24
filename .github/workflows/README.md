@@ -466,6 +466,16 @@ through Vite env.
 
 ### Repository validation and failure diagnostics
 
+Editing `gate-test.yml` triggers all app test groups. Frontend tests use two
+Vitest workers, then build after the tests pass. The backend always attempts
+both its ordinary and MCP-enabled suites and fails if either profile fails.
+The MCP-enabled run discovers the checked-in tests under `apps.mcp`.
+
+Repository automation uses the locked dev dependencies. Workflow and Compose
+validation and release-source parity run before the test suites. The gate
+discovers JavaScript action regression tests in `.github/actions` and Python
+PR-diff regressions where present.
+
 The path-aware test gate includes `.github/**`, `deploy/**`, and maintained docs
 in automation validation. It runs workflow and
 composite syntax, parser-only script checks and synthetic Compose configuration
