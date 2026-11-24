@@ -113,7 +113,7 @@ class ReviewDiffTests(unittest.TestCase):
             lined,
         )
         self.assertIn("have NOT been inspected", lined)
-        self.assertIn("Dependency Review and npm malware review", lined)
+        self.assertIn("Dependency Review and dependency malware review", lined)
         self.assertIn(
             "Generated lockfile payloads excluded", (self.root / "summary").read_text()
         )

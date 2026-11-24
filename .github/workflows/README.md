@@ -51,7 +51,7 @@ duplicate inline comments or sees an unchanged verdict.
 - Node tests for repository automation
 - CodeQL for Python, JavaScript/TypeScript, and GitHub Actions
 - GitHub dependency review at high/critical severity, with detailed findings retained in the check logs and annotations
-- npm malware advisory review for changed lockfile packages, including initial lockfile additions against an empty dependency baseline and batched `package@version` advisory queries
+- Known-malware review for changed public npm and PyPI versions in the frontend and backend lockfiles
 - AI code, build, and security reviews for trusted same-repository pull requests
 - Dependabot auto-merge after independent gates and all three reviewers pass
 
@@ -119,7 +119,7 @@ All three reviewers inherit the same 2 MB (2,000,000-byte) source-diff budget fr
 `.github/actions/get-pr-diff/action.yml`; reviewer workflows do not override it.
 Only the regular generated `frontend/package-lock.json` payload is excluded
 from the source diff and Obi-Wan's changed-file contents. This exact path is
-covered by the independent Dependency Review and npm malware gates; other
+covered by the independent Dependency Review and dependency malware gates; other
 lockfiles and symlinks/executable files at that path remain in source review.
 Each AI prompt and job summary discloses excluded files and the full diff size.
 Manifests and source retain their review budget and added/context/deleted-line
@@ -128,7 +128,7 @@ publish an incomplete review and fail. Lockfile-only PRs explicitly have no
 source diff: an empty source review is not dependency-safety evidence, and all
 independent security gates remain required. Behavioral tests execute the real
 action against temporary Git histories, including oversized diffs and failures.
-Notoli and MacroMapper use the same exclusion with independent npm malware
+Notoli and MacroMapper use the same exclusion with independent dependency malware
 coverage. Infrastructure includes all lockfiles in AI source review.
 OpenAI review requests also cap combined reasoning and visible output at 16,000
 tokens so they do not reserve the model's full output allowance against project
@@ -352,15 +352,27 @@ required. Repository settings are audited independently of source; stage read-on
 defaults/disabled workflow-token approvals and SHA enforcement after source CI
 passes. Reviewer App tokens and scoped auto-merge/deployment grants remain explicit.
 
-The PR npm malware gate scans only added/changed exact package versions, at most
-25 per request, 200 requests total and 20 pages per batch, with 30-second timeouts.
-A missing base lock scans the complete head; a missing head lock while a frontend
-manifest remains fails. Invalid refs, unsupported/malformed locks, unverifiable
-versions, API/range evidence failures and known malware fail visibly. Removing the
-whole frontend has no remaining npm graph. This gate is distinct from the scheduled
-repository-alert feed. Mocked regressions make no API writes or model calls.
+The PR malware gate discovers committed npm v2/v3 lockfiles (`package-lock.json` or
+`npm-shrinkwrap.json`) and uv v1 `uv.lock` files at any depth in the base and
+head. This application uses `frontend/package-lock.json` and `backend/uv.lock`.
+It checks added or changed
+direct and transitive registry versions, including optional and platform-specific
+entries. A new lockfile scans the full graph. A missing head lock with a remaining
+manifest, malformed or unsupported input, or incomplete advisory evidence fails the
+check. The local Python project is excluded. Private indexes, Git URLs, direct
+downloads and workspace links require separate provenance review and fail the gate.
 
-Python malware coverage follows [the canonical decision](README.md#python-malware-coverage-limitation).
+The gate sends only public npm and PyPI names and exact versions to the
+[GitHub malware advisory API](https://docs.github.com/en/rest/security-advisories/global-advisories#list-global-security-advisories)
+and [OSV's batch API](https://google.github.io/osv.dev/post-v1-querybatch/). GitHub
+matches affected releases and ranges; an ambiguous batch is rechecked by exact
+version. OSV supplies normalized matches for [OpenSSF malware reports](https://github.com/ossf/malicious-packages),
+including PyPI advisories GitHub indexes under a different spelling. Only active
+malware records contribute findings. The scanner installs no PR dependencies.
+It limits a revision to 100 lockfiles and a review to 2,000 changed coordinates, batches of 25, 20 pages per
+batch, 200 total requests and 30 seconds per request. The reviewer receives
+up to 16 KiB of findings and the omitted count; any finding fails the gate.
+
 Shared deployment files are synchronized to the Infrastructure source pin, including
 the approved Action-upgrade/unauthorized-drift regression. Update the source before
 consumers; never edit a vendored workflow or test independently.
@@ -535,7 +547,7 @@ flowchart TD
     T["gate-test.yml<br/>Changed files select tests"]
     Q["gate-codeql.yml<br/>Changed files select analyzers"]
     V["gate-vulnerability.yml<br/>Dependency vulnerability review"]
-    M["gate-malware.yml<br/>npm malware · app repos only"]
+    M["gate-malware.yml<br/>npm and PyPI malware · app repos only"]
     S["gate-secrets.yml<br/>Gitleaks scan"]
     RC["review-code.yml · Obi-Wan"]
     RB["review-build.yml · Lint Eastwood"]
@@ -676,15 +688,13 @@ runtime verification for those claims.
 
 ### Python malware coverage limitation
 
-Keep the existing vulnerability review; it does not establish malware detection.
-No mandatory Python malware service is configured. Known-advisory matching,
-publishing attestations and source review cannot clear new/unknown malicious
-behavior, typosquatting or compromised trusted publishers. Maintainers still review
-package identity, installation hooks and dependency changes. Reconsider a gate
-only with a complete immutable resolved graph, bounded feed freshness/error policy,
-representative false-positive evaluation and a named maintenance owner; new services,
-credentials or spend require their own review. Infrastructure's validation-tool
-pins are distinct from application dependency scanning.
+The gate checks known malware for exact public PyPI versions in the backend lock.
+For example, GitHub records [GHSA-f3g9-pmww-pww3](https://github.com/advisories/GHSA-f3g9-pmww-pww3)
+under its original mixed-case name. The normalized OSV query also finds the
+OpenSSF record for that release. Neither feed inspects downloaded artifacts or
+detects unpublished malware or a newly compromised publisher. Docker images,
+GitHub Actions and Infrastructure's separate toolchain are outside these two
+application lockfiles. Dependency Review and CodeQL retain their existing roles.
 
 ### Locked Python environments
 
