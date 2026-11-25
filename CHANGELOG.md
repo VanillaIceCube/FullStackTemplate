@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 2026-11-25
+
+### Changed
+
+- Use the launch-only deployment controller and keep shared CI, reviewer workflows and repository-specific comment identities aligned.
+
 ## 2026-11-24
 
 ### Added
