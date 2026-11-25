@@ -411,7 +411,7 @@ not authorize merging, branch promotion, production deployment, or key rotation.
 - [Workflow behavior and maintenance](workflows/README.md).
 - [Shared action and reviewer contracts](actions/README.md).
 - [CI/CD architecture](workflows/README.md#-architecture-and-trust-boundaries).
-- [Application production setup and recovery](../deploy/production/README.md).
+- [Application production setup and launches](../deploy/production/README.md).
 
 ## 🤝 Shared engineering ownership and rollout
 
@@ -445,7 +445,7 @@ credential-rotation or security-bypass authority.
 Ordinary source merges through reviewed `main` before exact-tree promotion through
 the repository's existing `env-prod` process. A promotion merge may have a different
 SHA while preserving the exact reviewed tree. Keep required CI, reviewers, owner
-authorization and recovery gates. An explicitly owner-authorized narrow deployment
+authorization and readiness checks. An explicitly owner-authorized narrow deployment
 experiment must return its production-only changes and history promptly to main
 through review before ordinary promotion resumes. Preserve newer main work and
 both histories; never reset or force-push to manufacture parity.
@@ -457,4 +457,4 @@ parity and deployment acceptance when both branches are ready. An absent product
 branch does not authorize creating one. FullStackTemplate remains an onboarding
 example without an active production target. History reconciliation never authorizes
 deployment. Infrastructure's existing owner-triggered gateway promotion decision
-and separate initial setup/recovery scope remain in force.
+and separate initial host setup scope remain in force.

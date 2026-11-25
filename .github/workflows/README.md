@@ -101,7 +101,7 @@ flowchart LR
     DEPLOY --> TARGET["Requires an adopter with a configured production target"]
 ```
 
-[Application release configuration, verification and recovery](../../deploy/production/README.md)
+[Application release configuration and verification](../../deploy/production/README.md)
 
 ## 🧪 Checks and diagnostics
 
