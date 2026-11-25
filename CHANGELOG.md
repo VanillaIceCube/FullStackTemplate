@@ -7,7 +7,7 @@ All notable changes to this project are documented in this file.
 ### Changed
 
 - Save SQLite and both existing app containers before migrating. Stop both services on a failed deployment health check. Keep shared CI, reviewer workflows and repository-specific comment identities aligned.
-- Verify the production launcher against Infrastructure’s shared `app-release/` directory.
+- Verify the production launcher against Infrastructure’s shared `deploy/` directory.
 
 ## 2026-11-24
 
