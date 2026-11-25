@@ -128,33 +128,15 @@ history and valid UTF-8 text when editing or merging entries.
 
 ## 💻 Local development
 
-Use uv for Python environments; do not assume dependencies are installed.
-Use the locked Python 3.12 backend project and the Node version range in
-`frontend/package.json`. From the repository root:
+Use the locked Python 3.12 environment and the Node version declared in
+`frontend/package.json`. The [backend guide](backend/README.md) covers uv,
+migrations and startup. The [frontend guide](frontend/README.md) covers `npm ci`
+and Vite.
 
-```powershell
-uv sync --locked --project backend
-uv run --locked --project backend python backend/manage.py migrate
-uv run --locked --project backend python backend/manage.py runserver 8000
-```
-
-In a separate shell, from the repository root:
-
-```powershell
-Set-Location frontend
-npm ci
-npm start
-```
-
-Backend image definitions live in `backend/docker/`; keep `backend/` as the
-Docker build context. Each Dockerfile has a matching `<Dockerfile>.dockerignore`
-beside it; exclusions remain relative to the context root. Frontend image definitions and Nginx configuration live in
-`frontend/docker/`; keep `frontend/` as the Docker build context.
-
-For local Docker hot reload and optional standalone HTTPS, follow
-[deploy/README.md](deploy/README.md). Initialize only missing local environment
-and database files; never truncate an existing SQLite file. Local Compose/proxy
-files are not production release inputs.
+Follow the [local Docker guide](deploy/README.md) for hot reload, HTTPS and
+dependency changes. Build from the `backend/` and `frontend/` contexts with
+their matching Dockerfile ignore files. Create missing local environment and
+SQLite files only. Production uses the [app release guide](deploy/production/README.md).
 
 ## ⚙️ Configuration
 
