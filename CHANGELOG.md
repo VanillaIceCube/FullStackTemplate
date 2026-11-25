@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
-- Use the launch-only deployment controller and keep shared CI, reviewer workflows and repository-specific comment identities aligned.
+- Save SQLite and both existing app containers before migrating. Stop both services on a failed deployment health check. Keep shared CI, reviewer workflows and repository-specific comment identities aligned.
 
 ## 2026-11-24
 
