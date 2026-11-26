@@ -214,7 +214,7 @@ protect `env-prod`. Main merges and source review do not authorize activation.
 
 ### Separate reviewer keys
 
-Use the [exact key names and deferred migration steps](README.md#-credential-ownership). Each generated repository needs its own reviewer project and credentials; never copy this template's secrets.
+Use the [exact key names and deferred migration steps](_README.md#-credential-ownership). Each generated repository needs its own reviewer project and credentials; never copy this template's secrets.
 
 ## 🔑 Credential ownership
 
@@ -310,7 +310,7 @@ before considering a prior failure resolved. Check both a human and a trusted
 Dependabot PR before activating requirements. A missing check stays pending,
 and a skipped reviewer must be rerun: GitHub itself accepts skipped required
 jobs. Use the read-only audit in
-[the branch-protection guidance](README.md#-branch-protection)
+[the branch-protection guidance](_README.md#-branch-protection)
 to verify actual successful reviewer results.
 
 The reviewers run for trusted same-repository pull requests, including
