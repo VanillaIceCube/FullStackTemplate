@@ -105,7 +105,6 @@ owner. The alert tracker requires the `Security` issue type and these fields:
 | Domain | Single-select | `CI/CD` |
 | Priority | Single-select | `P0`, `P1`, `P2` |
 | Size | Single-select | `M` |
-| Estimate | Number | |
 | End date | Date | |
 
 Use **Target date** for planned deadlines and **End date** for actual completion.
@@ -116,8 +115,9 @@ The shared planning schema also includes `P3`, sizes `XS` through `XL`, and a
 
 Before switching the alert workflows, export the existing Project items and
 field values. Backfill the linked issues in place, including closed issues and
-the Domain, Priority, Size, Estimate, Start date, and End date values on
-existing RoboCop-managed tickets. Move Work type to the native issue type.
+the Domain, Priority, Size, Start date, and End date values on existing
+RoboCop-managed tickets. Use Size for effort and keep historical Estimate
+values in the migration export. Move Work type to the native issue type.
 Re-read the native values and compare them to the export before enabling the
 new tracker. Keep a deliberate native edit when it conflicts with a Project
 value and record the difference in the rollout issue.

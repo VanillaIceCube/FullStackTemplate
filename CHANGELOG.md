@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
-- Track security alerts in native GitHub Issues using RoboCop's existing installation token and repository issue fields.
+- Track security alerts in native GitHub Issues using RoboCop's existing installation token and repository issue fields. Record relative effort as Size.
 - Save SQLite and both existing app containers before migrating. Stop both services on a failed deployment health check. Keep shared CI, reviewer workflows and repository-specific comment identities aligned.
 - Compare the shared launcher, tests and workflow directly with the Infrastructure commit in `deploy/production/app.json`.
 - Rename the GitHub automation guide to `.github/_README.md` so the repository homepage shows the root README.
