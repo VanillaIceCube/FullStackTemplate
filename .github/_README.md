@@ -98,7 +98,8 @@ ready to start. Use milestones and a date-filtered saved view for release planni
 
 The repository owner manages issue types and fields under **Settings → Planning**.
 Reuse the account's settings when creating another repository under the same
-owner. The alert tracker requires the `Security` issue type and these fields:
+owner. The alert tracker uses the `Bug` issue type for new remediation tickets
+and requires these fields:
 
 | Issue field | Type | Required values |
 | --- | --- | --- |
