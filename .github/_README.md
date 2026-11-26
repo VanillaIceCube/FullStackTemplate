@@ -129,6 +129,16 @@ Then remove the old GitHub Project variable and token from repository Actions
 settings. The rollout and verification evidence are tracked in
 [FullStackTemplate #386](https://github.com/VanillaIceCube/FullStackTemplate/issues/386).
 
+**FullStackTemplate verification, November 25, 2026.** The Project 12 export
+contained 139 issues. The backfill and read-back comparison verified the native
+planning values on all 42 CodeQL, vulnerability, and malware tracking issues,
+including both open alert tickets. Domain, Priority, Size, Estimate, issue type,
+and populated dates matched the export. Issue numbers, states, closure reasons,
+and closure dates were preserved. See [#79](https://github.com/VanillaIceCube/FullStackTemplate/issues/79)
+and [#80](https://github.com/VanillaIceCube/FullStackTemplate/issues/80) for
+examples. The only pending issue field update on this board is the migration
+tracker itself, which the alert workflows do not manage.
+
 ### 2. Register the AI reviewer GitHub Apps
 
 Create three private GitHub Apps under the repository owner. Give each app only
