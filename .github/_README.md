@@ -80,25 +80,21 @@ already supplied by the pinned workflows under `.github/workflows/`; those
 workflows upload the results to **Security → Code scanning**. The template
 uses the same `actions`, JavaScript/TypeScript, and Python coverage as Notoli.
 
-#### Labels used by security automation
-
-Create these labels with the following descriptions so the scheduled alert
-workflows can group and update their managed issues:
+#### Repository labels
 
 | Label | Description |
 | --- | --- |
 | `dependencies` | Dependabot-authored dependency update PRs |
-| `codeql` | Grouped CodeQL security alerts. |
-| `vulnerability` | Grouped Dependabot vulnerability alerts of every severity. |
-| `malware` | Grouped Dependabot malware alerts. |
 | `codex` | Work generated or assisted by Codex |
+
+RoboCop identifies its issues from the source references and feed marker in their bodies.
 
 ### 1. Configure repository issue tracking
 
 Use the repository's **Issues** tab for triage and planning. Save views for newly
 created issues and recently updated issues. Where repository boards are available,
 use a board grouped by native issue status for Kanban, with **Todo** for work
-ready to start. Use milestones and a date-filtered saved view for release planning.
+ready to start. Use milestone due dates for release planning.
 
 The repository owner manages issue types and fields under **Settings → Planning**.
 Reuse the account's settings when creating another repository under the same
@@ -110,21 +106,18 @@ and requires these fields:
 | Domain | Single-select | Frontend, Backend, Cloud |
 | Priority | Single-select | `P0`, `P1`, `P2` |
 | Size | Single-select | `M` |
-| End date | Date | |
 
 Use **Product** for discovery, roadmap, and workflow decisions. Route
 implementation to Frontend, Backend, or Cloud. Cloud covers infrastructure,
 hosting, deployment, and delivery pipelines.
 
-Use **Target date** for planned deadlines and **End date** for actual completion.
-The shared planning schema also includes `P3`, sizes `XS` through `XL`, and a
-**Start date** field. [GitHub issue field setup](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/managing-issue-fields)
+The shared planning schema also includes `P3` and sizes `XS` through `XL`. [GitHub issue field setup](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/managing-issue-fields)
 
 #### Move an existing repository off Projects
 
 Before switching the alert workflows, export the existing Project items and
 field values. Backfill the linked issues in place, including closed issues and
-the Domain, Priority, Size, Start date, and End date values on existing
+the Domain, Priority, and Size values on existing
 RoboCop-managed tickets. Use Size for effort and keep historical Estimate
 values in the migration export. Move Work type to the native issue type.
 Re-read the native values and compare them to the export before enabling the
