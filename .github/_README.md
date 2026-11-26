@@ -24,7 +24,7 @@ The frontend skips TypeScript 7.0.x because the ESLint parser requires a TypeScr
 1. Configure Actions, dependency alerts, advanced CodeQL, and available secret scanning/push protection using this repository's settings below.
 2. Install the three reviewer GitHub Apps and set their App ID variables.
 3. Store each persona's OpenAI key and App private key in both Actions and Dependabot secrets: six reviewer secrets in each store.
-4. Configure this repository's reviewer project, security-alert Project, and separate Project token.
+4. Configure this repository's OpenAI reviewer project and native issue fields.
 5. Verify fresh same-repository human and Dependabot PR results before activating or changing required checks.
 6. Configure deployment separately through the app or gateway production guide.
 
@@ -93,31 +93,60 @@ workflows can group and update their managed issues:
 | `malware` | Grouped Dependabot malware alerts. |
 | `codex` | Work generated or assisted by Codex |
 
-### 1. Create the Project
+### 1. Configure repository issue tracking
 
-Create a Project in GitHub or copy Notoli's Project (`VanillaIceCube` Project `8`)
-without its linked issues. Update the Project title, description and README,
-link the target repository, and set the repository variable
-`SECURITY_ALERTS_PROJECT_ID` to the Project v2 node ID.
+Use the repository's **Issues** tab for triage and planning. Save views for newly
+created issues and recently updated issues. Where repository boards are available,
+use a board grouped by native issue status for Kanban, with **Todo** for work
+ready to start. Use milestones and a date-filtered saved view for release planning.
 
-Verify the following fields against Notoli:
+The repository owner manages issue types and fields under **Settings → Planning**.
+Reuse the account's settings when creating another repository under the same
+owner. The alert tracker uses the `Bug` issue type for new remediation tickets
+and requires these fields:
 
-- `Status`: `Backlog`, `Ready`, `In Progress`, `In Review`, `Done`
-- `Domain`: `Frontend`, `Backend`, `UX/UI`, `Data Model`, `Deployment`, `CI/CD`
-- `Work type`: `Bug`, `Feature`, `Enhancement`, `Refactor`, `Chore`, `Research`,
-  `Security`
-- `Priority`: `P0`, `P1`, `P2`, `P3`
-- `Size`: `XS`, `S`, `M`, `L`, `XL`
-- `Estimate`, `Start date`, and `End date`
+| Issue field | Type | Required values |
+| --- | --- | --- |
+| Domain | Single-select | Frontend, Backend, Cloud |
+| Priority | Single-select | `P0`, `P1`, `P2` |
+| Size | Single-select | `M` |
+| End date | Date | |
 
-The copied views match Notoli's `Kanban`, `Detailed Kanban`, `New Issues`,
-`Updated Issues`, `Issue Picker`, and `Roadmap` layouts, including their visible
-fields, filters, grouping, and sorting.
+Use **Product** for discovery, roadmap, and workflow decisions. Route
+implementation to Frontend, Backend, or Cloud. Cloud covers infrastructure,
+hosting, deployment, and delivery pipelines.
 
-Open the new Project's **Workflows** page and configure `Auto-add to project`
-for the target repository. Verify the other workflows and views after copying.
-GitHub documents this behavior in
-[Copying an existing project](https://docs.github.com/en/issues/planning-and-tracking-with-projects/creating-projects/copying-an-existing-project).
+Use **Target date** for planned deadlines and **End date** for actual completion.
+The shared planning schema also includes `P3`, sizes `XS` through `XL`, and a
+**Start date** field. [GitHub issue field setup](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/managing-issue-fields)
+
+#### Move an existing repository off Projects
+
+Before switching the alert workflows, export the existing Project items and
+field values. Backfill the linked issues in place, including closed issues and
+the Domain, Priority, Size, Start date, and End date values on existing
+RoboCop-managed tickets. Use Size for effort and keep historical Estimate
+values in the migration export. Move Work type to the native issue type.
+Re-read the native values and compare them to the export before enabling the
+new tracker. Keep a deliberate native edit when it conflicts with a Project
+value and record the difference in the rollout issue.
+
+After merging the workflow change, dispatch all three alert workflows on
+main and verify that they reconcile existing issue URLs and retain their
+planning data. Retain the export and close the board only after verification.
+Then remove the old GitHub Project variable and token from repository Actions
+settings. The rollout and verification evidence are tracked in
+[FullStackTemplate #386](https://github.com/VanillaIceCube/FullStackTemplate/issues/386).
+
+**FullStackTemplate verification, November 25, 2026.** The Project 12 export
+contained 139 issues. The backfill and read-back comparison verified the native
+planning values on all 42 CodeQL, vulnerability, and malware tracking issues,
+including both open alert tickets. Domain, Priority, Size, Estimate, issue type,
+and populated dates matched the export. Issue numbers, states, closure reasons,
+and closure dates were preserved. See [#79](https://github.com/VanillaIceCube/FullStackTemplate/issues/79)
+and [#80](https://github.com/VanillaIceCube/FullStackTemplate/issues/80) for
+examples. The only pending issue field update on this board is the migration
+tracker itself, which the alert workflows do not manage.
 
 ### 2. Register the AI reviewer GitHub Apps
 
@@ -181,20 +210,11 @@ Variable: OPENAI_REVIEWERS_PROJECT_ID
 Secret:   OBI_WAN_OPENAI_API_KEY
 Secret:   LINT_EASTWOOD_OPENAI_API_KEY
 Secret:   ROBOCOP_OPENAI_API_KEY
-Variable: SECURITY_ALERTS_PROJECT_ID
-Secret:   SECURITY_ALERTS_TOKEN
 ```
 
-`SECURITY_ALERTS_TOKEN` must be a distinct user token with access to the
-personal or organization Project. Do not reuse a GitHub App key or installation
-token. The three scheduled/manual alert workflows use RoboCop to read alerts
-and manage repository issues, while this token adds and updates those issues in
-the Project.
-
 Enable the repository settings in [the baseline above](#0-match-the-repository-settings),
-then install RoboCop with the permissions listed in this guide. Add the
-`SECURITY_ALERTS_TOKEN` secret before running an alert workflow; it cannot be
-copied from Notoli because it is a credential.
+then install RoboCop with the permissions listed in this guide. The three alert
+workflows use its installation token to read alerts and manage native issues.
 Run each `Alert: ...` workflow manually once after the first successful CI run.
 No-alert runs should succeed without creating issues.
 
@@ -254,9 +274,7 @@ stores as well (six review secrets total).
    separate secret settings too where specified above.
 3. In **Actions → Variables**, set `OPENAI_REVIEWERS_PROJECT_ID` to that same OpenAI
    project's actual `proj_...` ID. All three keys and the project header must
-   match. This is an OpenAI project ID; `SECURITY_ALERTS_PROJECT_ID` is a separate
-   GitHub Project node ID and stays unchanged. App identity variables/private
-   keys and deployment credentials also stay unchanged.
+   match. This variable identifies the OpenAI project for the reviewers.
 4. Run a same-repository PR smoke test for all three reviewers. Where supported,
    also verify a Dependabot PR using its separate secret store. After an
    approved merge, manually run CodeQL Alert, Vulnerability Alert, and Malware
