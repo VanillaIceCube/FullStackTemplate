@@ -103,10 +103,14 @@ and requires these fields:
 
 | Issue field | Type | Required values |
 | --- | --- | --- |
-| Domain | Single-select | `CI/CD` |
+| Domain | Single-select | Frontend, Backend, Cloud |
 | Priority | Single-select | `P0`, `P1`, `P2` |
 | Size | Single-select | `M` |
 | End date | Date | |
+
+Use **Product** for discovery, roadmap, and workflow decisions. Route
+implementation to Frontend, Backend, or Cloud. Cloud covers infrastructure,
+hosting, deployment, and delivery pipelines.
 
 Use **Target date** for planned deadlines and **End date** for actual completion.
 The shared planning schema also includes `P3`, sizes `XS` through `XL`, and a
