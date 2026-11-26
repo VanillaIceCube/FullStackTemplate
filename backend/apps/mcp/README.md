@@ -165,7 +165,7 @@ tokens, codes, tickets, private configuration and credentials out of logs/result
 An operator may schedule toolkit token cleanup separately; this change schedules
 no production maintenance. No OIDC login or automatic account linking is added.
 
-### 🌐 Hosting, readiness and rollback
+### 🌐 Hosting and readiness
 
 Production requires an HTTPS origin in `DJANGO_MCP_BASE_URL`, correct frontend,
 host/CORS/CSRF origins, a strong independent Django secret and
@@ -182,7 +182,7 @@ The generic framework supplies no production subnet or ingress attachment.
 Each application retains its reviewed exact proxy addresses and network policy;
 consult its deployment guide rather than inferring addresses from the framework.
 
-Infrastructure owns gateway routing; each file under `nginx/vhosts/` shows its
+Infrastructure owns gateway routing; each file under `gateway/nginx/vhosts/` shows its
 MCP and discovery locations directly. Coordinate exact `/mcp`, discovery,
 `/auth/mcp/` forwarding, no caching or interactive edge challenges, HTTP/1.1,
 buffering off and the 120-second upstream idle timeout. JSON mode does not require
@@ -198,12 +198,7 @@ readiness. Do not add a live vhost, network or production client before reviewed
 onboarding and operator authorization. Review Cloudflare route/cache/challenge
 policy when activating a new app; this extraction changes no domain or edge rule.
 
-Use the existing app-only immutable release/recovery guide and maintenance lock.
-Retain previous images and private recovery evidence. Roll back the affected
-component explicitly; never recreate shared networks, restore a historical
-database casually, prune images globally or replay the initial cutover. Disabling
-a newly adopted profile hides routes/UI; retain OAuth tables/data for deliberate
-operator cleanup rather than reversing migrations or silently revoking grants.
+Use the app’s production launch guide and maintenance lock. Coordinate any deliberate profile change, preserve OAuth tables and grants, and run the matching readiness checks.
 Moving framework documentation changes no application issuer, scopes, consent
 salt, client IDs, database tables, credentials, domain tools or readiness policy.
 
