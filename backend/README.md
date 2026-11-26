@@ -48,6 +48,12 @@ For Docker hot reload and dependency volumes, use the
 
 ## 🔐 Authentication API
 
+Start with the [account routes](apps/authentication/urls.py) to trace a request
+from a form. The [serializers](apps/authentication/serializers.py) validate the
+inputs and implement email login. The [views](apps/authentication/views.py)
+create accounts and issue password-reset links. The [account tests](apps/authentication/tests/)
+exercise registration, login and recovery through those HTTP endpoints.
+
 Registration, login and reset preserve passwords exactly, including leading and
 trailing spaces. Request serializers reject malformed credential/link types with
 HTTP 400; email addresses are trimmed and normalized. Registration returns an
