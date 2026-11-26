@@ -20,7 +20,7 @@ Source-controlled configuration and GitHub account/repository settings are separ
 1. Configure Actions, dependency alerts, advanced CodeQL, and available secret scanning/push protection using this repository's settings below.
 2. Install the three reviewer GitHub Apps and set their App ID variables.
 3. Store each persona's OpenAI key and App private key in both Actions and Dependabot secrets: six reviewer secrets in each store.
-4. Configure this repository's reviewer project, security-alert Project, and separate Project token.
+4. Configure this repository's OpenAI reviewer project and native issue fields.
 5. Verify fresh same-repository human and Dependabot PR results before activating or changing required checks.
 6. Configure deployment separately through the app or gateway production guide.
 
@@ -111,6 +111,23 @@ owner. The alert tracker requires the `Security` issue type and these fields:
 Use **Target date** for planned deadlines and **End date** for actual completion.
 The shared planning schema also includes `P3`, sizes `XS` through `XL`, and a
 **Start date** field. [GitHub issue field setup](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/managing-issue-fields)
+
+#### Move an existing repository off Projects
+
+Before switching the alert workflows, export the existing Project items and
+field values. Backfill the linked issues in place, including closed issues and
+the Domain, Priority, Size, Estimate, Start date, and End date values on
+existing RoboCop-managed tickets. Move Work type to the native issue type.
+Re-read the native values and compare them to the export before enabling the
+new tracker. Keep a deliberate native edit when it conflicts with a Project
+value and record the difference in the rollout issue.
+
+After merging the workflow change, dispatch all three alert workflows on
+main and verify that they reconcile existing issue URLs and retain their
+planning data. Retain the export and close the board only after verification.
+Then remove the old GitHub Project variable and token from repository Actions
+settings. The rollout and verification evidence are tracked in
+[FullStackTemplate #386](https://github.com/VanillaIceCube/FullStackTemplate/issues/386).
 
 ### 2. Register the AI reviewer GitHub Apps
 

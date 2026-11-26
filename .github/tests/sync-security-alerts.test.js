@@ -318,6 +318,24 @@ test('only the observed empty-error 422 with verified completion is tolerated', 
   }
 });
 
+test("exact structured concurrent-close response requires verified state and lifecycle body", async () => {
+  const observed = { resource: "Issue", code: "custom", message: "This issue was closed by another request. Reload it and try again." };
+  for (const errors of [[observed], [], [observed, { resource: "Issue", code: "invalid" }], [{ ...observed, resource: "PullRequest" }], [{ ...observed, code: "invalid" }], [null], null]) {
+    for (const final of [{ state: "closed", state_reason: "completed", body: "saved" }, { state: "open", body: "saved" }, { state: "closed", state_reason: "not_planned", body: "saved" }, { state: "closed", state_reason: "completed", body: "other" }, null, "unavailable"]) {
+      const error = { status: 422, response: { data: { message: "Validation Failed", errors } } };
+      let reads = 0;
+      const client = { rest: { issues: {
+        get: async () => { if (++reads === 1) return { data: { state: "open" } }; if (final === "unavailable") throw new Error("read denied"); return { data: final }; },
+        update: async () => { throw error; },
+      } } };
+      const benign = Array.isArray(errors) && (errors.length === 0 || (errors.length === 1 && errors[0] === observed));
+      if (benign && final?.state === "closed" && final.state_reason === "completed" && final.body === "saved") await closeManagedIssue(client, { issue_number: 11 }, "saved");
+      else await assert.rejects(closeManagedIssue(client, { issue_number: 11 }, "saved"), actual => actual === error);
+      assert.equal(reads, benign ? 2 : 1);
+    }
+  }
+});
+
 test("omitted-alert draft recovery accounts for each source exactly once before mutation", async () => {
   const { validateGroups } = require("../actions/track-security-alerts/sync-security-alerts");
   const source = { feed, alerts: Array.from({ length: 15 }, (_, i) => ({ ref: `dependabot:${i + 1}` })) };
