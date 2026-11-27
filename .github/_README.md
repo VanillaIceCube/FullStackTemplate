@@ -398,8 +398,8 @@ and blocked the merge. See the PR for follow-up validation after the fix and
 corresponding failure and recovery in Notoli.
 
 ```powershell
-gh api repos/VanillaIceCube/FullStackTemplate/rulesets/19855608 > ruleset.json
-gh api "repos/VanillaIceCube/FullStackTemplate/commits/<HEAD_SHA>/check-runs?per_page=100" > head-check-runs.json
+gh api repos/VanillaIceCube/fullstack-template/rulesets/19855608 > ruleset.json
+gh api "repos/VanillaIceCube/fullstack-template/commits/<HEAD_SHA>/check-runs?per_page=100" > head-check-runs.json
 node .github/scripts/validate-reviewer-gates.js ruleset.json head-check-runs.json
 ```
 
