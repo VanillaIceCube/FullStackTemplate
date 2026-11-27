@@ -1,6 +1,6 @@
 # ⚙️ GitHub automation
 
-GitHub Actions, repository setup, dependency updates, and AI reviews for FullStackTemplate.
+GitHub Actions, repository setup, dependency updates, and AI reviews for fullstack-template.
 Source-controlled configuration and GitHub account/repository settings are separate.
 
 ## 🧭 Structure
@@ -398,8 +398,8 @@ and blocked the merge. See the PR for follow-up validation after the fix and
 corresponding failure and recovery in Notoli.
 
 ```powershell
-gh api repos/VanillaIceCube/FullStackTemplate/rulesets/19855608 > ruleset.json
-gh api "repos/VanillaIceCube/FullStackTemplate/commits/<HEAD_SHA>/check-runs?per_page=100" > head-check-runs.json
+gh api repos/VanillaIceCube/fullstack-template/rulesets/19855608 > ruleset.json
+gh api "repos/VanillaIceCube/fullstack-template/commits/<HEAD_SHA>/check-runs?per_page=100" > head-check-runs.json
 node .github/scripts/validate-reviewer-gates.js ruleset.json head-check-runs.json
 ```
 
@@ -430,9 +430,9 @@ not authorize merging, branch promotion, production deployment, or key rotation.
 
 ## 🤝 Shared engineering ownership and rollout
 
-FullStackTemplate owns reusable application engineering and a canonical parent
-issue tracks the entire rollout across FullStackTemplate, Notoli, MacroMapper and
-Infrastructure. Infrastructure owns ingress, host operations and the versioned
+fullstack-template owns reusable application engineering and a canonical parent
+issue tracks the entire rollout across fullstack-template, notoli, macromapper and
+infrastructure. Infrastructure owns ingress, host operations and the versioned
 release engine; its changes retain an Infrastructure parent linked to downstream
 adoptions. Apps own domain behavior, UX, credentials, OAuth issuers, consent and
 MCP tools. Preserve deliberate profile differences, exact proxy trust and
