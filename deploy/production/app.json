@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "shared_source": {
-    "repository": "VanillaIceCube/JudeAndrewAlabaInfrastructure",
+    "repository": "VanillaIceCube/infrastructure",
     "commit": "4a7c8549875c7fc596d509a01b1facf92f3951ec"
   },
   "app": "fullstacktemplate",
