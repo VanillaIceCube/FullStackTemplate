@@ -1,6 +1,6 @@
 # Production launches
 
-The template has no active `env-prod` branch. Its domain and networks are examples for an independently provisioned application. Application settings and readiness checks live in [app.json](app.json). The [Compose file](compose.yml) defines the two services. The [shared release guide](https://github.com/VanillaIceCube/infrastructure/blob/88123d60db9743b50af6779f532a37c5f81ae4a0/deploy/README.md) describes the Infrastructure-owned launcher. For local development, see the [deployment README](../README.md).
+The template has no active `env-prod` branch. Its domain and networks are examples for an independently provisioned application. Application settings and readiness checks live in [app.json](app.json). The [Compose file](compose.yml) defines the two services. The [shared release guide](https://github.com/VanillaIceCube/infrastructure/blob/51a48938ab24c11c4fe14a6e8d1becfce9936595/deploy/README.md) describes the Infrastructure-owned launcher. For local development, see the [deployment README](../README.md).
 
 ## Release sequence
 
