@@ -7,12 +7,7 @@ Source-controlled configuration and GitHub account/repository settings are separ
 
 | Location | Purpose |
 | --- | --- |
-| [workflows](workflows/README.md) | Entry points, gates, reviewers, schedules and deployment. The guide includes four flow diagrams. |
-| [scripts](scripts) | Standalone automation programs that workflows or people run, and their supporting modules. |
-| [actions](actions/README.md) | Reusable composite steps, each with its own `action.yml` and implementation. |
-| [tests](tests) | One suite per tested JavaScript implementation or workflow, named after its source. |
-| [fixtures](fixtures) | Saved test inputs and expected output. Use lowercase, hyphen-separated nouns for the data and add the scenario last when variants exist (for example, `github-check-runs-passing.json`). |
-| [package.json](package.json) and [package-lock.json](package-lock.json) | JavaScript dependencies for automation and their verified install versions. |
+| [workflows](workflows/README.md) | Entry points, gates, reviewers, schedules and deployment. |
 | [dependabot.yml](dependabot.yml) | Dependency ecosystems and update schedules. |
 
 Keep the exact `pyyaml` development pin lowercase so Dependabot's uv updater can match it.
@@ -400,14 +395,14 @@ corresponding failure and recovery in Notoli.
 ```powershell
 gh api repos/VanillaIceCube/fullstack-template/rulesets/19855608 > ruleset.json
 gh api "repos/VanillaIceCube/fullstack-template/commits/<HEAD_SHA>/check-runs?per_page=100" > head-check-runs.json
-node .github/scripts/validate-reviewer-gates.js ruleset.json head-check-runs.json
+node ../JudeAndrewAlabaInfrastructure/.github/scripts/validate-reviewer-gates.js ruleset.json head-check-runs.json
 ```
 
 <a id="-verification"></a>
 
 ## 🧪 Checks
 
-The [test workflow](workflows/gate-test.yml) validates workflow and script syntax,
+The [test workflow](workflows/ci-orchestrator.yml) validates workflow and script syntax,
 checks Docker Compose configuration with test settings, and limits logs sent to
 the build reviewer. See the [workflow checks](workflows/README.md#-checks-and-diagnostics)
 for local dependencies and commands.
@@ -424,19 +419,19 @@ not authorize merging, branch promotion, production deployment, or key rotation.
 ## 📚 Reference
 
 - [Workflow behavior and maintenance](workflows/README.md).
-- [Shared action and reviewer contracts](actions/README.md).
+- [Shared action and reviewer contracts](https://github.com/VanillaIceCube/agent-hub/tree/main/.github/actions).
 - [CI/CD architecture](workflows/README.md#-architecture-and-trust-boundaries).
 - [Application production setup and launches](../deploy/production/README.md).
 
 ## 🤝 Shared engineering ownership and rollout
 
-fullstack-template owns reusable application engineering and a canonical parent
-issue tracks the entire rollout across fullstack-template, notoli, macromapper and
-infrastructure. Infrastructure owns ingress, host operations and the versioned
-release engine; its changes retain an Infrastructure parent linked to downstream
-adoptions. Apps own domain behavior, UX, credentials, OAuth issuers, consent and
-MCP tools. Preserve deliberate profile differences, exact proxy trust and
-Infrastructure's Required CI/secret gate rather than forcing identical files.
+FullStackTemplate owns the application blueprint and shared application framework.
+Infrastructure owns shared CI, scanners, ingress, host operations and the release
+engine. AgentHub owns the reviewers, prompts and alert triage. Applications own
+their domain behavior, UX, credentials, OAuth issuers, consent and MCP tools.
+Keep each repository's required checks, release authorization and proxy trust.
+Track a shared change in its owning repository and link each affected consumer.
+[Ownership and migration order](https://github.com/VanillaIceCube/infrastructure/issues/191)
 
 For each shared change, inventory every repository as required, not applicable
 with reason, already satisfied with evidence, or deferred with reason, owner,
